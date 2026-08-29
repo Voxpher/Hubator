@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — EcommerceHubator</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-bar">
+    <a href="index.html" class="logo">Ecommerce<span>Hubator</span></a>
+    <nav class="main-nav"><ul><li><a href="shop.html">Continue shopping</a></li></ul></nav>
+    <div class="header-actions">
+      <a href="cart.html" class="icon-link" aria-label="Cart">🛍️<span class="cart-count">0</span></a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap breadcrumb"><a href="index.html">Home</a> / <a href="cart.html">Cart</a> / Checkout</div>
+
+  <div class="wrap checkout-grid">
+    <form id="checkout-form">
+      <div class="form-section">
+        <h3>Contact</h3>
+        <div class="form-field">
+          <label>Email</label>
+          <input type="email" required placeholder="you@email.com">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Shipping address</h3>
+        <div class="form-row">
+          <div class="form-field"><label>First name</label><input type="text" required></div>
+          <div class="form-field"><label>Last name</label><input type="text" required></div>
+        </div>
+        <div class="form-field"><label>Address</label><input type="text" required></div>
+        <div class="form-row">
+          <div class="form-field"><label>City</label><input type="text" required></div>
+          <div class="form-field"><label>Postal code</label><input type="text" required></div>
+        </div>
+        <div class="form-field">
+          <label>Country</label>
+          <select required>
+            <option value="">Select country</option>
+            <option>India</option><option>United States</option><option>United Kingdom</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Payment</h3>
+        <div class="pay-methods">
+          <div class="pay-method active">Card</div>
+          <div class="pay-method">UPI</div>
+          <div class="pay-method">PayPal</div>
+        </div>
+        <!--
+          PAYMENT INTEGRATION POINT
+          This template does not process real payments — there is no backend here.
+          Easiest path (no server needed): create a Stripe Payment Link in your
+          Stripe Dashboard and set STRIPE_PAYMENT_LINK below. See README.md.
+        -->
+        <div id="card-fields">
+          <div class="form-field"><label>Card number</label><input type="text" placeholder="•••• •••• •••• ••••"></div>
+          <div class="form-row">
+            <div class="form-field"><label>Expiry</label><input type="text" placeholder="MM/YY"></div>
+            <div class="form-field"><label>CVC</label><input type="text" placeholder="•••"></div>
+          </div>
+        </div>
+        <div class="checkout-note">
+          🔑 <strong>Replace this before going live:</strong> set your Stripe (or other
+          processor's) publishable key / payment link in <code>js/checkout.js</code>.
+          Card fields above are placeholders — never collect raw card numbers yourself
+          without a PCI-compliant integration like Stripe Elements or a hosted Checkout page.
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Place order</button>
+    </form>
+
+    <div class="summary-box" id="checkout-summary"></div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 EcommerceHubator. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/checkout.js"></script>
+<script>
+  function renderSummary(){
+    const lines = cartLines();
+    const subtotal = cartSubtotal();
+    const shipping = subtotal >= 75 || subtotal === 0 ? 0 : 6;
+    document.getElementById("checkout-summary").innerHTML = `
+      <h3 style="margin-bottom:16px;">Order summary</h3>
+      ${lines.map(l => `
+        <div class="summary-row"><span>${l.product.name} × ${l.qty}</span><span>${fmt(l.product.price * l.qty)}</span></div>
+      `).join("")}
+      <div class="summary-row"><span>Shipping</span><span>${shipping === 0 ? "Free" : fmt(shipping)}</span></div>
+      <div class="summary-row total"><span>Total</span><span>${fmt(subtotal + shipping)}</span></div>
+    `;
+  }
+  renderSummary();
+
+  document.getElementById("checkout-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    startCheckout(); // defined in js/checkout.js — wire up your payment provider there
+  });
+</script>
+</body>
+</html>

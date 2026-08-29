@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop — EcommerceHubator</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-bar">
+    <a href="index.html" class="logo">Ecommerce<span>Hubator</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html" class="active">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a href="login.html" class="btn btn-outline btn-sm">Sign in</a>
+      <a href="cart.html" class="icon-link" aria-label="Cart">🛍️<span class="cart-count">0</span></a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap breadcrumb"><a href="index.html">Home</a> / Shop</div>
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow">All products</span>
+      <h1 style="font-size:2.4rem;">Shop the collection</h1>
+      <p>12 items, sourced from independent makers.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:36px;">
+    <div class="wrap">
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-chip active" data-cat="All">All</button>
+        <button class="filter-chip" data-cat="Home">Home</button>
+        <button class="filter-chip" data-cat="Kitchen">Kitchen</button>
+        <button class="filter-chip" data-cat="Apparel">Apparel</button>
+        <button class="filter-chip" data-cat="Accessories">Accessories</button>
+        <button class="filter-chip" data-cat="Bags">Bags</button>
+        <button class="filter-chip" data-cat="Footwear">Footwear</button>
+      </div>
+      <div class="product-grid" id="shop-grid"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <a href="index.html" class="logo">Ecommerce<span>Hubator</span></a>
+        <p style="margin-top:12px;max-width:32ch;">Curated everyday goods from independent makers.</p>
+      </div>
+      <div><h5>Shop</h5><ul><li><a href="shop.html">All products</a></li></ul></div>
+      <div><h5>Company</h5><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+      <div><h5>Account</h5><ul><li><a href="login.html">Sign in</a></li><li><a href="cart.html">Cart</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 EcommerceHubator. All rights reserved.</span>
+      <span>Built with a static HTML template</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  function cardHTML(p){
+    return `
+      <div class="product-card" data-cat="${p.category}">
+        <a href="product.html?id=${p.id}" class="product-media">
+          ${p.badge ? `<span class="product-badge ticket ${p.badge==='Sale'?'on-sale':''}">${p.badge}</span>` : ""}
+          <img src="${p.img}" alt="${p.name}">
+        </a>
+        <div class="product-body">
+          <span class="product-cat">${p.category}</span>
+          <h4><a href="product.html?id=${p.id}">${p.name}</a></h4>
+          <div class="product-foot">
+            <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
+            <button class="add-btn" aria-label="Add to cart" onclick="addToCart(${p.id})">+</button>
+          </div>
+        </div>
+      </div>`;
+  }
+  const grid = document.getElementById("shop-grid");
+  function render(cat){
+    const list = cat === "All" ? PRODUCTS : PRODUCTS.filter(p => p.category === cat);
+    grid.innerHTML = list.map(cardHTML).join("") || `<p>No products in this category yet.</p>`;
+  }
+  document.querySelectorAll(".filter-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      render(chip.dataset.cat);
+    });
+  });
+  const params = new URLSearchParams(location.search);
+  const initialCat = params.get("cat") || "All";
+  document.querySelectorAll(".filter-chip").forEach(c => c.classList.toggle("active", c.dataset.cat === initialCat));
+  render(initialCat);
+</script>
+</body>
+</html>

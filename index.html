@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcommerceHubator — Everyday goods, made to last</title>
+<meta name="description" content="Curated home, kitchen and everyday goods. Small runs, honest materials.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-bar">
+    <a href="index.html" class="logo">Ecommerce<span>Hubator</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a href="login.html" class="btn btn-outline btn-sm">Sign in</a>
+      <a href="cart.html" class="icon-link" aria-label="Cart">🛍️<span class="cart-count">0</span></a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <span class="eyebrow">Small runs · Honest materials</span>
+        <h1>Everyday goods,<br>made to be used.</h1>
+        <p class="lede">EcommerceHubator sources kitchen, home and wardrobe staples from independent makers — nothing mass-produced, nothing disposable.</p>
+        <div class="hero-actions">
+          <a href="shop.html" class="btn btn-primary">Shop the collection</a>
+          <a href="about.html" class="btn btn-outline">Our story</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong>120+</strong><span>Independent makers</span></div>
+          <div><strong>4.8/5</strong><span>Average rating</span></div>
+          <div><strong>18k</strong><span>Orders shipped</span></div>
+        </div>
+      </div>
+      <div class="hero-stack">
+        <div class="stack-card">
+          <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80" alt="Ceramic pour-over set">
+          <div class="sc-body"><h4>Ceramic Pour-Over Set</h4><span class="ticket on-sale">$42</span></div>
+        </div>
+        <div class="stack-card">
+          <img src="https://images.unsplash.com/photo-1591561954557-26941169b49e?w=400&q=80" alt="Canvas tote">
+          <div class="sc-body"><h4>Canvas Field Tote</h4><span class="ticket">$58</span></div>
+        </div>
+        <div class="stack-card">
+          <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400&q=80" alt="Brass desk lamp">
+          <div class="sc-body"><h4>Brass Desk Lamp</h4><span class="ticket">$96</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Browse by category</span>
+          <h2>Find what you came for</h2>
+        </div>
+      </div>
+      <div class="cat-grid">
+        <a class="cat-card" href="shop.html?cat=Home"><span class="cat-icon">🏺</span><h4>Home</h4><span>32 items</span></a>
+        <a class="cat-card" href="shop.html?cat=Kitchen"><span class="cat-icon">☕</span><h4>Kitchen</h4><span>21 items</span></a>
+        <a class="cat-card" href="shop.html?cat=Apparel"><span class="cat-icon">👕</span><h4>Apparel</h4><span>18 items</span></a>
+        <a class="cat-card" href="shop.html?cat=Accessories"><span class="cat-icon">👜</span><h4>Accessories</h4><span>14 items</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Just landed</span>
+          <h2>Featured products</h2>
+          <p>A rotating edit of new arrivals and staff picks.</p>
+        </div>
+        <a href="shop.html" class="btn btn-outline btn-sm">View all</a>
+      </div>
+      <div class="product-grid" id="featured-grid"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="value-strip">
+        <div class="value-item"><span class="vi-icon">🚚</span><div><h4>Free shipping over $75</h4><p>Flat $6 rate below that, US only.</p></div></div>
+        <div class="value-item"><span class="vi-icon">↩️</span><div><h4>30-day returns</h4><p>No questions, prepaid label included.</p></div></div>
+        <div class="value-item"><span class="vi-icon">🔒</span><div><h4>Secure checkout</h4><p>Encrypted payments via Stripe.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="newsletter">
+        <div>
+          <h2>Get first look at new drops</h2>
+          <p>One email a month. New makers, restocks, no noise.</p>
+        </div>
+        <form onsubmit="event.preventDefault(); showToast('Subscribed — check your inbox');">
+          <input type="email" placeholder="you@email.com" required>
+          <button type="submit" class="btn btn-gold">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <a href="index.html" class="logo">Ecommerce<span>Hubator</span></a>
+        <p style="margin-top:12px;max-width:32ch;">Curated everyday goods from independent makers.</p>
+      </div>
+      <div>
+        <h5>Shop</h5>
+        <ul>
+          <li><a href="shop.html">All products</a></li>
+          <li><a href="shop.html?cat=Home">Home</a></li>
+          <li><a href="shop.html?cat=Kitchen">Kitchen</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Account</h5>
+        <ul>
+          <li><a href="login.html">Sign in</a></li>
+          <li><a href="signup.html">Create account</a></li>
+          <li><a href="cart.html">Cart</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 EcommerceHubator. All rights reserved.</span>
+      <span>Built with a static HTML template</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  const grid = document.getElementById("featured-grid");
+  PRODUCTS.slice(0,4).forEach(p => {
+    grid.innerHTML += `
+      <div class="product-card">
+        <a href="product.html?id=${p.id}" class="product-media">
+          ${p.badge ? `<span class="product-badge ticket ${p.badge==='Sale'?'on-sale':''}">${p.badge}</span>` : ""}
+          <img src="${p.img}" alt="${p.name}">
+        </a>
+        <div class="product-body">
+          <span class="product-cat">${p.category}</span>
+          <h4><a href="product.html?id=${p.id}">${p.name}</a></h4>
+          <div class="product-foot">
+            <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
+            <button class="add-btn" aria-label="Add to cart" onclick="addToCart(${p.id})">+</button>
+          </div>
+        </div>
+      </div>`;
+  });
+</script>
+</body>
+</html>

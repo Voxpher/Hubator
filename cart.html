@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Cart — EcommerceHubator</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-bar">
+    <a href="index.html" class="logo">Ecommerce<span>Hubator</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a href="login.html" class="btn btn-outline btn-sm">Sign in</a>
+      <a href="cart.html" class="icon-link" aria-label="Cart">🛍️<span class="cart-count">0</span></a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap breadcrumb"><a href="index.html">Home</a> / Cart</div>
+  <section class="page-hero" style="border-bottom:none;padding-bottom:0;">
+    <div class="wrap"><h1 style="font-size:2.2rem;">Your cart</h1></div>
+  </section>
+
+  <div class="wrap cart-grid" id="cart-root"></div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 EcommerceHubator. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  function renderCart(){
+    const lines = cartLines();
+    const root = document.getElementById("cart-root");
+    if(lines.length === 0){
+      root.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1;">
+          <div class="es-icon">🛍️</div>
+          <h2>Your cart is empty</h2>
+          <p>Nothing here yet — go find something worth keeping.</p>
+          <a href="shop.html" class="btn btn-primary">Browse the shop</a>
+        </div>`;
+      return;
+    }
+    const subtotal = cartSubtotal();
+    const shipping = subtotal >= 75 || subtotal === 0 ? 0 : 6;
+    const total = subtotal + shipping;
+
+    root.innerHTML = `
+      <div>
+        ${lines.map(l => `
+          <div class="cart-line">
+            <img src="${l.product.img}" alt="${l.product.name}">
+            <div>
+              <h4><a href="product.html?id=${l.product.id}">${l.product.name}</a></h4>
+              <div class="cl-meta">${l.product.category}</div>
+              <a class="remove-link" onclick="removeFromCart(${l.product.id}); renderCart();">Remove</a>
+            </div>
+            <div class="qty-control">
+              <button onclick="setQty(${l.product.id}, ${l.qty - 1}); renderCart();">−</button>
+              <input type="text" value="${l.qty}" readonly>
+              <button onclick="setQty(${l.product.id}, ${l.qty + 1}); renderCart();">+</button>
+            </div>
+            <span class="ticket">${fmt(l.product.price * l.qty)}</span>
+          </div>
+        `).join("")}
+      </div>
+      <div class="summary-box">
+        <h3 style="margin-bottom:18px;">Order summary</h3>
+        <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+        <div class="summary-row"><span>Shipping</span><span>${shipping === 0 ? "Free" : fmt(shipping)}</span></div>
+        <div class="promo-row">
+          <input type="text" placeholder="Promo code">
+          <button class="btn btn-outline btn-sm" onclick="showToast('Promo codes coming soon')">Apply</button>
+        </div>
+        <div class="summary-row total"><span>Total</span><span>${fmt(total)}</span></div>
+        <a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:16px;">Checkout</a>
+        <a href="shop.html" class="btn btn-outline btn-block" style="margin-top:10px;">Continue shopping</a>
+      </div>
+    `;
+  }
+  renderCart();
+</script>
+</body>
+</html>

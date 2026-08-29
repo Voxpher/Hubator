@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — EcommerceHubator</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-bar">
+    <a href="index.html" class="logo">Ecommerce<span>Hubator</span></a>
+    <nav class="main-nav"><ul><li><a href="shop.html">Shop</a></li></ul></nav>
+    <div class="header-actions">
+      <a href="cart.html" class="icon-link" aria-label="Cart">🛍️<span class="cart-count">0</span></a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h2 style="margin-bottom:6px;">Welcome back</h2>
+      <p style="margin-bottom:26px;">Sign in to check out faster and track orders.</p>
+
+      <form onsubmit="event.preventDefault(); showToast('Sign-in not connected yet — see js/auth.js'); ">
+        <div class="form-field"><label>Email</label><input type="email" required></div>
+        <div class="form-field"><label>Password</label><input type="password" required></div>
+        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+      </form>
+
+      <div class="divider-or">or continue with</div>
+      <div class="social-row">
+        <button class="btn btn-outline btn-block" onclick="showToast('Connect Google OAuth in js/auth.js')">Continue with Google</button>
+      </div>
+
+      <p class="auth-switch">Don't have an account? <a href="signup.html">Create one</a></p>
+    </div>
+
+    <div class="checkout-note" style="margin-top:20px;">
+      🔑 <strong>Replace this before going live:</strong> this form doesn't authenticate
+      anyone yet. Wire it up to a real auth provider (Supabase Auth, Firebase Auth, or
+      Auth0 are the easiest for a static site like this) and put your project's public
+      API key in <code>js/auth.js</code>.
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 EcommerceHubator. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

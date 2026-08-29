@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — EcommerceHubator</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-bar">
+    <a href="index.html" class="logo">Ecommerce<span>Hubator</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html" class="active">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a href="login.html" class="btn btn-outline btn-sm">Sign in</a>
+      <a href="cart.html" class="icon-link" aria-label="Cart">🛍️<span class="cart-count">0</span></a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap breadcrumb"><a href="index.html">Home</a> / Contact</div>
+  <section class="page-hero" style="border-bottom:none;">
+    <div class="wrap">
+      <span class="eyebrow">Get in touch</span>
+      <h1 style="font-size:2.4rem;">We reply within a day</h1>
+    </div>
+  </section>
+
+  <div class="wrap contact-grid">
+    <div>
+      <div class="contact-info-card"><h4>📧 Email</h4><p>hello@ecommercehubator.com</p></div>
+      <div class="contact-info-card"><h4>📞 Phone</h4><p>+91 00000 00000</p></div>
+      <div class="contact-info-card"><h4>📍 Studio</h4><p>Bālurghāt, West Bengal, India</p></div>
+      <div class="contact-info-card"><h4>🕐 Hours</h4><p>Mon–Fri, 10am–6pm IST</p></div>
+    </div>
+    <form onsubmit="event.preventDefault(); showToast('Message sent — we\'ll reply soon'); this.reset();">
+      <div class="form-row">
+        <div class="form-field"><label>Name</label><input type="text" required></div>
+        <div class="form-field"><label>Email</label><input type="email" required></div>
+      </div>
+      <div class="form-field"><label>Subject</label><input type="text"></div>
+      <div class="form-field"><label>Message</label><textarea required></textarea></div>
+      <button type="submit" class="btn btn-primary">Send message</button>
+    </form>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 EcommerceHubator. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+</body>
+</html>
