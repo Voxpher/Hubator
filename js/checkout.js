@@ -1,29 +1,11 @@
 /* =========================================================
-   PAYMENT INTEGRATION POINT
+   Qikink Payment Integration
    -----------------------------------------------------------
-   This is a static site (no server), so it cannot securely
-   charge cards on its own. Pick ONE of these two options:
-
-   OPTION A — Stripe Payment Link (no code, fastest)
-   1. In your Stripe Dashboard: Payment Links > Create.
-   2. Add your products/prices, save, copy the link URL.
-   3. Paste it below as STRIPE_PAYMENT_LINK.
-   This redirects the customer to a Stripe-hosted checkout —
-   Stripe handles card storage/PCI compliance for you.
-
-   OPTION B — Stripe Checkout Session (custom line items,
-   needs a tiny backend/serverless function)
-   1. Deploy a small function (Vercel/Netlify/Supabase Edge
-      Function) that takes the cart and calls
-      stripe.checkout.sessions.create(...) with your SECRET
-      key (never put the secret key in this front-end code).
-   2. Set STRIPE_SESSION_ENDPOINT below to that function's URL.
-   3. This file will POST the cart to it and redirect to the
-      returned session URL.
+   This static site posts the cart to Qikink's Create Order API.
+   Set QIKINK_BASE to "sandbox" (testing) or "live" (production).
    ========================================================= */
 
-const STRIPE_PAYMENT_LINK = ""; // e.g. "https://buy.stripe.com/xxxxxxxx"
-const STRIPE_SESSION_ENDPOINT = ""; // e.g. "https://yourapi.com/create-checkout-session"
+QIKINK = QIKINK || { base: "sandbox" };
 
 async function startCheckout(){
   const lines = cartLines();
@@ -32,27 +14,14 @@ async function startCheckout(){
     return;
   }
 
-  if(STRIPE_SESSION_ENDPOINT){
-    try{
-      const res = await fetch(STRIPE_SESSION_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: lines.map(l => ({ id: l.product.id, qty: l.qty })) })
-      });
-      const data = await res.json();
-      if(data.url){ window.location.href = data.url; return; }
-    }catch(err){
-      console.error("Checkout session error:", err);
-    }
+  try{
+    const data = await createQikinkOrder(lines, "COD", 1);
+    if(data.order_url){ window.location.href = data.order_url; return; }
+    showToast("Order created — redirecting to checkout");
+    localStorage.removeItem("eh_cart");
+    setTimeout(() => { window.location.href = "index.html"; }, 1600);
+  }catch(err){
+    console.error("Qikink checkout error:", err);
+    showToast("Checkout failed — " + (err.message || err));
   }
-
-  if(STRIPE_PAYMENT_LINK){
-    window.location.href = STRIPE_PAYMENT_LINK;
-    return;
-  }
-
-  // No payment provider configured yet — demo fallback so the flow is testable.
-  showToast("Order placed (demo mode — add your payment key in js/checkout.js)");
-  localStorage.removeItem(CART_KEY);
-  setTimeout(() => { window.location.href = "index.html"; }, 1600);
 }

@@ -61,6 +61,38 @@ function fmt(n){
   return "$" + n.toFixed(2);
 }
 
+async function createQikinkOrder(cartLines, gateway="COD", qikinkShipping=1) {
+  const token = await getAccessToken();
+  const items = cartLines.map(l => ({
+    search_from_my_products: 0,
+    quantity: l.qty,
+    price: l.product.price.toString(),
+    sku: `hub-${l.product.id}`,
+    designs: [],
+  }));
+
+  const body = {
+    order_number: `hub-${Date.now()}`,
+    qikink_shipping: qikinkShipping,
+    gateway: gateway,
+    total_order_value: cartSubtotal().toString(),
+    line_items: items,
+  };
+
+  const res = await fetch(`https://${QIKINK.base}.qikink.com/api/order/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json();
+  if (data.order_url) { window.location.href = data.order_url; return data; }
+  throw new Error("Qikink order error: " + JSON.stringify(data));
+}
+
 document.addEventListener("DOMContentLoaded", updateCartBadge);
 
 /* Mobile nav toggle, shared across pages */
