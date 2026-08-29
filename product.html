@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="page-title">Product — EcommerceHubator</title>
+<title id="page-title">Product — Hubator</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -53,7 +53,7 @@
       <div><h5>Account</h5><ul><li><a href="login.html">Sign in</a></li><li><a href="cart.html">Cart</a></li></ul></div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 EcommerceHubator. All rights reserved.</span>
+      <span>© 2026 Hubator. All rights reserved.</span>
       <span>Built with a static HTML template</span>
     </div>
   </div>
@@ -64,7 +64,7 @@
 <script>
   const id = new URLSearchParams(location.search).get("id") || 1;
   const p = getProductById(id) || PRODUCTS[0];
-  document.getElementById("page-title").textContent = p.name + " — EcommerceHubator";
+  document.getElementById("page-title").textContent = p.name + " — Hubator";
   document.getElementById("crumb-name").textContent = p.name;
 
   document.getElementById("pd-root").innerHTML = `

@@ -1,4 +1,4 @@
-# EcommerceHubator
+# Hubator
 
 A static, no-build ecommerce front-end: home, shop, product detail, cart,
 checkout, about, contact, sign in, and sign up — plain HTML/CSS/JS, no
@@ -29,7 +29,7 @@ No build tools needed. Either:
 
 ## 2. Push to GitHub
 ```bash
-cd ecommercehubator
+cd Hubator
 git init
 git add .
 git commit -m "Initial site"
@@ -76,6 +76,6 @@ a real backend/database and fetch the list instead.
 ## 5. Customize
 - Colors, fonts, spacing: `css/style.css`, `:root` block at the top has
   every color/font as a named variable.
-- Brand name: search-and-replace "EcommerceHubator" across the HTML files.
+- Brand name: search-and-replace "Hubator" across the HTML files.
 - Logo: currently text-based (`<a class="logo">`) — swap for an `<img>` if
   you have a logo file.
