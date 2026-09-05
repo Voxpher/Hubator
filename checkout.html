@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout — Hubator</title>
 <link rel="stylesheet" href="css/style.css">
+<!-- Razorpay Checkout SDK — loads the secure hosted payment popup -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 
@@ -23,11 +25,16 @@
 
   <div class="wrap checkout-grid">
     <form id="checkout-form">
+
       <div class="form-section">
         <h3>Contact</h3>
         <div class="form-field">
           <label>Email</label>
           <input name="email" type="email" required placeholder="you@email.com">
+        </div>
+        <div class="form-field">
+          <label>Phone <span style="color:#6b7280;font-size:0.8em;font-weight:400">(required for order updates)</span></label>
+          <input name="phone" type="tel" required placeholder="9876543210" pattern="[0-9]{10,15}" title="Enter a valid phone number">
         </div>
       </div>
 
@@ -37,23 +44,48 @@
           <div class="form-field"><label>First name</label><input name="firstName" type="text" required></div>
           <div class="form-field"><label>Last name</label><input name="lastName" type="text" required></div>
         </div>
-        <div class="form-field"><label>Address</label><input name="address" type="text" required></div>
+        <div class="form-field"><label>Address</label><input name="address" type="text" required placeholder="House no., street, area"></div>
+        <div class="form-field"><label>Apartment / Floor <span style="color:#9ca3af;font-size:0.8em">(optional)</span></label><input name="address2" type="text" placeholder="Flat 4B, 2nd Floor"></div>
         <div class="form-row">
           <div class="form-field"><label>City</label><input name="city" type="text" required></div>
-          <div class="form-field"><label>Postal code</label><input name="postalCode" type="text" required></div>
+          <div class="form-field"><label>State</label><input name="state" type="text" required placeholder="Maharashtra"></div>
         </div>
-        <div class="form-field">
-          <label>Country</label>
-          <select name="country" required>
-            <option value="">Select country</option>
-            <option>India</option><option>United States</option><option>United Kingdom</option><option>Other</option>
-          </select>
+        <div class="form-row">
+          <div class="form-field"><label>Postal code</label><input name="postalCode" type="text" required pattern="[0-9]{6}" title="Enter a 6-digit PIN code"></div>
+          <div class="form-field">
+            <label>Country</label>
+            <select name="country" required>
+              <option value="">Select country</option>
+              <option value="India" selected>India</option>
+              <option value="United States">United States</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <div class="form-section"><h3>Payment</h3><div class="checkout-note">Orders are currently created as Cash on Delivery. A PCI-compliant hosted payment flow must be added before accepting card or UPI payments; this page never collects raw payment-card details.</div></div>
+      <div class="form-section">
+        <h3>Payment</h3>
+        <p style="font-size:0.88rem;color:#6b7280;margin:0 0 1rem;">
+          Pay securely via <strong>UPI, Cards, Net Banking, or Wallets</strong> through Razorpay.
+          Your card details are never stored on our servers.
+        </p>
+        <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:#6b7280;margin-bottom:0.5rem;">
+          <span>🔒 Secured by</span>
+          <strong style="color:#072654;">Razorpay</strong>
+        </div>
+      </div>
 
-      <button type="submit" class="btn btn-primary btn-block">Place order</button>
+      <!-- Error message slot -->
+      <p id="checkout-error" role="alert" style="display:none;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.88rem;margin-bottom:1rem;"></p>
+
+      <button type="submit" id="pay-btn" class="btn btn-primary btn-block">
+        Pay securely →
+      </button>
+      <p style="text-align:center;font-size:0.78rem;color:#9ca3af;margin-top:0.5rem;">
+        You will be redirected to Razorpay's secure checkout
+      </p>
     </form>
 
     <div class="summary-box" id="checkout-summary"></div>
@@ -73,24 +105,35 @@
 <script src="js/cart.js"></script>
 <script src="js/checkout.js"></script>
 <script>
-  function renderSummary(){
+  function renderSummary() {
     const lines = cartLines();
     const subtotal = cartSubtotal();
-    const shipping = subtotal >= 75 || subtotal === 0 ? 0 : 6;
     document.getElementById("checkout-summary").innerHTML = `
       <h3 style="margin-bottom:16px;">Order summary</h3>
       ${lines.map(l => `
-        <div class="summary-row"><span>${l.product.name} × ${l.qty}</span><span>${fmt(l.product.price * l.qty)}</span></div>
+        <div class="summary-row">
+          <span>${l.product.name} × ${l.qty}</span>
+          <span>${fmt(l.product.price * l.qty)}</span>
+        </div>
       `).join("")}
-      <div class="summary-row"><span>Shipping</span><span>${shipping === 0 ? "Free" : fmt(shipping)}</span></div>
-      <div class="summary-row total"><span>Total</span><span>${fmt(subtotal + shipping)}</span></div>
+      <div class="summary-row"><span>Shipping</span><span>Calculated at payment</span></div>
+      <div class="summary-row total"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
     `;
   }
-  loadProducts().then(renderSummary).catch(err => { document.getElementById("checkout-summary").innerHTML = `<p>${err.message}</p>`; });
+
+  loadProducts().then(renderSummary).catch(err => {
+    document.getElementById("checkout-summary").innerHTML = `<p>${err.message}</p>`;
+  });
 
   document.getElementById("checkout-form").addEventListener("submit", (e) => {
     e.preventDefault();
-    startCheckout(e.currentTarget).catch(err => showToast(err.message));
+    startCheckout(e.currentTarget).catch(err => {
+      const el = document.getElementById("checkout-error");
+      el.textContent = err.message;
+      el.style.display = "block";
+      document.getElementById("pay-btn").disabled = false;
+      document.getElementById("pay-btn").textContent = "Pay securely →";
+    });
   });
 </script>
 </body>
