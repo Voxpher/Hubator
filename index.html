@@ -164,8 +164,11 @@
   const grid = document.getElementById("featured-grid");
 
   async function loadFeaturedProducts() {
-    const items = await loadProducts().catch(err => { grid.innerHTML = `<p>${err.message}</p>`; return []; });
-    (items.slice(0,4)).forEach(p => {
+    // Uses the "home-featured" placement filter — only shows products you've marked
+    // as featured in the dashboard. sortOrder controls the display order.
+    const items = await loadProductsByPlacement("home-featured").catch(err => { grid.innerHTML = `<p>${err.message}</p>`; return []; });
+    if (!items.length) { grid.innerHTML = `<p style="color:#6b7280">No featured products yet. Add products in the dashboard and mark them as "Homepage — Featured".</p>`; return; }
+    items.forEach(p => {
       grid.innerHTML += `
         <div class="product-card">
           <a href="product.html?id=${p.id}" class="product-media">
