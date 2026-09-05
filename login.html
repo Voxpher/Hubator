@@ -79,7 +79,7 @@
       const next = new URLSearchParams(location.search).get("next") || "index.html";
       window.location.href = next;
     } catch (err) {
-      showAuthError("login-form", err.message);
+      const msg = err.message.includes("verify") ? err.message + " <a href=\"forgot-password.html\">Resend link?</a>" : err.message; document.getElementById("login-form-error").innerHTML = msg; document.getElementById("login-form-error").style.display = "block";
       btn.disabled = false;
       btn.textContent = "Sign in";
     }

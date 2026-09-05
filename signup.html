@@ -59,6 +59,9 @@
     </div>
   </div>
 </main>
+    </div>
+  </div>
+</main>
 
 <footer class="site-footer">
   <div class="wrap">
@@ -95,7 +98,11 @@
 
     try {
       await signUp(`${first} ${last}`.trim(), email, pass);
-      window.location.href = "index.html";
+      // Show "check your email" message instead of redirecting
+      document.getElementById("signup-form").style.display = "none";
+      document.querySelector(".auth-switch").style.display = "none";
+      document.querySelector(".auth-card h2").textContent = "Check your inbox!";
+      document.querySelector(".auth-card p").innerHTML = `We sent a verification link to <strong>${email}</strong>.<br>Click it to activate your account, then <a href="login.html">sign in</a>.`;
     } catch (err) {
       showAuthError("signup-form", err.message);
       btn.disabled = false;
