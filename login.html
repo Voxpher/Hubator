@@ -10,7 +10,7 @@
 
 <header class="site-header">
   <div class="wrap header-bar">
-    <a href="index.html" class="logo">Hubator</span></a>
+    <a href="index.html" class="logo">Hubator</a>
     <nav class="main-nav"><ul><li><a href="shop.html">Shop</a></li></ul></nav>
     <div class="header-actions">
       <a href="cart.html" class="icon-link" aria-label="Cart">🛍️<span class="cart-count">0</span></a>
@@ -22,27 +22,29 @@
   <div class="auth-wrap">
     <div class="auth-card">
       <h2 style="margin-bottom:6px;">Welcome back</h2>
-      <p style="margin-bottom:26px;">Sign in to check out faster and track orders.</p>
+      <p style="margin-bottom:26px;color:#6b7280;">Sign in to check out faster and track your orders.</p>
 
-      <form onsubmit="event.preventDefault(); showToast('Sign-in not connected yet — see js/auth.js'); ">
-        <div class="form-field"><label>Email</label><input type="email" required></div>
-        <div class="form-field"><label>Password</label><input type="password" required></div>
-        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+      <form id="login-form" novalidate>
+        <div class="form-field">
+          <label for="login-email">Email</label>
+          <input id="login-email" name="email" type="email" required autocomplete="email" placeholder="you@email.com">
+        </div>
+        <div class="form-field">
+          <label for="login-password" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>Password</span>
+            <a href="forgot-password.html" style="font-size:0.8rem;font-weight:400;color:#f59e0b;">Forgot password?</a>
+          </label>
+          <input id="login-password" name="password" type="password" required autocomplete="current-password" placeholder="••••••••">
+        </div>
+
+        <p id="login-form-error" role="alert" style="display:none;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:0.5rem 0.75rem;font-size:0.85rem;margin-bottom:0.75rem;"></p>
+
+        <button type="submit" id="login-btn" class="btn btn-primary btn-block">Sign in</button>
       </form>
 
-      <div class="divider-or">or continue with</div>
-      <div class="social-row">
-        <button class="btn btn-outline btn-block" onclick="showToast('Connect Google OAuth in js/auth.js')">Continue with Google</button>
-      </div>
-
-      <p class="auth-switch">Don't have an account? <a href="signup.html">Create one</a></p>
-    </div>
-
-    <div class="checkout-note" style="margin-top:20px;">
-      🔑 <strong>Replace this before going live:</strong> this form doesn't authenticate
-      anyone yet. Wire it up to a real auth provider (Supabase Auth, Firebase Auth, or
-      Auth0 are the easiest for a static site like this) and put your project's public
-      API key in <code>js/auth.js</code>.
+      <p class="auth-switch" style="margin-top:20px;text-align:center;">
+        Don't have an account? <a href="signup.html">Create one</a>
+      </p>
     </div>
   </div>
 </main>
@@ -55,7 +57,33 @@
   </div>
 </footer>
 
+<script src="js/config.js"></script>
+<script src="js/products.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/auth.js"></script>
+<script>
+  // Already signed in → go home
+  if (isSignedIn()) window.location.href = "index.html";
+
+  document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearAuthError("login-form");
+    const btn = document.getElementById("login-btn");
+    btn.disabled = true;
+    btn.textContent = "Signing in…";
+    try {
+      await signIn(
+        document.getElementById("login-email").value.trim(),
+        document.getElementById("login-password").value
+      );
+      const next = new URLSearchParams(location.search).get("next") || "index.html";
+      window.location.href = next;
+    } catch (err) {
+      showAuthError("login-form", err.message);
+      btn.disabled = false;
+      btn.textContent = "Sign in";
+    }
+  });
+</script>
 </body>
 </html>
