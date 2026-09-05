@@ -71,6 +71,7 @@
   </div>
 </footer>
 
+<script src="js/config.js"></script>
 <script src="js/products.js"></script>
 <script src="js/cart.js"></script>
 <script>
@@ -86,7 +87,7 @@
           <h4><a href="product.html?id=${p.id}">${p.name}</a></h4>
           <div class="product-foot">
             <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
-            <button class="add-btn" aria-label="Add to cart" onclick="addToCart(${p.id})">+</button>
+            <button class="add-btn" aria-label="Add to cart" onclick="addToCart('${p.id}')">+</button>
           </div>
         </div>
       </div>`;
@@ -106,7 +107,7 @@
   const params = new URLSearchParams(location.search);
   const initialCat = params.get("cat") || "All";
   document.querySelectorAll(".filter-chip").forEach(c => c.classList.toggle("active", c.dataset.cat === initialCat));
-  render(initialCat);
+  loadProducts().then(() => render(initialCat)).catch(err => { grid.innerHTML = `<p>${err.message}</p>`; });
 </script>
 </body>
 </html>

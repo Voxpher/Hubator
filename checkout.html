@@ -27,57 +27,31 @@
         <h3>Contact</h3>
         <div class="form-field">
           <label>Email</label>
-          <input type="email" required placeholder="you@email.com">
+          <input name="email" type="email" required placeholder="you@email.com">
         </div>
       </div>
 
       <div class="form-section">
         <h3>Shipping address</h3>
         <div class="form-row">
-          <div class="form-field"><label>First name</label><input type="text" required></div>
-          <div class="form-field"><label>Last name</label><input type="text" required></div>
+          <div class="form-field"><label>First name</label><input name="firstName" type="text" required></div>
+          <div class="form-field"><label>Last name</label><input name="lastName" type="text" required></div>
         </div>
-        <div class="form-field"><label>Address</label><input type="text" required></div>
+        <div class="form-field"><label>Address</label><input name="address" type="text" required></div>
         <div class="form-row">
-          <div class="form-field"><label>City</label><input type="text" required></div>
-          <div class="form-field"><label>Postal code</label><input type="text" required></div>
+          <div class="form-field"><label>City</label><input name="city" type="text" required></div>
+          <div class="form-field"><label>Postal code</label><input name="postalCode" type="text" required></div>
         </div>
         <div class="form-field">
           <label>Country</label>
-          <select required>
+          <select name="country" required>
             <option value="">Select country</option>
             <option>India</option><option>United States</option><option>United Kingdom</option><option>Other</option>
           </select>
         </div>
       </div>
 
-      <div class="form-section">
-        <h3>Payment</h3>
-        <div class="pay-methods">
-          <div class="pay-method active">Card</div>
-          <div class="pay-method">UPI</div>
-          <div class="pay-method">PayPal</div>
-        </div>
-        <!--
-          PAYMENT INTEGRATION POINT
-          This template does not process real payments — there is no backend here.
-          Easiest path (no server needed): create a Stripe Payment Link in your
-          Stripe Dashboard and set STRIPE_PAYMENT_LINK below. See README.md.
-        -->
-        <div id="card-fields">
-          <div class="form-field"><label>Card number</label><input type="text" placeholder="•••• •••• •••• ••••"></div>
-          <div class="form-row">
-            <div class="form-field"><label>Expiry</label><input type="text" placeholder="MM/YY"></div>
-            <div class="form-field"><label>CVC</label><input type="text" placeholder="•••"></div>
-          </div>
-        </div>
-        <div class="checkout-note">
-          🔑 <strong>Replace this before going live:</strong> set your Stripe (or other
-          processor's) publishable key / payment link in <code>js/checkout.js</code>.
-          Card fields above are placeholders — never collect raw card numbers yourself
-          without a PCI-compliant integration like Stripe Elements or a hosted Checkout page.
-        </div>
-      </div>
+      <div class="form-section"><h3>Payment</h3><div class="checkout-note">Orders are currently created as Cash on Delivery. A PCI-compliant hosted payment flow must be added before accepting card or UPI payments; this page never collects raw payment-card details.</div></div>
 
       <button type="submit" class="btn btn-primary btn-block">Place order</button>
     </form>
@@ -94,6 +68,7 @@
   </div>
 </footer>
 
+<script src="js/config.js"></script>
 <script src="js/products.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/checkout.js"></script>
@@ -111,11 +86,11 @@
       <div class="summary-row total"><span>Total</span><span>${fmt(subtotal + shipping)}</span></div>
     `;
   }
-  renderSummary();
+  loadProducts().then(renderSummary).catch(err => { document.getElementById("checkout-summary").innerHTML = `<p>${err.message}</p>`; });
 
   document.getElementById("checkout-form").addEventListener("submit", (e) => {
     e.preventDefault();
-    startCheckout(); // defined in js/checkout.js — wire up your payment provider there
+    startCheckout(e.currentTarget).catch(err => showToast(err.message));
   });
 </script>
 </body>

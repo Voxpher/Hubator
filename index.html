@@ -48,15 +48,15 @@
       <div class="hero-stack">
         <div class="stack-card">
           <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80" alt="Ceramic pour-over set">
-          <div class="sc-body"><h4>Ceramic Pour-Over Set</h4><span class="ticket on-sale">$42</span></div>
+          <div class="sc-body"><h4>Ceramic Pour-Over Set</h4><span class="ticket on-sale">₹3,499</span></div>
         </div>
         <div class="stack-card">
           <img src="https://images.unsplash.com/photo-1591561954557-26941169b49e?w=400&q=80" alt="Canvas tote">
-          <div class="sc-body"><h4>Canvas Field Tote</h4><span class="ticket">$58</span></div>
+          <div class="sc-body"><h4>Canvas Field Tote</h4><span class="ticket">₹4,799</span></div>
         </div>
         <div class="stack-card">
           <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400&q=80" alt="Brass desk lamp">
-          <div class="sc-body"><h4>Brass Desk Lamp</h4><span class="ticket">$96</span></div>
+          <div class="sc-body"><h4>Brass Desk Lamp</h4><span class="ticket">₹7,999</span></div>
         </div>
       </div>
     </div>
@@ -96,7 +96,7 @@
   <section class="section">
     <div class="wrap">
       <div class="value-strip">
-        <div class="value-item"><span class="vi-icon">🚚</span><div><h4>Free shipping over $75</h4><p>Flat $6 rate below that, US only.</p></div></div>
+        <div class="value-item"><span class="vi-icon">🚚</span><div><h4>Free shipping on eligible orders</h4><p>Shipping is calculated securely at checkout.</p></div></div>
         <div class="value-item"><span class="vi-icon">↩️</span><div><h4>30-day returns</h4><p>No questions, prepaid label included.</p></div></div>
         <div class="value-item"><span class="vi-icon">🔒</span><div><h4>Secure checkout</h4><p>Encrypted payments via Stripe.</p></div></div>
       </div>
@@ -157,14 +157,14 @@
   </div>
 </footer>
 
+<script src="js/config.js"></script>
 <script src="js/products.js"></script>
 <script src="js/cart.js"></script>
 <script>
   const grid = document.getElementById("featured-grid");
 
   async function loadFeaturedProducts() {
-    const products = await fetchQikinkProducts().catch(() => getProductsFallback());
-    const items = Array.isArray(products) ? products : getProductsFallback();
+    const items = await loadProducts().catch(err => { grid.innerHTML = `<p>${err.message}</p>`; return []; });
     (items.slice(0,4)).forEach(p => {
       grid.innerHTML += `
         <div class="product-card">
@@ -177,7 +177,7 @@
             <h4><a href="product.html?id=${p.id}">${p.name}</a></h4>
             <div class="product-foot">
               <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
-              <button class="add-btn" aria-label="Add to cart" onclick="addToCart(${p.id})">+</button>
+              <button class="add-btn" aria-label="Add to cart" onclick="addToCart('${p.id}')">+</button>
             </div>
           </div>
         </div>`;
