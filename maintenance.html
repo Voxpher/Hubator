@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>We'll be back soon — Hubator</title>
+<meta name="description" content="Hubator is currently undergoing scheduled maintenance. We'll be back shortly.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#FAF7F0">
+<link rel="icon" href="favicon.ico" sizes="any">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap');
+
+  :root {
+    --paper: #FAF7F0;
+    --ink: #16231F;
+    --ink-soft: #4A554F;
+    --gold: #C99A2E;
+    --gold-deep: #9C7620;
+    --line: #D8D2C4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Work Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-decoration: none;
+    margin-bottom: 48px;
+    display: block;
+  }
+
+  .icon {
+    font-size: 3.5rem;
+    margin-bottom: 24px;
+    display: block;
+    animation: spin 6s linear infinite;
+  }
+
+  @keyframes spin {
+    0%   { transform: rotate(0deg);   }
+    25%  { transform: rotate(10deg);  }
+    50%  { transform: rotate(0deg);   }
+    75%  { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg);   }
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 42ch;
+    line-height: 1.6;
+    margin: 0 auto 36px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border-radius: 100px;
+    margin-bottom: 48px;
+  }
+
+  .badge span {
+    width: 7px;
+    height: 7px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.75); }
+  }
+
+  .divider {
+    width: 48px;
+    height: 2px;
+    background: var(--gold);
+    margin: 0 auto 36px;
+    border-radius: 2px;
+  }
+
+  .contact {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+
+  .contact a {
+    color: var(--gold-deep);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .contact a:hover { text-decoration: underline; }
+
+  .footer {
+    position: fixed;
+    bottom: 20px;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    opacity: 0.6;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .icon, .badge span { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+  <a href="index.html" class="logo">Hubator</a>
+
+  <span class="icon" role="img" aria-label="Maintenance">🔧</span>
+
+  <div class="badge">
+    <span></span>
+    Scheduled maintenance
+  </div>
+
+  <h1>We'll be back<br>very soon.</h1>
+
+  <p class="subtitle">
+    We're making some improvements to give you a better experience.
+    This won't take long — check back in a little while.
+  </p>
+
+  <div class="divider"></div>
+
+  <p class="contact">
+    Urgent enquiry? Email us at
+    <a href="mailto:support@hubator.com">support@hubator.com</a><br>
+    or WhatsApp <a href="https://wa.me/919242036989">+91 9242036989</a>
+  </p>
+
+  <p class="footer">© 2026 Hubator</p>
+
+</body>
+</html>
