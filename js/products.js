@@ -1,24 +1,16 @@
-/* Customer-safe catalog client. No credentials belong in this repository.
- *
- * API base URL is configured once in js/config.js as window.HUBATOR_API_BASE.
- * Never add API keys, secrets, or tokens to this file — it lives in a public repo.
+/**
+ * js/products.js — Customer-safe catalog client.
+ * No credentials belong in this file or this repository.
+ * API base URL is set once in js/config.js as window.HUBATOR_API_BASE.
  */
 
 window.PRODUCTS = [];
 
-// ---------------------------------------------------------------------------
-// URL helpers
-// ---------------------------------------------------------------------------
-
 function hubatorApiUrl(path) {
   const base = (window.HUBATOR_API_BASE || "").replace(/\/$/, "");
-  if (!base) throw new Error("The store API URL has not been configured yet.");
+  if (!base) return null;
   return base + path;
 }
-
-// ---------------------------------------------------------------------------
-// Shape a raw API product into the flat object the UI expects
-// ---------------------------------------------------------------------------
 
 function productForStorefront(product) {
   const primaryImage = product.images
@@ -40,49 +32,43 @@ function productForStorefront(product) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Load ALL published products (shop page, product detail lookup)
-// ---------------------------------------------------------------------------
-
-async function loadProducts() {
-  const response = await fetch(hubatorApiUrl("/api/public/products"));
-  if (!response.ok) throw new Error("We could not load products right now.");
-  const data = await response.json();
-  window.PRODUCTS = (data.products || []).map(productForStorefront);
-  window.dispatchEvent(new CustomEvent("hubator:products-loaded", { detail: window.PRODUCTS }));
-  return window.PRODUCTS;
-}
-
-// ---------------------------------------------------------------------------
-// Load products for a specific storefront placement
-// (used by homepage sections — only fetches what that section needs)
-// ---------------------------------------------------------------------------
-
-async function loadProductsByPlacement(placement) {
-  const url = hubatorApiUrl("/api/public/products") + "?placement=" + encodeURIComponent(placement);
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("We could not load products right now.");
-  const data = await response.json();
-  // Results arrive pre-sorted by sortOrder asc from the API
+async function _fetchProducts(path) {
+  const url = hubatorApiUrl(path);
+  if (!url) throw new Error("Store API URL is not configured.");
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Could not load products right now. Please refresh.");
+  const data = await res.json();
   return (data.products || []).map(productForStorefront);
 }
 
-// ---------------------------------------------------------------------------
-// Lookup helpers (operate on the in-memory cache populated by loadProducts)
-// ---------------------------------------------------------------------------
-
-function getProductById(id) {
-  return window.PRODUCTS.find((product) => product.id === String(id));
+/** Load ALL published products — populates window.PRODUCTS */
+async function loadProducts() {
+  try {
+    window.PRODUCTS = await _fetchProducts("/api/public/products");
+    window.dispatchEvent(new CustomEvent("hubator:products-loaded", { detail: window.PRODUCTS }));
+    return window.PRODUCTS;
+  } catch (err) {
+    console.error("[Hubator] loadProducts:", err.message);
+    throw err;
+  }
 }
 
-// ---------------------------------------------------------------------------
-// Currency formatter
-// ---------------------------------------------------------------------------
+/** Load products for a specific storefront placement */
+async function loadProductsByPlacement(placement) {
+  try {
+    return await _fetchProducts("/api/public/products?placement=" + encodeURIComponent(placement));
+  } catch (err) {
+    console.error("[Hubator] loadProductsByPlacement:", err.message);
+    throw err;
+  }
+}
+
+function getProductById(id) {
+  return window.PRODUCTS.find((p) => p.id === String(id)) || null;
+}
 
 function fmt(amount) {
   return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
+    style: "currency", currency: "INR", maximumFractionDigits: 0,
   }).format(amount);
 }

@@ -4,51 +4,78 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout — Hubator</title>
+<meta name="description" content="Secure checkout powered by Razorpay.">
+<meta name="theme-color" content="#FAF7F0">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="favicon.ico">
+<meta property="og:title" content="Checkout — Hubator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hubator">
+<meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="css/style.css">
-<!-- Razorpay Checkout SDK — loads the secure hosted payment popup -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
-
 <div id="site-header"></div>
-
-<main>
+<main id="main-content">
   <div class="wrap breadcrumb"><a href="index.html">Home</a> / <a href="cart.html">Cart</a> / Checkout</div>
-
+  <section class="page-hero" style="border-bottom:none;padding-bottom:0;">
+    <div class="wrap"><h1>Checkout</h1></div>
+  </section>
   <div class="wrap checkout-grid">
-    <form id="checkout-form">
-
+    <form id="checkout-form" novalidate>
       <div class="form-section">
-        <h3>Contact</h3>
+        <h2 style="font-size:1.1rem;margin-bottom:14px;">Contact</h2>
         <div class="form-field">
-          <label>Email</label>
-          <input name="email" type="email" required placeholder="you@email.com">
+          <label for="co-email">Email</label>
+          <input id="co-email" name="email" type="email" required autocomplete="email" placeholder="you@email.com">
         </div>
         <div class="form-field">
-          <label>Phone <span style="color:#6b7280;font-size:0.8em;font-weight:400">(required for order updates)</span></label>
-          <input name="phone" type="tel" required placeholder="9876543210" pattern="[0-9]{10,15}" title="Enter a valid phone number">
+          <label for="co-phone">Phone <span style="color:#9ca3af;font-size:0.8em;font-weight:400">(required for order updates)</span></label>
+          <input id="co-phone" name="phone" type="tel" required autocomplete="tel" placeholder="9876543210" pattern="[0-9]{10,15}">
         </div>
       </div>
-
       <div class="form-section">
-        <h3>Shipping address</h3>
+        <h2 style="font-size:1.1rem;margin-bottom:14px;">Shipping address</h2>
         <div class="form-row">
-          <div class="form-field"><label>First name</label><input name="firstName" type="text" required></div>
-          <div class="form-field"><label>Last name</label><input name="lastName" type="text" required></div>
-        </div>
-        <div class="form-field"><label>Address</label><input name="address" type="text" required placeholder="House no., street, area"></div>
-        <div class="form-field"><label>Apartment / Floor <span style="color:#9ca3af;font-size:0.8em">(optional)</span></label><input name="address2" type="text" placeholder="Flat 4B, 2nd Floor"></div>
-        <div class="form-row">
-          <div class="form-field"><label>City</label><input name="city" type="text" required></div>
-          <div class="form-field"><label>State</label><input name="state" type="text" required placeholder="Maharashtra"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-field"><label>Postal code</label><input name="postalCode" type="text" required pattern="[0-9]{6}" title="Enter a 6-digit PIN code"></div>
           <div class="form-field">
-            <label>Country</label>
-            <select name="country" required>
-              <option value="">Select country</option>
-              <option value="India" selected>India</option>
+            <label for="co-fname">First name</label>
+            <input id="co-fname" name="firstName" type="text" required autocomplete="given-name">
+          </div>
+          <div class="form-field">
+            <label for="co-lname">Last name</label>
+            <input id="co-lname" name="lastName" type="text" required autocomplete="family-name">
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="co-addr">Address</label>
+          <input id="co-addr" name="address" type="text" required autocomplete="address-line1" placeholder="House no., street, area">
+        </div>
+        <div class="form-field">
+          <label for="co-addr2">Apartment / Floor <span style="color:#9ca3af;font-size:0.8em;font-weight:400">(optional)</span></label>
+          <input id="co-addr2" name="address2" type="text" autocomplete="address-line2" placeholder="Flat 4B, 2nd Floor">
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="co-city">City</label>
+            <input id="co-city" name="city" type="text" required autocomplete="address-level2">
+          </div>
+          <div class="form-field">
+            <label for="co-state">State</label>
+            <input id="co-state" name="state" type="text" required autocomplete="address-level1" placeholder="Maharashtra">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="co-pin">Postal code</label>
+            <input id="co-pin" name="postalCode" type="text" required autocomplete="postal-code" pattern="[0-9]{6}" title="Enter a 6-digit PIN code" placeholder="400001">
+          </div>
+          <div class="form-field">
+            <label for="co-country">Country</label>
+            <select id="co-country" name="country" required autocomplete="country-name">
+              <option value="" disabled selected>Select country</option>
+              <option value="India">India</option>
               <option value="United States">United States</option>
               <option value="United Kingdom">United Kingdom</option>
               <option value="Other">Other</option>
@@ -56,69 +83,58 @@
           </div>
         </div>
       </div>
-
       <div class="form-section">
-        <h3>Payment</h3>
-        <p style="font-size:0.88rem;color:#6b7280;margin:0 0 1rem;">
-          Pay securely via <strong>UPI, Cards, Net Banking, or Wallets</strong> through Razorpay.
-          Your card details are never stored on our servers.
-        </p>
-        <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:#6b7280;margin-bottom:0.5rem;">
-          <span>🔒 Secured by</span>
-          <strong style="color:#072654;">Razorpay</strong>
-        </div>
+        <h2 style="font-size:1.1rem;margin-bottom:14px;">Payment</h2>
+        <p style="font-size:0.88rem;color:#6b7280;margin:0 0 0.75rem;">Pay securely via <strong>UPI, Cards, Net Banking, or Wallets</strong> through Razorpay. Your card details are never stored on our servers.</p>
+        <p style="font-size:0.8rem;color:#6b7280;margin:0;">🔒 Secured by <strong style="color:#072654;">Razorpay</strong></p>
       </div>
-
-      <!-- Error message slot -->
-      <p id="checkout-error" role="alert" style="display:none;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.88rem;margin-bottom:1rem;"></p>
-
-      <button type="submit" id="pay-btn" class="btn btn-primary btn-block">
-        Pay securely →
-      </button>
-      <p style="text-align:center;font-size:0.78rem;color:#9ca3af;margin-top:0.5rem;">
-        You will be redirected to Razorpay's secure checkout
-      </p>
+      <p id="checkout-form-error" role="alert" style="display:none;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.88rem;margin-bottom:1rem;"></p>
+      <button type="submit" id="pay-btn" class="btn btn-primary btn-block">Pay securely →</button>
+      <p style="text-align:center;font-size:0.78rem;color:#9ca3af;margin-top:0.5rem;">You will be redirected to Razorpay's secure checkout</p>
     </form>
-
-    <div class="summary-box" id="checkout-summary"></div>
+    <div class="summary-box" id="checkout-summary" aria-label="Order summary"></div>
   </div>
 </main>
-
 <div id="site-footer"></div>
-
-<script src="js/layout.js"></script><script src="js/config.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/config.js"></script>
 <script src="js/products.js"></script>
-<script src="js/cart.js"></script><script src="js/auth.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/checkout.js"></script>
 <script>
   function renderSummary() {
     const lines = cartLines();
     const subtotal = cartSubtotal();
-    document.getElementById("checkout-summary").innerHTML = `
-      <h3 style="margin-bottom:16px;">Order summary</h3>
-      ${lines.map(l => `
-        <div class="summary-row">
-          <span>${l.product.name} × ${l.qty}</span>
-          <span>${fmt(l.product.price * l.qty)}</span>
-        </div>
-      `).join("")}
-      <div class="summary-row"><span>Shipping</span><span>Calculated at payment</span></div>
-      <div class="summary-row total"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
-    `;
+    const box = document.getElementById("checkout-summary");
+    box.innerHTML = "";
+    const h = document.createElement("h3"); h.textContent = "Order summary"; h.style.marginBottom = "16px"; box.appendChild(h);
+    lines.forEach(function(l) {
+      const r = document.createElement("div"); r.className = "summary-row";
+      const n = document.createElement("span"); n.textContent = l.product.name + " \u00D7 " + l.qty;
+      const p = document.createElement("span"); p.textContent = fmt(l.product.price * l.qty);
+      r.appendChild(n); r.appendChild(p); box.appendChild(r);
+    });
+    const sr = document.createElement("div"); sr.className = "summary-row";
+    const sl = document.createElement("span"); sl.textContent = "Shipping";
+    const sv = document.createElement("span"); sv.textContent = "Calculated at payment";
+    sr.appendChild(sl); sr.appendChild(sv); box.appendChild(sr);
+    const tr = document.createElement("div"); tr.className = "summary-row total";
+    const tl = document.createElement("span"); tl.textContent = "Subtotal";
+    const tv = document.createElement("span"); tv.textContent = fmt(subtotal);
+    tr.appendChild(tl); tr.appendChild(tv); box.appendChild(tr);
   }
-
-  loadProducts().then(renderSummary).catch(err => {
-    document.getElementById("checkout-summary").innerHTML = `<p>${err.message}</p>`;
+  loadProducts().then(renderSummary).catch(function(err) {
+    const box = document.getElementById("checkout-summary");
+    box.textContent = err.message;
   });
-
-  document.getElementById("checkout-form").addEventListener("submit", (e) => {
+  document.getElementById("checkout-form").addEventListener("submit", function(e) {
     e.preventDefault();
-    startCheckout(e.currentTarget).catch(err => {
-      const el = document.getElementById("checkout-error");
-      el.textContent = err.message;
-      el.style.display = "block";
+    startCheckout(e.currentTarget).catch(function(err) {
+      const el = document.getElementById("checkout-form-error");
+      el.textContent = err.message; el.style.display = "block";
       document.getElementById("pay-btn").disabled = false;
-      document.getElementById("pay-btn").textContent = "Pay securely →";
+      document.getElementById("pay-btn").textContent = "Pay securely \u2192";
     });
   });
 </script>

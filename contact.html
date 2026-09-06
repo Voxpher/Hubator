@@ -4,43 +4,76 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact — Hubator</title>
+<meta name="description" content="Get in touch with the Hubator team.">
+<meta name="theme-color" content="#FAF7F0">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="favicon.ico">
+<meta property="og:title" content="Contact — Hubator">
+<meta property="og:description" content="Get in touch with the Hubator team.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hubator">
+<meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div id="site-header"></div>
-
-<main>
+<main id="main-content">
   <div class="wrap breadcrumb"><a href="index.html">Home</a> / Contact</div>
   <section class="page-hero" style="border-bottom:none;">
     <div class="wrap">
       <span class="eyebrow">Get in touch</span>
-      <h1 style="font-size:2.4rem;">We reply within a day</h1>
+      <h1>We reply within a day</h1>
     </div>
   </section>
 
   <div class="wrap contact-grid">
     <div>
-      <div class="contact-info-card"><h4>📧 Email</h4><p>hello@Hubator.com</p></div>
-      <div class="contact-info-card"><h4>📞 Phone</h4><p>+91 00000 00000</p></div>
-      <div class="contact-info-card"><h4>📍 Studio</h4><p>Bālurghāt, West Bengal, India</p></div>
-      <div class="contact-info-card"><h4>🕐 Hours</h4><p>Mon–Fri, 10am–6pm IST</p></div>
-    </div>
-    <form onsubmit="event.preventDefault(); showToast('Message sent — we\'ll reply soon'); this.reset();">
-      <div class="form-row">
-        <div class="form-field"><label>Name</label><input type="text" required></div>
-        <div class="form-field"><label>Email</label><input type="email" required></div>
+      <div class="contact-info-card">
+        <h3 style="font-size:0.95rem;margin-bottom:4px;">📧 Email</h3>
+        <p><a href="mailto:support@hubator.com">support@hubator.com</a></p>
       </div>
-      <div class="form-field"><label>Subject</label><input type="text"></div>
-      <div class="form-field"><label>Message</label><textarea required></textarea></div>
+      <div class="contact-info-card">
+        <h3 style="font-size:0.95rem;margin-bottom:4px;">📞 Phone / WhatsApp</h3>
+        <p><a href="tel:+919242036989">+91 9242036989</a></p>
+      </div>
+      <div class="contact-info-card">
+        <h3 style="font-size:0.95rem;margin-bottom:4px;">📍 Location</h3>
+        <p>Gangarampur, West Bengal, India — 733124</p>
+      </div>
+      <div class="contact-info-card">
+        <h3 style="font-size:0.95rem;margin-bottom:4px;">🕐 Hours</h3>
+        <p>Mon–Sat, 9am–6pm IST</p>
+      </div>
+    </div>
+
+    <form id="contact-form" onsubmit="event.preventDefault(); showToast('Message sent — we\'ll reply soon'); this.reset();" novalidate>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="ct-name">Name</label>
+          <input id="ct-name" type="text" name="name" required autocomplete="name">
+        </div>
+        <div class="form-field">
+          <label for="ct-email">Email</label>
+          <input id="ct-email" type="email" name="email" required autocomplete="email">
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="ct-subject">Subject <span style="color:#9ca3af;font-size:0.8em;font-weight:400">(optional)</span></label>
+        <input id="ct-subject" type="text" name="subject">
+      </div>
+      <div class="form-field">
+        <label for="ct-message">Message</label>
+        <textarea id="ct-message" name="message" required rows="5"></textarea>
+      </div>
       <button type="submit" class="btn btn-primary">Send message</button>
     </form>
   </div>
 </main>
-
 <div id="site-footer"></div>
-
-<script src="js/layout.js"></script><script src="js/products.js"></script>
-<script src="js/cart.js"></script><script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>

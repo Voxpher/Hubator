@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shop — Hubator</title>
 <link rel="stylesheet" href="css/style.css">
+
+<meta name="description" content="Shop all Hubator products — apparel, home, kitchen and accessories.">
+<meta name="theme-color" content="#FAF7F0">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="favicon.ico">
+<meta property="og:title" content="Shop — Hubator">
+<meta property="og:description" content="Shop all Hubator products — apparel, home, kitchen and accessories.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hubator">
+<meta name="twitter:card" content="summary">
 </head>
 <body>
 
@@ -23,13 +33,13 @@
   <section class="section" style="padding-top:36px;">
     <div class="wrap">
       <div class="filter-bar" id="filter-bar">
-        <button class="filter-chip active" data-cat="All">All</button>
-        <button class="filter-chip" data-cat="Home">Home</button>
-        <button class="filter-chip" data-cat="Kitchen">Kitchen</button>
-        <button class="filter-chip" data-cat="Apparel">Apparel</button>
-        <button class="filter-chip" data-cat="Accessories">Accessories</button>
-        <button class="filter-chip" data-cat="Bags">Bags</button>
-        <button class="filter-chip" data-cat="Footwear">Footwear</button>
+        <button class="filter-chip active" data-cat="All" aria-pressed="true">All</button>
+        <button class="filter-chip" data-cat="Home" aria-pressed="false">Home</button>
+        <button class="filter-chip" data-cat="Kitchen" aria-pressed="false">Kitchen</button>
+        <button class="filter-chip" data-cat="Apparel" aria-pressed="false">Apparel</button>
+        <button class="filter-chip" data-cat="Accessories" aria-pressed="false">Accessories</button>
+        <button class="filter-chip" data-cat="Bags" aria-pressed="false">Bags</button>
+        <button class="filter-chip" data-cat="Footwear" aria-pressed="false">Footwear</button>
       </div>
       <div class="product-grid" id="shop-grid"></div>
     </div>
@@ -66,8 +76,9 @@
   }
   document.querySelectorAll(".filter-chip").forEach(chip => {
     chip.addEventListener("click", () => {
-      document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      document.querySelectorAll(".filter-chip").forEach(c => { c.classList.remove("active"); c.setAttribute("aria-pressed","false"); });
       chip.classList.add("active");
+      chip.setAttribute("aria-pressed","true");
       render(chip.dataset.cat);
     });
   });

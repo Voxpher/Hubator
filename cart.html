@@ -4,78 +4,142 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Your Cart — Hubator</title>
+<meta name="description" content="Your shopping cart at Hubator.">
+<meta name="theme-color" content="#FAF7F0">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="favicon.ico">
+<meta property="og:title" content="Your Cart — Hubator">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hubator">
+<meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div id="site-header"></div>
-
-<main>
+<main id="main-content">
   <div class="wrap breadcrumb"><a href="index.html">Home</a> / Cart</div>
   <section class="page-hero" style="border-bottom:none;padding-bottom:0;">
-    <div class="wrap"><h1 style="font-size:2.2rem;">Your cart</h1></div>
+    <div class="wrap"><h1>Your cart</h1></div>
   </section>
-
   <div class="wrap cart-grid" id="cart-root"></div>
 </main>
-
 <div id="site-footer"></div>
-
-<script src="js/layout.js"></script><script src="js/config.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/config.js"></script>
 <script src="js/products.js"></script>
-<script src="js/cart.js"></script><script src="js/auth.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
 <script>
-  function renderCart(){
+  function renderCart() {
     const lines = cartLines();
     const root = document.getElementById("cart-root");
-    if(lines.length === 0){
-      root.innerHTML = `
-        <div class="empty-state" style="grid-column:1/-1;">
-          <div class="es-icon">🛍️</div>
-          <h2>Your cart is empty</h2>
-          <p>Nothing here yet — go find something worth keeping.</p>
-          <a href="shop.html" class="btn btn-primary">Browse the shop</a>
-        </div>`;
+    root.innerHTML = "";
+
+    if (!lines.length) {
+      root.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="es-icon">🛍️</div><h2>Your cart is empty</h2><p>Nothing here yet — go find something worth keeping.</p><a href="shop.html" class="btn btn-primary">Browse the shop</a></div>';
       return;
     }
-    const subtotal = cartSubtotal();
-    const shipping = subtotal >= 75 || subtotal === 0 ? 0 : 6;
-    const total = subtotal + shipping;
 
-    root.innerHTML = `
-      <div>
-        ${lines.map(l => `
-          <div class="cart-line">
-            <img src="${l.product.img}" alt="${l.product.name}">
-            <div>
-              <h4><a href="product.html?id=${l.product.id}">${l.product.name}</a></h4>
-              <div class="cl-meta">${l.product.category}</div>
-              <a class="remove-link" onclick="removeFromCart(${l.product.id}); renderCart();">Remove</a>
-            </div>
-            <div class="qty-control">
-              <button onclick="setQty(${l.product.id}, ${l.qty - 1}); renderCart();">−</button>
-              <input type="text" value="${l.qty}" readonly>
-              <button onclick="setQty(${l.product.id}, ${l.qty + 1}); renderCart();">+</button>
-            </div>
-            <span class="ticket">${fmt(l.product.price * l.qty)}</span>
-          </div>
-        `).join("")}
-      </div>
-      <div class="summary-box">
-        <h3 style="margin-bottom:18px;">Order summary</h3>
-        <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
-        <div class="summary-row"><span>Shipping</span><span>${shipping === 0 ? "Free" : fmt(shipping)}</span></div>
-        <div class="promo-row">
-          <input type="text" placeholder="Promo code">
-          <button class="btn btn-outline btn-sm" onclick="showToast('Promo codes coming soon')">Apply</button>
-        </div>
-        <div class="summary-row total"><span>Total</span><span>${fmt(total)}</span></div>
-        <a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:16px;">Checkout</a>
-        <a href="shop.html" class="btn btn-outline btn-block" style="margin-top:10px;">Continue shopping</a>
-      </div>
-    `;
+    const subtotal = cartSubtotal();
+
+    // Lines column
+    const linesCol = document.createElement("div");
+    lines.forEach(function(l) {
+      const line = document.createElement("div");
+      line.className = "cart-line";
+
+      const img = document.createElement("img");
+      img.src = l.product.img; img.alt = l.product.name;
+      img.width = 76; img.height = 76;
+
+      const info = document.createElement("div");
+      const name = document.createElement("h4");
+      const nameLink = document.createElement("a");
+      nameLink.href = "product.html?id=" + l.product.id;
+      nameLink.textContent = l.product.name;
+      name.appendChild(nameLink);
+      const meta = document.createElement("div");
+      meta.className = "cl-meta"; meta.textContent = l.product.category;
+
+      // Remove button (not anchor — semantic fix)
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "remove-btn";
+      removeBtn.setAttribute("aria-label", "Remove " + l.product.name + " from cart");
+      removeBtn.textContent = "Remove";
+      removeBtn.onclick = function() { removeFromCart(l.product.id); renderCart(); };
+
+      info.appendChild(name); info.appendChild(meta); info.appendChild(removeBtn);
+
+      // Qty control
+      const qtyCtrl = document.createElement("div");
+      qtyCtrl.className = "qty-control";
+      const decBtn = document.createElement("button");
+      decBtn.setAttribute("type", "button");
+      decBtn.setAttribute("aria-label", "Decrease quantity");
+      decBtn.textContent = "−";
+      decBtn.onclick = function() { setQty(l.product.id, l.qty - 1); renderCart(); };
+
+      const qtyInput = document.createElement("input");
+      qtyInput.type = "number"; // semantic fix: was type="text"
+      qtyInput.value = String(l.qty);
+      qtyInput.min = "1"; qtyInput.max = "20";
+      qtyInput.setAttribute("aria-label", "Quantity for " + l.product.name);
+      qtyInput.setAttribute("readonly", "");
+      qtyInput.style.cssText = "width:44px;text-align:center;border:none;background:none;font-family:var(--font-mono);";
+
+      const incBtn = document.createElement("button");
+      incBtn.setAttribute("type", "button");
+      incBtn.setAttribute("aria-label", "Increase quantity");
+      incBtn.textContent = "+";
+      incBtn.onclick = function() { setQty(l.product.id, l.qty + 1); renderCart(); };
+
+      qtyCtrl.appendChild(decBtn); qtyCtrl.appendChild(qtyInput); qtyCtrl.appendChild(incBtn);
+
+      const price = document.createElement("span");
+      price.className = "ticket";
+      price.textContent = fmt(l.product.price * l.qty);
+
+      line.appendChild(img); line.appendChild(info);
+      line.appendChild(qtyCtrl); line.appendChild(price);
+      linesCol.appendChild(line);
+    });
+
+    // Summary box
+    const summary = document.createElement("div");
+    summary.className = "summary-box";
+    summary.setAttribute("aria-label", "Order summary");
+
+    const sh = document.createElement("h3"); sh.textContent = "Order summary"; sh.style.marginBottom = "18px";
+    summary.appendChild(sh);
+
+    [["Subtotal", fmt(subtotal)], ["Shipping", "Calculated at checkout"]].forEach(function(pair) {
+      const r = document.createElement("div"); r.className = "summary-row";
+      const l = document.createElement("span"); l.textContent = pair[0];
+      const v = document.createElement("span"); v.textContent = pair[1];
+      r.appendChild(l); r.appendChild(v); summary.appendChild(r);
+    });
+
+    const promoRow = document.createElement("div"); promoRow.className = "promo-row";
+    const promoInput = document.createElement("input"); promoInput.type = "text"; promoInput.placeholder = "Promo code"; promoInput.setAttribute("aria-label", "Promo code");
+    const promoBtn = document.createElement("button"); promoBtn.className = "btn btn-outline btn-sm"; promoBtn.textContent = "Apply"; promoBtn.type = "button";
+    promoBtn.onclick = function() { showToast("Promo codes coming soon"); };
+    promoRow.appendChild(promoInput); promoRow.appendChild(promoBtn); summary.appendChild(promoRow);
+
+    const totalRow = document.createElement("div"); totalRow.className = "summary-row total";
+    const tl = document.createElement("span"); tl.textContent = "Total";
+    const tv = document.createElement("span"); tv.textContent = fmt(subtotal);
+    totalRow.appendChild(tl); totalRow.appendChild(tv); summary.appendChild(totalRow);
+
+    const checkoutLink = document.createElement("a"); checkoutLink.href = "checkout.html"; checkoutLink.className = "btn btn-primary btn-block"; checkoutLink.textContent = "Checkout"; checkoutLink.style.marginTop = "16px";
+    const continueLink = document.createElement("a"); continueLink.href = "shop.html"; continueLink.className = "btn btn-outline btn-block"; continueLink.textContent = "Continue shopping"; continueLink.style.marginTop = "10px";
+    summary.appendChild(checkoutLink); summary.appendChild(continueLink);
+
+    root.appendChild(linesCol); root.appendChild(summary);
   }
-  loadProducts().then(renderCart).catch(err => { document.getElementById("cart-root").innerHTML = `<p>${err.message}</p>`; });
+
+  loadProducts().then(renderCart).catch(function(err) {
+    document.getElementById("cart-root").textContent = err.message;
+  });
 </script>
 </body>
 </html>
