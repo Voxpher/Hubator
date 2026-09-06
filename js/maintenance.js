@@ -12,7 +12,7 @@
  * ╚══════════════════════════════════════════════╝
  */
 
-const MAINTENANCE_MODE = true; // ← CHANGE THIS: true = ON, false = OFF
+const MAINTENANCE_MODE = false; // ← CHANGE THIS: true = ON, false = OFF
 
 (function () {
   const page = location.pathname.split("/").pop() || "index.html";
