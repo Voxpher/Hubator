@@ -20,135 +20,207 @@
     --line: #D8D2C4;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * {
+    box-sizing: border-box;
+  }
 
   body {
-    font-family: 'Work Sans', sans-serif;
-    background: var(--paper);
-    color: var(--ink);
+    margin: 0;
     min-height: 100vh;
+    min-height: 100svh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    font-family: 'Work Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
     padding: 24px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
     text-align: center;
+    line-height: 1.6;
+  }
+
+  main {
+    width: 100%;
+    max-width: 640px;
+    margin-block: auto;
+    padding-block: 28px;
+  }
+
+  a {
+    color: var(--gold-deep);
+    text-underline-offset: 4px;
+  }
+
+  a:focus-visible {
+    outline: 2px solid var(--gold-deep);
+    outline-offset: 4px;
   }
 
   .logo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-bottom: 32px;
     font-family: 'Fraunces', serif;
     font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--ink);
     text-decoration: none;
-    margin-bottom: 48px;
-    display: block;
   }
 
-  .icon {
-    font-size: 3.5rem;
-    margin-bottom: 24px;
-    display: block;
-    animation: spin 6s linear infinite;
+  .maintenance-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 24px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    color: var(--gold-deep);
   }
 
-  @keyframes spin {
-    0%   { transform: rotate(0deg);   }
-    25%  { transform: rotate(10deg);  }
-    50%  { transform: rotate(0deg);   }
-    75%  { transform: rotate(-10deg); }
-    100% { transform: rotate(0deg);   }
-  }
-
-  h1 {
-    font-family: 'Fraunces', serif;
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    font-weight: 700;
-    line-height: 1.1;
-    margin-bottom: 16px;
-    letter-spacing: -0.02em;
-  }
-
-  .subtitle {
-    font-size: 1.05rem;
-    color: var(--ink-soft);
-    max-width: 42ch;
-    line-height: 1.6;
-    margin: 0 auto 36px;
+  .maintenance-icon svg {
+    width: 48px;
+    height: 48px;
   }
 
   .badge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 9px;
+    max-width: 100%;
+    margin-bottom: 28px;
+    padding: 9px 18px;
+    border-radius: 100px;
     background: var(--ink);
     color: var(--paper);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    padding: 8px 18px;
-    border-radius: 100px;
-    margin-bottom: 48px;
   }
 
-  .badge span {
-    width: 7px;
-    height: 7px;
-    background: var(--gold);
-    border-radius: 50%;
-    animation: pulse 1.4s ease-in-out infinite;
+  .badge svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--gold);
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%       { opacity: 0.4; transform: scale(0.75); }
+  h1 {
+    margin: 0 0 16px;
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 7vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    max-width: 42ch;
+    margin: 0 auto 32px;
+    font-size: 1.05rem;
+    color: var(--ink-soft);
   }
 
   .divider {
     width: 48px;
     height: 2px;
-    background: var(--gold);
-    margin: 0 auto 36px;
+    margin: 0 auto 28px;
     border-radius: 2px;
+    background: var(--gold);
   }
 
   .contact {
-    font-size: 0.88rem;
+    margin: 0 0 8px;
+    font-size: 0.9rem;
     color: var(--ink-soft);
   }
 
-  .contact a {
-    color: var(--gold-deep);
-    font-weight: 600;
-    text-decoration: none;
+  .contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 20px;
   }
 
-  .contact a:hover { text-decoration: underline; }
+  .contact-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    max-width: 100%;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .contact-links a span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .contact-links svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
 
   .footer {
-    position: fixed;
-    bottom: 20px;
-    font-size: 0.75rem;
+    padding-top: 24px;
+    font-size: 0.78rem;
     color: var(--ink-soft);
-    opacity: 0.6;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .icon, .badge span { animation: none; }
+  .footer p {
+    margin: 0;
+  }
+
+  @media (max-width: 480px) {
+    body {
+      padding-inline: 16px;
+    }
+
+    main {
+      padding-block: 20px;
+    }
+
+    .logo {
+      margin-bottom: 24px;
+    }
+
+    .contact-links {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+    }
   }
 </style>
 </head>
 <body>
 
-  <a href="index.html" class="logo">Hubator</a>
+<main id="main-content">
+  <a href="index.html" class="logo" aria-label="Hubator home">Hubator</a>
 
-  <span class="icon" role="img" aria-label="Maintenance">🔧</span>
+  <div class="maintenance-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+      <path d="M14 6a6 6 0 0 0-7 7l-4 4a3 3 0 0 0 4 4l4-4a6 6 0 0 0 7-7l-4 3-3-3 3-4Z"></path>
+    </svg>
+  </div>
 
   <div class="badge">
-    <span></span>
-    Scheduled maintenance
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M12 6v6l4 2"></path>
+    </svg>
+    <span>Scheduled maintenance</span>
   </div>
 
   <h1>We'll be back<br>very soon.</h1>
@@ -158,15 +230,30 @@
     This won't take long — check back in a little while.
   </p>
 
-  <div class="divider"></div>
+  <div class="divider" aria-hidden="true"></div>
 
-  <p class="contact">
-    Urgent enquiry? Email us at
-    <a href="mailto:support@hubator.com">support@hubator.com</a><br>
-    or WhatsApp <a href="https://wa.me/919242036989">+91 9242036989</a>
-  </p>
+  <p class="contact">Need help while we're away? Get in touch:</p>
 
-  <p class="footer">© 2026 Hubator</p>
+  <div class="contact-links">
+    <a href="mailto:support@hubator.com">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M3 5h18v14H3Z"></path>
+        <path d="m3 6 9 7 9-7"></path>
+      </svg>
+      <span>support@hubator.com</span>
+    </a>
+    <a href="https://wa.me/919242036989" aria-label="WhatsApp us at +91 9242036989">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M5 3h4l2 5-3 2a16 16 0 0 0 6 6l2-3 5 2v4a2 2 0 0 1-2 2C10 21 3 14 3 5a2 2 0 0 1 2-2Z"></path>
+      </svg>
+      <span>+91 9242036989</span>
+    </a>
+  </div>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 Hubator</p>
+</footer>
 
 </body>
 </html>

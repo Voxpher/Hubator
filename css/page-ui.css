@@ -1,0 +1,329 @@
+/* Shared enhancements for secondary storefront pages. */
+
+.page-icon {
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  flex: 0 0 auto;
+  vertical-align: -0.2em;
+  pointer-events: none;
+}
+
+.page-icon--success {
+  color: #166534;
+}
+
+.page-icon--error {
+  color: #b42318;
+}
+
+.page-icon--warning {
+  color: #936300;
+}
+
+.page-ui main {
+  min-width: 0;
+}
+
+.page-ui .breadcrumb {
+  padding: 20px var(--wrap-h, 28px);
+  overflow-wrap: anywhere;
+}
+
+.page-ui .page-hero h1 {
+  overflow-wrap: anywhere;
+}
+
+.page-ui .btn {
+  min-height: 44px;
+  white-space: normal;
+  text-align: center;
+}
+
+.page-ui .form-field input,
+.page-ui .form-field select,
+.page-ui .form-field textarea {
+  min-width: 0;
+  max-width: 100%;
+  font-size: 1rem;
+}
+
+.page-ui .form-field input,
+.page-ui .form-field select {
+  min-height: 46px;
+}
+
+.page-ui .form-field input:focus-visible,
+.page-ui .form-field select:focus-visible,
+.page-ui .form-field textarea:focus-visible {
+  outline: 2px solid var(--gold-deep);
+  outline-offset: 3px;
+}
+
+.page-ui [role="alert"] {
+  overflow-wrap: anywhere;
+}
+
+.page-ui .auth-switch a {
+  display: inline-block;
+  padding-block: 10px;
+}
+
+.page-ui .auth-wrap {
+  width: 100%;
+  max-width: 480px;
+  padding-top: clamp(28px, 5vw, 56px);
+  padding-bottom: clamp(44px, 7vw, 80px);
+}
+
+.page-ui .auth-card {
+  min-width: 0;
+}
+
+.page-ui .auth-card h2 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.2;
+}
+
+.page-ui .auth-card h3 {
+  line-height: 1.3;
+}
+
+.page-ui .auth-card p {
+  overflow-wrap: anywhere;
+}
+
+.page-ui .auth-card > div > div > .page-icon,
+.page-ui #forgot-success > div > .page-icon,
+.page-ui #reset-success > div > .page-icon,
+.page-ui #reset-invalid > div > .page-icon,
+.page-ui #verify-loading > div > .page-icon,
+.page-ui #verify-success > div > .page-icon,
+.page-ui #verify-error > div > .page-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.page-ui .form-row > .form-field {
+  min-width: 0;
+}
+
+/* Articles and policies: undo the global list reset inside prose only. */
+
+.page-ui .article-content {
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.page-ui .article-content h2 {
+  margin-top: 32px;
+  margin-bottom: 12px;
+  font-size: clamp(1.25rem, 2.5vw, 1.7rem);
+  line-height: 1.3;
+}
+
+.page-ui .article-content > h2:first-child {
+  margin-top: 0;
+}
+
+.page-ui .article-content p {
+  margin-bottom: 16px;
+}
+
+.page-ui .article-content ul,
+.page-ui .article-content ol {
+  margin: 0 0 20px;
+  padding-left: 24px;
+  color: var(--ink-soft);
+}
+
+.page-ui .article-content ul {
+  list-style: disc;
+}
+
+.page-ui .article-content li {
+  margin-bottom: 8px;
+  padding-left: 3px;
+}
+
+.page-ui .article-content a,
+.page-ui .contact-info-card a {
+  color: var(--gold-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.page-ui .article-content a:hover,
+.page-ui .contact-info-card a:hover {
+  color: var(--ink);
+}
+
+.page-ui .article-content .page-icon {
+  margin-right: 4px;
+}
+
+/* Contact */
+
+.page-ui .contact-grid {
+  padding-inline: var(--wrap-h, 28px);
+}
+
+.page-ui .contact-grid > * {
+  min-width: 0;
+}
+
+.page-ui .contact-info-card {
+  padding: clamp(18px, 3vw, 24px);
+}
+
+.page-ui .contact-info-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-ui .contact-info-card h3 .page-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--gold-deep);
+}
+
+.page-ui .contact-info-card p {
+  overflow-wrap: anywhere;
+}
+
+.page-ui .contact-info-card a {
+  display: inline-block;
+  padding-block: 8px;
+}
+
+.page-ui #contact-form textarea {
+  min-height: 160px;
+}
+
+/* Confirmation */
+
+.page-ui .confirmation-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.page-ui .confirmation-columns > * {
+  min-width: 0;
+}
+
+.page-ui #conf-address,
+.page-ui #conf-email,
+.page-ui #conf-order-number,
+.page-ui #conf-payment {
+  overflow-wrap: anywhere;
+}
+
+.page-ui #conf-items > div,
+.page-ui #conf-totals > div {
+  gap: 16px;
+}
+
+.page-ui #conf-items > div > span:first-child,
+.page-ui #conf-totals > div > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.page-ui #conf-items > div > span:last-child,
+.page-ui #conf-totals > div > span:last-child {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.page-ui .about-hero {
+  padding-inline: var(--wrap-h, 28px);
+}
+
+.page-ui .about-hero > * {
+  min-width: 0;
+}
+
+.page-ui .about-hero img {
+  width: 100%;
+}
+
+@media (max-width: 680px) {
+  .page-ui .breadcrumb {
+    padding: 16px var(--wrap-h, 16px);
+    line-height: 1.8;
+  }
+
+  .page-ui .page-hero {
+    padding-top: 20px;
+    padding-bottom: 28px;
+  }
+
+  .page-ui .page-hero h1 {
+    font-size: clamp(1.7rem, 7vw, 2.2rem) !important;
+    line-height: 1.15;
+  }
+
+  .page-ui .contact-grid {
+    gap: 24px;
+    padding-bottom: 44px;
+  }
+
+  .page-ui #contact-form > .btn {
+    width: 100%;
+  }
+
+  .page-ui .article-content h2 {
+    margin-top: 28px;
+  }
+
+  .page-ui .article-content ul,
+  .page-ui .article-content ol {
+    padding-left: 21px;
+  }
+
+  .page-ui .about-hero {
+    gap: 24px;
+    padding-top: 24px;
+    padding-bottom: 40px;
+  }
+
+  .page-ui .about-hero h1 {
+    font-size: clamp(1.7rem, 7vw, 2.3rem) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-ui .auth-card {
+    padding: 24px 18px;
+  }
+
+  .page-ui .confirmation-columns {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .page-ui .auth-card label[for="login-password"] {
+    flex-wrap: wrap;
+    column-gap: 12px;
+    row-gap: 8px;
+  }
+
+  .page-ui .auth-card label[for="login-password"] a {
+    padding-block: 8px;
+  }
+}
+
+@media print {
+  .page-ui .article-content {
+    font-size: 11pt;
+  }
+
+  .page-ui .article-content h2 {
+    break-after: avoid;
+  }
+
+  .page-ui .contact-info-card,
+  .page-ui .confirmation-columns > div {
+    break-inside: avoid;
+  }
+}

@@ -21,34 +21,34 @@
 
 <div id="site-header"></div>
 
-<main>
+<main id="main-content">
   <div class="auth-wrap">
     <div class="auth-card">
-      <h2 style="margin-bottom:6px;">Create your account</h2>
-      <p style="margin-bottom:26px;color:#6b7280;">Faster checkout, order history, saved addresses.</p>
+      <h2 id="signup-heading" tabindex="-1" style="margin-bottom:6px;">Create your account</h2>
+      <p id="signup-description" style="margin-bottom:26px;color:#6b7280;">Faster checkout, order history, saved addresses.</p>
 
       <form id="signup-form" novalidate>
         <div class="form-row">
           <div class="form-field">
             <label for="signup-firstname">First name</label>
-            <input id="signup-firstname" type="text" required autocomplete="given-name" placeholder="Arjun">
+            <input id="signup-firstname" name="firstName" type="text" required autocomplete="given-name" placeholder="Arjun">
           </div>
           <div class="form-field">
             <label for="signup-lastname">Last name</label>
-            <input id="signup-lastname" type="text" autocomplete="family-name" placeholder="Sharma">
+            <input id="signup-lastname" name="lastName" type="text" autocomplete="family-name" placeholder="Sharma">
           </div>
         </div>
         <div class="form-field">
           <label for="signup-email">Email</label>
-          <input id="signup-email" type="email" required autocomplete="email" placeholder="you@email.com">
+          <input id="signup-email" name="email" type="email" required autocomplete="email" placeholder="you@email.com">
         </div>
         <div class="form-field">
           <label for="signup-password">Password <span style="color:#9ca3af;font-size:0.78rem;font-weight:400">(minimum 8 characters)</span></label>
-          <input id="signup-password" type="password" required autocomplete="new-password" placeholder="••••••••" minlength="8">
+          <input id="signup-password" name="password" type="password" required autocomplete="new-password" placeholder="••••••••" minlength="8">
         </div>
         <div class="form-field">
           <label for="signup-confirm">Confirm password</label>
-          <input id="signup-confirm" type="password" required autocomplete="new-password" placeholder="••••••••">
+          <input id="signup-confirm" name="confirmPassword" type="password" required autocomplete="new-password" placeholder="••••••••">
         </div>
 
         <p id="signup-form-error" role="alert" style="display:none;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:0.5rem 0.75rem;font-size:0.85rem;margin-bottom:0.75rem;"></p>
@@ -62,48 +62,104 @@
     </div>
   </div>
 </main>
-    </div>
-  </div>
-</main>
 
 <div id="site-footer"></div>
 
-<script src="js/maintenance.js"></script><script src="js/layout.js"></script><script src="js/config.js"></script>
+<script src="js/maintenance.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/config.js"></script>
 <script src="js/products.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/auth.js"></script>
 <script>
-  if (isSignedIn()) window.location.href = "index.html";
+  if (isSignedIn()) {
+    window.location.replace("index.html");
+  }
 
-  document.getElementById("signup-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
+  document.getElementById("signup-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
     clearAuthError("signup-form");
 
-    const first = document.getElementById("signup-firstname").value.trim();
-    const last  = document.getElementById("signup-lastname").value.trim();
-    const email = document.getElementById("signup-email").value.trim();
-    const pass  = document.getElementById("signup-password").value;
-    const conf  = document.getElementById("signup-confirm").value;
-
-    if (!first) { showAuthError("signup-form", "Please enter your first name."); return; }
-    if (pass.length < 8) { showAuthError("signup-form", "Password must be at least 8 characters."); return; }
-    if (pass !== conf)   { showAuthError("signup-form", "Passwords do not match."); return; }
-
+    const form = event.currentTarget;
     const btn = document.getElementById("signup-btn");
+    if (btn.disabled) return;
+
+    const firstInput = document.getElementById("signup-firstname");
+    const emailInput = document.getElementById("signup-email");
+    const passwordInput = document.getElementById("signup-password");
+    const confirmInput = document.getElementById("signup-confirm");
+
+    const first = firstInput.value.trim();
+    const last = document.getElementById("signup-lastname").value.trim();
+    const email = emailInput.value.trim();
+    const pass = passwordInput.value;
+    const conf = confirmInput.value;
+
+    function fail(message, input) {
+      showAuthError("signup-form", message);
+      input.focus();
+    }
+
+    if (!first) {
+      fail("Please enter your first name.", firstInput);
+      return;
+    }
+
+    emailInput.value = email;
+    if (!email || !emailInput.validity.valid) {
+      fail("Please enter a valid email address.", emailInput);
+      return;
+    }
+
+    if (pass.length < 8) {
+      fail("Password must be at least 8 characters.", passwordInput);
+      return;
+    }
+
+    if (pass !== conf) {
+      fail("Passwords do not match.", confirmInput);
+      return;
+    }
+
     btn.disabled = true;
     btn.textContent = "Creating account…";
+    form.setAttribute("aria-busy", "true");
 
     try {
       await signUp(`${first} ${last}`.trim(), email, pass);
-      // Show "check your email" message instead of redirecting
-      document.getElementById("signup-form").style.display = "none";
+
+      form.style.display = "none";
       document.querySelector(".auth-switch").style.display = "none";
-      document.querySelector(".auth-card h2").textContent = "Check your inbox!";
-      document.querySelector(".auth-card p").innerHTML = `We sent a verification link to <strong>${email}</strong>.<br>Click it to activate your account, then <a href="login.html">sign in</a>.`;
+
+      const heading = document.getElementById("signup-heading");
+      const description = document.getElementById("signup-description");
+      const emailText = document.createElement("strong");
+      const signInLink = document.createElement("a");
+
+      emailText.textContent = email;
+      signInLink.href = "login.html";
+      signInLink.textContent = "sign in";
+
+      heading.textContent = "Check your inbox!";
+      description.replaceChildren(
+        document.createTextNode("We sent a verification link to "),
+        emailText,
+        document.createTextNode("."),
+        document.createElement("br"),
+        document.createTextNode("Click it to activate your account, then "),
+        signInLink,
+        document.createTextNode(".")
+      );
+
+      passwordInput.value = "";
+      confirmInput.value = "";
+      heading.focus();
     } catch (err) {
-      showAuthError("signup-form", err.message);
+      showAuthError("signup-form", err.message || "Could not create your account. Please try again.");
       btn.disabled = false;
       btn.textContent = "Create account";
+    } finally {
+      form.removeAttribute("aria-busy");
     }
   });
 </script>
