@@ -36,7 +36,7 @@
     root.innerHTML = "";
 
     if (!lines.length) {
-      root.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="es-icon">🛍️</div><h2>Your cart is empty</h2><p>Nothing here yet — go find something worth keeping.</p><a href="shop.html" class="btn btn-primary">Browse the shop</a></div>';
+      root.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="es-icon" style="color:var(--ink-soft)"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div><h2>Your cart is empty</h2><p>Nothing here yet \u2014 go find something worth keeping.</p><a href="shop.html" class="btn btn-primary">Browse the shop</a></div>';
       return;
     }
 
