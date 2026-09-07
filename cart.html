@@ -132,7 +132,21 @@
 
     const checkoutLink = document.createElement("a"); checkoutLink.href = "checkout.html"; checkoutLink.className = "btn btn-primary btn-block"; checkoutLink.textContent = "Checkout"; checkoutLink.style.marginTop = "16px";
     const continueLink = document.createElement("a"); continueLink.href = "shop.html"; continueLink.className = "btn btn-outline btn-block"; continueLink.textContent = "Continue shopping"; continueLink.style.marginTop = "10px";
-    summary.appendChild(checkoutLink); summary.appendChild(continueLink);
+    // Soft sign-in nudge for guest users (never blocking)
+if (typeof isSignedIn === "function" && !isSignedIn()) {
+  var nudge = document.createElement("p");
+  nudge.style.cssText = "font-size:0.82rem;color:var(--ink-soft);text-align:center;margin:12px 0 0;";
+  var nudgeLink = document.createElement("a");
+  nudgeLink.href = "login.html?next=cart.html";
+  nudgeLink.textContent = "Sign in";
+  nudgeLink.style.color = "var(--gold-deep)";
+  nudgeLink.style.fontWeight = "600";
+  nudge.appendChild(document.createTextNode("Have an account? "));
+  nudge.appendChild(nudgeLink);
+  nudge.appendChild(document.createTextNode(" for faster checkout"));
+  summary.appendChild(nudge);
+}
+summary.appendChild(checkoutLink); summary.appendChild(continueLink);
 
     root.appendChild(linesCol); root.appendChild(summary);
   }

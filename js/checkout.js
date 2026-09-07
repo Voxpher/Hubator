@@ -1,29 +1,43 @@
 /**
- * js/checkout.js — Razorpay payment flow.
- * No secrets here. Secret key stays on the dashboard server.
- *
- * Flow:
- * 1. Snapshot form values before opening popup (race-condition fix)
- * 2. POST razorpay-create → get Razorpay order_id + amount
- * 3. Open Razorpay popup → customer pays
- * 4. POST razorpay-verify with HMAC tokens → MongoDB order created
- * 5. Clear cart, show confirmation
+ * js/checkout.js
+ * Works for both guest and logged-in users -- no account required to purchase.
+ * Logged-in users get their details pre-filled.
  */
 
+// Pre-fill form fields for logged-in users
+document.addEventListener("DOMContentLoaded", function () {
+  var customer = typeof currentCustomer === "function" ? currentCustomer() : null;
+  if (!customer) return;
+  // Pre-fill name
+  if (customer.name) {
+    var parts = customer.name.split(" ");
+    var fn = document.getElementById("co-fname");
+    var ln = document.getElementById("co-lname");
+    if (fn) fn.value = parts[0] || "";
+    if (ln) ln.value = parts.slice(1).join(" ") || "";
+  }
+  var emailEl = document.getElementById("co-email");
+  if (emailEl && customer.email) emailEl.value = customer.email;
+  // Phone if stored
+  if (customer.phone) {
+    var phoneEl = document.getElementById("co-phone");
+    if (phoneEl) phoneEl.value = customer.phone;
+  }
+});
+
 async function startCheckout(form) {
-  const lines = cartLines();
+  var lines = cartLines();
   if (!lines.length) { showToast("Your cart is empty"); return; }
 
-  const btn = document.getElementById("pay-btn");
-  if (btn) { btn.disabled = true; btn.textContent = "Please wait…"; }
+  var btn = document.getElementById("pay-btn");
+  if (btn) { btn.disabled = true; btn.textContent = "Please wait..."; }
 
-  // Snapshot ALL form values BEFORE the popup opens
-  // (prevents race condition if user edits fields during payment)
-  const val = (name) => {
-    const el = form.elements[name];
+  // Snapshot ALL form values before popup opens (prevents race condition)
+  function val(name) {
+    var el = form.elements[name];
     return el ? el.value.trim() : "";
-  };
-  const snapshot = {
+  }
+  var snap = {
     firstName:  val("firstName"),
     lastName:   val("lastName"),
     email:      val("email"),
@@ -35,99 +49,104 @@ async function startCheckout(form) {
     postalCode: val("postalCode"),
     country:    val("country") || "India",
   };
+  var fullName = (snap.firstName + " " + snap.lastName).trim();
 
-  const fullName = `${snapshot.firstName} ${snapshot.lastName}`.trim();
-
-  // ── Step 1: Create Razorpay order server-side ─────────────────────────────
-  let rzpData;
+  // Step 1: Create Razorpay order server-side
+  var rzpData;
   try {
-    const url = hubatorApiUrl("/api/public/orders/razorpay-create");
+    var url = hubatorApiUrl("/api/public/orders/razorpay-create");
     if (!url) throw new Error("Store API URL not configured.");
-    const res = await fetch(url, {
+    var res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        items: lines.map((l) => ({ productId: l.product.id, quantity: l.qty })),
-      }),
+      body: JSON.stringify({ items: lines.map(function(l) { return { productId: l.product.id, quantity: l.qty }; }) }),
     });
-    const text = await res.text();
-    try { rzpData = JSON.parse(text); } catch { rzpData = {}; }
-    if (!res.ok) throw new Error(rzpData.error || `Payment initiation failed (${res.status})`);
-  } catch (err) {
-    if (btn) { btn.disabled = false; btn.textContent = "Pay securely →"; }
+    var text = await res.text();
+    try { rzpData = JSON.parse(text); } catch(e) { rzpData = {}; }
+    if (!res.ok) throw new Error(rzpData.error || ("Payment initiation failed (" + res.status + ")"));
+  } catch(err) {
+    if (btn) { btn.disabled = false; btn.textContent = "Pay securely \u2192"; }
     throw err;
   }
 
-  // ── Step 2: Open Razorpay popup ───────────────────────────────────────────
-  await new Promise((resolve, reject) => {
-    const options = {
+  // Step 2: Open Razorpay popup
+  await new Promise(function(resolve, reject) {
+    var options = {
       key:      rzpData.keyId,
       amount:   rzpData.amount,
       currency: rzpData.currency,
       order_id: rzpData.razorpayOrderId,
       name:     "Hubator",
-      description: `${lines.length} item${lines.length > 1 ? "s" : ""}`,
-      prefill: { name: fullName, email: snapshot.email, contact: snapshot.phone },
+      description: lines.length + " item" + (lines.length > 1 ? "s" : ""),
+      prefill: { name: fullName, email: snap.email, contact: snap.phone },
       theme: { color: "#C99A2E" },
       modal: {
-        ondismiss: () => {
-          if (btn) { btn.disabled = false; btn.textContent = "Pay securely →"; }
+        ondismiss: function() {
+          if (btn) { btn.disabled = false; btn.textContent = "Pay securely \u2192"; }
           reject(new Error("Payment was cancelled. You have not been charged."));
         },
       },
-      handler: async (response) => {
-        // ── Step 3: Verify + create order ────────────────────────────────────
+      handler: async function(response) {
+        // Step 3: Verify payment + create MongoDB order
         try {
-          const verifyUrl = hubatorApiUrl("/api/public/orders/razorpay-verify");
-          const verifyRes = await fetch(verifyUrl, {
+          var verifyUrl = hubatorApiUrl("/api/public/orders/razorpay-verify");
+          var verifyRes = await fetch(verifyUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              razorpay_order_id:  response.razorpay_order_id,
+              razorpay_order_id:   response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              customer: { name: fullName, email: snapshot.email, phone: snapshot.phone },
+              razorpay_signature:  response.razorpay_signature,
+              customer: { name: fullName, email: snap.email, phone: snap.phone },
               shippingAddress: {
                 name:       fullName,
-                line1:      snapshot.address,
-                line2:      snapshot.address2 || undefined,
-                city:       snapshot.city,
-                state:      snapshot.state || snapshot.city,
-                postalCode: snapshot.postalCode,
-                country:    snapshot.country,
-                phone:      snapshot.phone,
+                line1:      snap.address,
+                line2:      snap.address2 || undefined,
+                city:       snap.city,
+                state:      snap.state || snap.city,
+                postalCode: snap.postalCode,
+                country:    snap.country,
+                phone:      snap.phone,
               },
-              items: lines.map((l) => ({ productId: l.product.id, quantity: l.qty })),
+              items: lines.map(function(l) { return { productId: l.product.id, quantity: l.qty }; }),
               shippingMethod: "Standard",
             }),
           });
-
-          const text = await verifyRes.text();
-          let data = {};
-          try { data = JSON.parse(text); } catch { /* non-JSON response */ }
+          var vtext = await verifyRes.text();
+          var data = {};
+          try { data = JSON.parse(vtext); } catch(e) {}
 
           if (!verifyRes.ok) {
-            throw new Error(
-              data.error ||
-              `Order save failed (${verifyRes.status}). Your payment went through — please contact support with payment ID: ${response.razorpay_payment_id}`
-            );
+            throw new Error(data.error || ("Order save failed (" + verifyRes.status + "). Payment went through -- contact support with ID: " + response.razorpay_payment_id));
           }
 
-          // ── Success ───────────────────────────────────────────────────────
+          // Save order details for confirmation page
+          sessionStorage.setItem("hubator_last_order", JSON.stringify({
+            orderNumber:     data.orderNumber,
+            email:           snap.email,
+            items:           data.items || lines.map(function(l) { return { name: l.product.name, qty: l.qty, price: l.product.price }; }),
+            subtotal:        data.subtotal || rzpData.subtotal,
+            discountAmount:  data.discountAmount || 0,
+            shippingAmount:  data.shippingAmount || 0,
+            total:           data.total,
+            paymentMethod:   "razorpay",
+            paymentId:       response.razorpay_payment_id,
+            shippingAddress: data.shippingAddress || { line1: snap.address, line2: snap.address2, city: snap.city, state: snap.state, postalCode: snap.postalCode, country: snap.country },
+          }));
+
           localStorage.removeItem(CART_KEY);
-          showToast(`✅ Order ${data.orderNumber} confirmed! Thank you.`);
-          setTimeout(() => { window.location.href = "index.html"; }, 2000);
+          window.location.href = "order-confirmation.html";
           resolve();
-        } catch (err) {
+        } catch(err) {
           reject(err);
         }
       },
     };
 
-    const rzp = new window.Razorpay(options);
-    rzp.on("payment.failed", (resp) => {
-      if (btn) { btn.disabled = false; btn.textContent = "Pay securely →"; }
-      reject(new Error("Payment failed: " + (resp.error?.description || "Please try again.")));
+    var rzp = new window.Razorpay(options);
+    rzp.on("payment.failed", function(resp) {
+      if (btn) { btn.disabled = false; btn.textContent = "Pay securely \u2192"; }
+      reject(new Error("Payment failed: " + ((resp.error && resp.error.description) || "Please try again.")));
     });
     rzp.open();
   });
