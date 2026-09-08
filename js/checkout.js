@@ -174,6 +174,9 @@ async function startCheckout(form) {
           var data = {}; try { data = JSON.parse(vtext); } catch(e) {}
           if (!verifyRes.ok) throw new Error(data.error || ("Order save failed. Contact support with payment ID: " + response.razorpay_payment_id));
 
+          // Auto-create/sign-in guest account after payment
+          await activateGuestAccount(fullName, snap.email, snap.phone);
+
           sessionStorage.setItem("hubator_last_order", JSON.stringify({
             orderNumber: data.orderNumber, email: snap.email,
             items: data.items || lines.map(function(l) { return { name: l.product.name, qty: l.qty, price: l.product.price }; }),
@@ -193,5 +196,32 @@ async function startCheckout(form) {
       reject(new Error("Payment failed: " + ((resp.error && resp.error.description) || "Please try again.")));
     });
     rzp.open();
-  });
-}
+  }
+
+  // ── Auto-create guest account after payment ──────────────────────────────────
+
+  async function activateGuestAccount(name, email, phone) {
+    if (typeof isSignedIn === "function" && isSignedIn()) return; // already signed in, skip
+    try {
+      const res = await fetch(hubatorApiUrl("/api/public/auth/guest-activate"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, phone })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.token) {
+        // Save session — they are now signed in
+        localStorage.setItem("hubator_token", data.token);
+        localStorage.setItem("hubator_customer", JSON.stringify({
+          id: data.customer.id,
+          name: data.customer.name,
+          email: data.customer.email
+        }));
+      }
+    } catch (e) {
+      // Silent fail — never block the order confirmation
+      console.error("[guest-activate]", e);
+    }
+  }
+
+})(window); // End of IIFE if any, or just close the module

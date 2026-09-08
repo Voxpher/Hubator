@@ -140,6 +140,11 @@
     addrEl.textContent = [a.line1, a.line2, a.city, a.state, a.postalCode, a.country].filter(Boolean).join(", ");
   }
 })();
+
+  // Update header auth to show customer name if auto-signed-in
+  if (typeof updateHeaderAuth === "function") {
+    updateHeaderAuth();
+  }
 </script>
 </body>
 </html>

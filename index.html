@@ -119,11 +119,24 @@
 <script>
   const grid = document.getElementById("featured-grid");
 
-  async function loadFeaturedProducts() {
-    // Uses the "home-featured" placement filter — only shows products you've marked
-    // as featured in the dashboard. sortOrder controls the display order.
-    const items = await loadProductsByPlacement("home-featured").catch(err => { grid.innerHTML = `<p>${err.message}</p>`; return []; });
-    if (!items.length) { grid.innerHTML = `<p style="color:#6b7280">No featured products yet. Add products in the dashboard and mark them as "Homepage — Featured".</p>`; return; }
+  // Show skeletons immediately so grid is never blank while products load
+  grid.innerHTML = Array(4).fill('<div class="product-card skeleton"></div>').join('');
+
+  async function renderFeatured() {
+    let items;
+    try {
+      items = await loadProductsByPlacement("home-featured");
+    } catch (err) {
+      grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">' + err.message + '</p>';
+      return;
+    }
+
+    if (!items.length) {
+      grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">No featured products yet.</p>';
+      return;
+    }
+
+    grid.innerHTML = "";
     items.forEach(p => {
       grid.innerHTML += `
         <div class="product-card">
@@ -143,7 +156,20 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", loadFeaturedProducts);
+  async function showError(err) {
+    grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">' + err.message + '</p>';
+  }
+
+  document.addEventListener("DOMContentLoaded", async function() {
+    // Show skeletons immediately
+    grid.innerHTML = Array(4).fill('<div class="product-card skeleton"></div>').join('');
+    // Then load real data
+    try {
+      await renderFeatured();
+    } catch (err) {
+      showError(err);
+    }
+  });
 </script>
 </body>
 </html>
