@@ -555,7 +555,7 @@
       make("a", { href: "index.html", class: "logo", text: "Hubator" }),
       make("p", {
         class: "footer-brand-description",
-        text: "Curated everyday goods from independent makers.",
+        text: "Curated apparel & fashion from independent designers.",
       })
     );
     const grid = append(make("div", { class: "footer-grid" }), brand);
