@@ -33,6 +33,8 @@ function productForStorefront(product) {
     badge: Number(product.compareAtPrice) > 0 ? "Sale" : null,
     desc: String(product.description || product.shortDescription || ""),
     variants: product.variants || [],
+    allowCOD: product.allowCOD !== false,
+    allowPrepaid: product.allowPrepaid !== false,
     placements: product.placements || [],
     stock: product.stock == null ? null : Math.max(0, Number(product.stock) || 0),
     sortOrder: Number(product.sortOrder) || 0,
