@@ -1,7 +1,7 @@
 /**
  * js/auth.js — Customer auth.
- * JWT stored in localStorage under "hubator_token".
- * No secrets here — public repo.
+ * Session tokens are kept in sessionStorage so they do not persist after the
+ * browser session ends. Display-only customer details use the same scope.
  */
 
 const TOKEN_KEY    = "hubator_token";
@@ -10,7 +10,7 @@ const CUSTOMER_KEY = "hubator_customer";
 // ── Token helpers ─────────────────────────────────────────────────────────────
 
 function getToken() {
-  try { return localStorage.getItem(TOKEN_KEY); }
+  try { return sessionStorage.getItem(TOKEN_KEY); }
   catch { return null; }
 }
 
@@ -35,13 +35,15 @@ function saveSession(token, customer) {
     throw new Error("The sign-in response was invalid. Please try again.");
   }
   try {
-    localStorage.setItem(TOKEN_KEY, token);
-    // Only store non-sensitive display info in localStorage
-    localStorage.setItem(CUSTOMER_KEY, JSON.stringify({
+    sessionStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.setItem(CUSTOMER_KEY, JSON.stringify({
       id:    customer.id,
       name:  customer.name,
       email: customer.email,
     }));
+    // Remove sessions created by older storefront versions.
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(CUSTOMER_KEY);
   } catch {
     clearSession();
     throw new Error("Unable to save your sign-in in this browser.");
@@ -51,6 +53,8 @@ function saveSession(token, customer) {
 
 function clearSession() {
   try {
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(CUSTOMER_KEY);
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(CUSTOMER_KEY);
   } catch { /* Storage may be disabled. */ }
@@ -58,7 +62,7 @@ function clearSession() {
 
 function getStoredCustomer() {
   try {
-    const customer = JSON.parse(localStorage.getItem(CUSTOMER_KEY));
+    const customer = JSON.parse(sessionStorage.getItem(CUSTOMER_KEY));
     return customer && typeof customer === "object" ? customer : null;
   }
   catch { return null; }
@@ -121,6 +125,7 @@ async function resetPassword(token, password) {
 }
 
 function signOut() {
+  if (!window.confirm("Are you sure you want to sign out?")) return;
   clearSession();
   updateHeaderAuth();
   window.dispatchEvent(new CustomEvent("hubator:auth-changed"));

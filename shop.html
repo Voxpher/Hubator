@@ -65,7 +65,7 @@
           <h4><a href="product.html?id=${encodeURIComponent(p.id)}">${escapeHtml(p.name)}</a></h4>
           <div class="product-foot">
             <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
-            <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add to cart" : "Out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
+            <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
           </div>
         </div>
       </div>`;
@@ -74,7 +74,7 @@
   const filterBar = document.getElementById("filter-bar");
   function render(cat){
     const list = cat === "All" ? PRODUCTS : PRODUCTS.filter(p => p.category === cat);
-    grid.innerHTML = list.map(cardHTML).join("") || `<p>No products in this category yet.</p>`;
+    grid.innerHTML = list.map(cardHTML).join("") || `<p>There are no products in this category yet.</p>`;
   }
   function selectCategory(cat) {
     document.querySelectorAll(".filter-chip").forEach(c => {
@@ -107,7 +107,10 @@
     if (!categories.includes(initialCat) && initialCat !== "All") initialCat = "All";
     selectCategory(initialCat);
   }
-  loadProducts().then(syncCategories).catch(err => { grid.innerHTML = `<p>${escapeHtml(err.message)}</p>`; });
+  loadProducts().then(syncCategories).catch(err => {
+    console.error("[Hubator] shop:", err);
+    grid.innerHTML = "<p>We couldn't load the collection. Please refresh and try again.</p>";
+  });
   window.addEventListener("hubator:products-loaded", () => {
     syncCategories();
     const active = document.querySelector(".filter-chip.active");

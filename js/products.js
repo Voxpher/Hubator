@@ -138,7 +138,7 @@ function productIsPurchasable(product) {
 
 function safeProductImageUrl(url) {
   const value = String(url || "").trim();
-  return /^(https?:|\/|\.\/)/i.test(value) ? value : "";
+  return /^(https:\/\/|\/(?!\/)|\.\/)/i.test(value) ? value : "";
 }
 
 function escapeHtml(value) {

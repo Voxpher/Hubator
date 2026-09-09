@@ -74,7 +74,11 @@
       removeBtn.className = "remove-btn";
       removeBtn.setAttribute("aria-label", "Remove " + l.product.name + " from cart");
       removeBtn.textContent = "Remove";
-      removeBtn.onclick = function() { removeFromCart(l.product.id); renderCart(); };
+      removeBtn.onclick = function() {
+        if (!window.confirm("Remove " + l.product.name + " from your cart?")) return;
+        removeFromCart(l.product.id);
+        renderCart();
+      };
 
       info.appendChild(name); info.appendChild(meta); info.appendChild(removeBtn);
 
@@ -131,7 +135,7 @@
     const promoRow = document.createElement("div"); promoRow.className = "promo-row";
     const promoInput = document.createElement("input"); promoInput.type = "text"; promoInput.placeholder = "Promo code"; promoInput.setAttribute("aria-label", "Promo code");
     const promoBtn = document.createElement("button"); promoBtn.className = "btn btn-outline btn-sm"; promoBtn.textContent = "Apply"; promoBtn.type = "button";
-    promoBtn.onclick = function() { showToast("Promo codes coming soon"); };
+    promoBtn.onclick = function() { showToast("Promo codes are not available for this order."); };
     promoRow.appendChild(promoInput); promoRow.appendChild(promoBtn); summary.appendChild(promoRow);
 
     const totalRow = document.createElement("div"); totalRow.className = "summary-row total";
@@ -161,7 +165,8 @@ summary.appendChild(checkoutLink); summary.appendChild(continueLink);
   }
 
   loadProducts().then(renderCart).catch(function(err) {
-    document.getElementById("cart-root").textContent = err.message;
+    console.error("[Hubator] cart:", err);
+    document.getElementById("cart-root").textContent = "We couldn't load your cart. Please refresh and try again.";
   });
   window.addEventListener("hubator:products-loaded", renderCart);
   window.addEventListener("hubator:cart-changed", renderCart);

@@ -64,7 +64,7 @@ function _initOtpFlow() {
     var email = emailEl ? emailEl.value.trim() : "";
     if (!email || !emailEl || !emailEl.validity.valid) { showToast("Please enter a valid email address first."); return; }
 
-    sendBtn.disabled = true; sendBtn.textContent = "Sending...";
+    sendBtn.disabled = true; sendBtn.textContent = "Sending code…";
     try {
       var url = hubatorApiUrl("/api/public/auth/send-otp");
       if (!url) throw new Error("Store API URL is not configured.");
@@ -97,7 +97,7 @@ function _initOtpFlow() {
       return;
     }
 
-    if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.textContent = "Checking..."; }
+    if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.textContent = "Verifying…"; }
     try {
       var url = hubatorApiUrl("/api/public/auth/verify-otp");
       if (!url) throw new Error("Store API URL is not configured.");
@@ -164,7 +164,7 @@ async function startCheckout(form) {
   }
 
   var btn = document.getElementById("pay-btn");
-  if (btn) { btn.disabled = true; btn.textContent = "Please wait..."; }
+  if (btn) { btn.disabled = true; btn.textContent = "Preparing payment…"; }
 
   function val(name) { var el = form.elements[name]; return el ? el.value.trim() : ""; }
   var snap = {

@@ -11,7 +11,7 @@
 <meta name="twitter:card" content="summary">
 </head>
 <body><div id="site-header"></div>
-<main><div class="wrap breadcrumb"><a href="index.html">Home</a> / <a href="shop.html">Shop</a> / <span id="crumb-name">Product</span></div><div class="wrap pd-grid" id="pd-root"><p>Loading product…</p></div></main>
+<main><div class="wrap breadcrumb"><a href="index.html">Home</a> / <a href="shop.html">Shop</a> / <span id="crumb-name">Product</span></div><div class="wrap pd-grid" id="pd-root" aria-live="polite"><p>Loading product details…</p></div></main>
 <div id="site-footer"></div>
 <script src="js/maintenance.js"></script><script src="js/layout.js"></script><script src="js/config.js"></script><script src="js/products.js"></script><script src="js/cart.js"></script><script src="js/auth.js"></script><script>
   const id = new URLSearchParams(location.search).get("id");
@@ -23,5 +23,8 @@
     document.title = `${p.name} — Hubator`;
     document.getElementById("crumb-name").textContent = p.name;
     root.innerHTML = `<div class="pd-gallery"><div class="pd-gallery-main"><img src="${escapeHtml(safeProductImageUrl(p.img))}" alt="${escapeHtml(p.name)}"></div></div><div class="pd-info"><span class="product-cat">${escapeHtml(p.category)}</span><h1 style="font-size:2rem;">${escapeHtml(p.name)}</h1><div class="pd-price-row"><span class="pd-price">${fmt(p.price)}</span>${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}</div><p>${escapeHtml(p.desc)}</p>${available ? "" : '<p class="product-stock-status" role="status">Out of stock</p>'}<div class="pd-actions"><button class="btn btn-primary" data-id="${escapeHtml(p.id)}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">Add to cart</button><a href="${available ? "checkout.html" : "#"}" class="btn btn-outline" data-id="${escapeHtml(p.id)}" ${available ? 'onclick="return addToCart(this.dataset.id)"' : 'aria-disabled="true"'}>Buy now</a></div><ul class="pd-meta"><li>Prices shown in Indian Rupees</li><li>Shipping is calculated securely at checkout</li></ul></div>`;
-  }).catch(err => { document.getElementById("pd-root").textContent = err.message; });
+  }).catch(err => {
+    console.error("[Hubator] product:", err);
+    document.getElementById("pd-root").textContent = "We couldn't load this product. Please refresh and try again.";
+  });
 </script></body></html>

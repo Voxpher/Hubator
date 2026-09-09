@@ -103,7 +103,8 @@
           <p>One email a month. New arrivals, restocks, no noise.</p>
         </div>
         <form onsubmit="event.preventDefault(); showToast('Subscribed — check your inbox');">
-          <input type="email" placeholder="you@email.com" required>
+          <label class="sr-only" for="newsletter-email">Email address</label>
+          <input id="newsletter-email" type="email" placeholder="you@email.com" required>
           <button type="submit" class="btn btn-gold">Subscribe</button>
         </form>
       </div>
@@ -127,12 +128,13 @@
     try {
       items = await loadProductsByPlacement("home-featured");
     } catch (err) {
-      grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">' + escapeHtml(err.message) + '</p>';
+      console.error("[Hubator] featured products:", err);
+      grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">We couldn’t load featured products. Please refresh and try again.</p>';
       return;
     }
 
     if (!items.length) {
-      grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">No featured products yet.</p>';
+      grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">There are no featured products right now.</p>';
       return;
     }
 
@@ -150,7 +152,7 @@
             <h4><a href="product.html?id=${encodeURIComponent(p.id)}">${escapeHtml(p.name)}</a></h4>
             <div class="product-foot">
               <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
-              <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add to cart" : "Out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
+              <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
             </div>
           </div>
         </div>`;
@@ -158,7 +160,8 @@
   }
 
   async function showError(err) {
-    grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">' + escapeHtml(err.message) + '</p>';
+    console.error("[Hubator] featured products:", err);
+    grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">We couldn’t load featured products. Please refresh and try again.</p>';
   }
 
   document.addEventListener("DOMContentLoaded", async function() {
