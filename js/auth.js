@@ -9,11 +9,16 @@ const CUSTOMER_KEY = "hubator_customer";
 
 // ── Token helpers ─────────────────────────────────────────────────────────────
 
-function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function getToken() {
+  try { return localStorage.getItem(TOKEN_KEY); }
+  catch { return null; }
+}
 
 function _parseJwtExpiry(token) {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const encoded = token.split(".")[1];
+    if (!encoded) return 0;
+    const payload = JSON.parse(atob(encoded.replace(/-/g, "+").replace(/_/g, "/")));
     return payload.exp ? payload.exp * 1000 : Infinity;
   } catch { return 0; }
 }
@@ -26,26 +31,43 @@ function isSignedIn() {
 }
 
 function saveSession(token, customer) {
-  localStorage.setItem(TOKEN_KEY, token);
-  // Only store non-sensitive display info in localStorage
-  localStorage.setItem(CUSTOMER_KEY, JSON.stringify({
-    id:    customer.id,
-    name:  customer.name,
-    email: customer.email,
-  }));
+  if (typeof token !== "string" || !token || !customer || customer.id == null) {
+    throw new Error("The sign-in response was invalid. Please try again.");
+  }
+  try {
+    localStorage.setItem(TOKEN_KEY, token);
+    // Only store non-sensitive display info in localStorage
+    localStorage.setItem(CUSTOMER_KEY, JSON.stringify({
+      id:    customer.id,
+      name:  customer.name,
+      email: customer.email,
+    }));
+  } catch {
+    clearSession();
+    throw new Error("Unable to save your sign-in in this browser.");
+  }
+  window.dispatchEvent(new CustomEvent("hubator:auth-changed"));
 }
 
 function clearSession() {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(CUSTOMER_KEY);
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(CUSTOMER_KEY);
+  } catch { /* Storage may be disabled. */ }
 }
 
 function getStoredCustomer() {
-  try { return JSON.parse(localStorage.getItem(CUSTOMER_KEY)) || null; }
+  try {
+    const customer = JSON.parse(localStorage.getItem(CUSTOMER_KEY));
+    return customer && typeof customer === "object" ? customer : null;
+  }
   catch { return null; }
 }
 
-function currentCustomer() { return isSignedIn() ? getStoredCustomer() : null; }
+function currentCustomer() {
+  const customer = isSignedIn() ? getStoredCustomer() : null;
+  return customer && customer.email ? customer : null;
+}
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 
@@ -101,7 +123,19 @@ async function resetPassword(token, password) {
 function signOut() {
   clearSession();
   updateHeaderAuth();
+  window.dispatchEvent(new CustomEvent("hubator:auth-changed"));
   window.location.href = "index.html";
+}
+
+function safeNextPath(value, fallback = "index.html") {
+  if (typeof value !== "string" || !value) return fallback;
+  try {
+    const url = new URL(value, location.href);
+    if (url.origin !== location.origin || value.startsWith("//")) return fallback;
+    return url.href;
+  } catch {
+    return fallback;
+  }
 }
 
 // ── Header state ──────────────────────────────────────────────────────────────
@@ -115,7 +149,7 @@ function updateHeaderAuth() {
   if (customer && isSignedIn()) {
     if (signInEl) signInEl.style.display = "none";
     if (userEl)   userEl.style.display   = "flex";
-    if (nameEl)   nameEl.textContent     = customer.name.split(" ")[0];
+    if (nameEl) nameEl.textContent     = String(customer.name || customer.email).split(" ")[0];
   } else {
     clearSession(); // wipe any expired token silently
     if (signInEl) signInEl.style.display = "";
@@ -142,3 +176,10 @@ function clearAuthError(formId) {
 // ── Run on every page ─────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", updateHeaderAuth);
+
+window.addEventListener("storage", (event) => {
+  if (event.key === TOKEN_KEY || event.key === CUSTOMER_KEY || event.key === null) {
+    updateHeaderAuth();
+    window.dispatchEvent(new CustomEvent("hubator:auth-changed"));
+  }
+});

@@ -63,7 +63,7 @@
   (async function () {
     const token = new URLSearchParams(location.search).get("token");
 
-    if (!token || token.length !== 64) {
+    if (!token || !/^[a-zA-Z0-9_-]{32,}$/.test(token)) {
       document.getElementById("verify-loading").style.display = "none";
       document.getElementById("verify-error").style.display = "block";
       document.getElementById("verify-error-msg").textContent =
@@ -72,7 +72,9 @@
     }
 
     try {
-      const res = await fetch(hubatorApiUrl("/api/public/auth/verify-email"), {
+      const url = hubatorApiUrl("/api/public/auth/verify-email");
+      if (!url) throw new Error("Store API URL is not configured.");
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
@@ -82,8 +84,7 @@
       if (!res.ok) throw new Error(data.error || "Verification failed.");
 
       // Save session and redirect
-      localStorage.setItem("hubator_token", data.token);
-      localStorage.setItem("hubator_customer", JSON.stringify(data.customer));
+      if (typeof saveSession === "function") saveSession(data.token, data.customer);
 
       document.getElementById("verify-loading").style.display = "none";
       document.getElementById("verify-success").style.display = "block";

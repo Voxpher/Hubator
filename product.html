@@ -15,5 +15,13 @@
 <div id="site-footer"></div>
 <script src="js/maintenance.js"></script><script src="js/layout.js"></script><script src="js/config.js"></script><script src="js/products.js"></script><script src="js/cart.js"></script><script src="js/auth.js"></script><script>
   const id = new URLSearchParams(location.search).get("id");
-  loadProducts().then(() => { const p = getProductById(id); const root = document.getElementById("pd-root"); if (!p) { root.innerHTML = '<p>That product is no longer available.</p>'; return; } document.title = `${p.name} — Hubator`; document.getElementById("crumb-name").textContent = p.name; root.innerHTML = `<div class="pd-gallery"><div class="pd-gallery-main"><img src="${p.img}" alt="${p.name}"></div></div><div class="pd-info"><span class="product-cat">${p.category}</span><h1 style="font-size:2rem;">${p.name}</h1><div class="pd-price-row"><span class="pd-price">${fmt(p.price)}</span>${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}</div><p>${p.desc}</p><div class="pd-actions"><button class="btn btn-primary" onclick="addToCart('${p.id}')">Add to cart</button><a href="checkout.html" class="btn btn-outline" onclick="addToCart('${p.id}')">Buy now</a></div><ul class="pd-meta"><li>Prices shown in Indian Rupees</li><li>Shipping is calculated securely at checkout</li></ul></div>`; }).catch(err => { document.getElementById("pd-root").innerHTML = `<p>${err.message}</p>`; });
+  loadProducts().then(() => {
+    const p = getProductById(id);
+    const root = document.getElementById("pd-root");
+    if (!p) { root.textContent = "That product is no longer available."; return; }
+    const available = productIsPurchasable(p);
+    document.title = `${p.name} — Hubator`;
+    document.getElementById("crumb-name").textContent = p.name;
+    root.innerHTML = `<div class="pd-gallery"><div class="pd-gallery-main"><img src="${escapeHtml(safeProductImageUrl(p.img))}" alt="${escapeHtml(p.name)}"></div></div><div class="pd-info"><span class="product-cat">${escapeHtml(p.category)}</span><h1 style="font-size:2rem;">${escapeHtml(p.name)}</h1><div class="pd-price-row"><span class="pd-price">${fmt(p.price)}</span>${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}</div><p>${escapeHtml(p.desc)}</p>${available ? "" : '<p class="product-stock-status" role="status">Out of stock</p>'}<div class="pd-actions"><button class="btn btn-primary" data-id="${escapeHtml(p.id)}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">Add to cart</button><a href="${available ? "checkout.html" : "#"}" class="btn btn-outline" data-id="${escapeHtml(p.id)}" ${available ? 'onclick="return addToCart(this.dataset.id)"' : 'aria-disabled="true"'}>Buy now</a></div><ul class="pd-meta"><li>Prices shown in Indian Rupees</li><li>Shipping is calculated securely at checkout</li></ul></div>`;
+  }).catch(err => { document.getElementById("pd-root").textContent = err.message; });
 </script></body></html>

@@ -10,16 +10,16 @@ index.html      Home page
 shop.html       Product grid with category filters
 product.html    Product detail (?id=1..12)
 cart.html       Cart, reads/writes localStorage
-checkout.html   Checkout form (payment not wired up yet — see below)
+checkout.html   Checkout form with Razorpay client flow
 about.html
 contact.html
 login.html
-signup.html     (auth not wired up yet — see below)
+signup.html     Customer signup and email verification
 css/style.css   All styling
 js/products.js  Product catalog (replace with real data or an API call)
 js/cart.js      Cart logic + toast notifications
-js/checkout.js  Payment integration point
-js/auth.js      Auth integration point
+js/checkout.js  Razorpay checkout and guest OTP flow
+js/auth.js      Customer auth and session handling
 ```
 
 ## 1. Run it locally
@@ -51,27 +51,16 @@ initialize with a README, since you already have one.)
 Every time you `git push` again, the live site updates automatically in
 about a minute.
 
-## 4. Replace the placeholder keys before going live
+## 4. Configure the public API before going live
 
-**Payments** (`js/checkout.js`):
-This is a static site, so it can't charge cards by itself. Pick one:
-- **Fastest, no code:** create a Stripe Payment Link in your Stripe
-  Dashboard, then set `STRIPE_PAYMENT_LINK` in `js/checkout.js`.
-- **Custom cart at checkout:** deploy a small serverless function
-  (Vercel/Netlify/Supabase Edge Function) that creates a Stripe Checkout
-  Session using your **secret** key (never put the secret key in this
-  front-end code), and set `STRIPE_SESSION_ENDPOINT` in `js/checkout.js`
-  to that function's URL.
-
-**Login/signup** (`js/auth.js`):
-Forms are visual only right now. Wire up Supabase Auth or Firebase
-Authentication (both have a generous free tier and work well with a
-static site) — paste their project URL/public key into `js/auth.js` and
-connect the sign-in/sign-up calls from `login.html` / `signup.html`.
+`js/config.js` contains the public dashboard API base URL. The storefront
+uses that API for published products, customer auth, email OTP confirmation,
+and Razorpay order creation/verification. Razorpay secret credentials remain
+server-side; never put them in this repository or in browser code.
 
 **Product data** (`js/products.js`):
-Replace the sample array with your real products, or point the site at
-a real backend/database and fetch the list instead.
+Products are loaded from the public dashboard API. Manage published
+products and storefront placements in that dashboard.
 
 ## 5. Customize
 - Colors, fonts, spacing: `css/style.css`, `:root` block at the top has

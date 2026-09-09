@@ -53,39 +53,67 @@
 <script src="js/cart.js"></script><script src="js/auth.js"></script>
 <script>
   function cardHTML(p){
+    const available = productIsPurchasable(p);
     return `
-      <div class="product-card" data-cat="${p.category}">
-        <a href="product.html?id=${p.id}" class="product-media">
-          ${p.badge ? `<span class="product-badge ticket ${p.badge==='Sale'?'on-sale':''}">${p.badge}</span>` : ""}
-          <img src="${p.img}" alt="${p.name}">
+      <div class="product-card" data-cat="${escapeHtml(p.category)}">
+        <a href="product.html?id=${encodeURIComponent(p.id)}" class="product-media">
+          ${p.badge ? `<span class="product-badge ticket ${p.badge==='Sale'?'on-sale':''}">${escapeHtml(p.badge)}</span>` : ""}
+          <img src="${escapeHtml(safeProductImageUrl(p.img))}" alt="${escapeHtml(p.name)}">
         </a>
         <div class="product-body">
-          <span class="product-cat">${p.category}</span>
-          <h4><a href="product.html?id=${p.id}">${p.name}</a></h4>
+          <span class="product-cat">${escapeHtml(p.category)}</span>
+          <h4><a href="product.html?id=${encodeURIComponent(p.id)}">${escapeHtml(p.name)}</a></h4>
           <div class="product-foot">
             <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
-            <button class="add-btn" aria-label="Add to cart" onclick="addToCart('${p.id}')">+</button>
+            <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add to cart" : "Out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
           </div>
         </div>
       </div>`;
   }
   const grid = document.getElementById("shop-grid");
+  const filterBar = document.getElementById("filter-bar");
   function render(cat){
     const list = cat === "All" ? PRODUCTS : PRODUCTS.filter(p => p.category === cat);
     grid.innerHTML = list.map(cardHTML).join("") || `<p>No products in this category yet.</p>`;
   }
-  document.querySelectorAll(".filter-chip").forEach(chip => {
-    chip.addEventListener("click", () => {
-      document.querySelectorAll(".filter-chip").forEach(c => { c.classList.remove("active"); c.setAttribute("aria-pressed","false"); });
-      chip.classList.add("active");
-      chip.setAttribute("aria-pressed","true");
-      render(chip.dataset.cat);
+  function selectCategory(cat) {
+    document.querySelectorAll(".filter-chip").forEach(c => {
+      const active = c.dataset.cat === cat;
+      c.classList.toggle("active", active);
+      c.setAttribute("aria-pressed", String(active));
     });
+    render(cat);
+  }
+  filterBar.addEventListener("click", (event) => {
+    const chip = event.target.closest(".filter-chip");
+    if (chip) selectCategory(chip.dataset.cat);
   });
   const params = new URLSearchParams(location.search);
-  const initialCat = params.get("cat") || "All";
-  document.querySelectorAll(".filter-chip").forEach(c => c.classList.toggle("active", c.dataset.cat === initialCat));
-  loadProducts().then(() => render(initialCat)).catch(err => { grid.innerHTML = `<p>${err.message}</p>`; });
+  const requestedCat = (params.get("cat") || "").trim();
+  let initialCat = requestedCat || "All";
+  function syncCategories() {
+    const existing = new Set(Array.from(document.querySelectorAll(".filter-chip")).map(c => c.dataset.cat));
+    const categories = Array.from(new Set(PRODUCTS.map(p => p.category).filter(Boolean))).sort();
+    categories.forEach(category => {
+      if (existing.has(category)) return;
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "filter-chip";
+      chip.dataset.cat = category;
+      chip.setAttribute("aria-pressed", "false");
+      chip.textContent = category;
+      filterBar.appendChild(chip);
+    });
+    if (!categories.includes(initialCat) && initialCat !== "All") initialCat = "All";
+    selectCategory(initialCat);
+  }
+  loadProducts().then(syncCategories).catch(err => { grid.innerHTML = `<p>${escapeHtml(err.message)}</p>`; });
+  window.addEventListener("hubator:products-loaded", () => {
+    syncCategories();
+    const active = document.querySelector(".filter-chip.active");
+    render(active ? active.dataset.cat : "All");
+  });
+  window.addEventListener("hubator:cart-changed", updateCartBadge);
 </script>
 </body>
 </html>

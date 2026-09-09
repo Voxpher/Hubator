@@ -73,10 +73,19 @@
         document.getElementById("login-email").value.trim(),
         document.getElementById("login-password").value
       );
-      const next = new URLSearchParams(location.search).get("next") || "index.html";
+      const next = safeNextPath(new URLSearchParams(location.search).get("next"));
       window.location.href = next;
     } catch (err) {
-      const msg = err.message.includes("verify") ? err.message + " <a href=\"forgot-password.html\">Resend link?</a>" : err.message; document.getElementById("login-form-error").innerHTML = msg; document.getElementById("login-form-error").style.display = "block";
+      const error = document.getElementById("login-form-error");
+      error.textContent = err.message;
+      if (err.message.toLowerCase().includes("verify")) {
+        error.appendChild(document.createTextNode(" "));
+        const resend = document.createElement("a");
+        resend.href = "forgot-password.html";
+        resend.textContent = "Resend link?";
+        error.appendChild(resend);
+      }
+      error.style.display = "block";
       btn.disabled = false;
       btn.textContent = "Sign in";
     }

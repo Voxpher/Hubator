@@ -49,7 +49,8 @@
       line.className = "cart-line";
 
       const img = document.createElement("img");
-      img.src = l.product.img; img.alt = l.product.name;
+      img.src = typeof safeProductImageUrl === "function" ? safeProductImageUrl(l.product.img) : "";
+      img.alt = l.product.name;
       img.width = 76; img.height = 76;
 
       const info = document.createElement("div");
@@ -60,6 +61,13 @@
       name.appendChild(nameLink);
       const meta = document.createElement("div");
       meta.className = "cl-meta"; meta.textContent = l.product.category;
+      if (l.product.stock != null && l.product.stock < l.qty) {
+        const unavailable = document.createElement("div");
+        unavailable.className = "cl-meta";
+        unavailable.style.color = "#b91c1c";
+        unavailable.textContent = "Currently unavailable";
+        info.appendChild(unavailable);
+      }
 
       // Remove button (not anchor — semantic fix)
       const removeBtn = document.createElement("button");
@@ -91,6 +99,7 @@
       incBtn.setAttribute("type", "button");
       incBtn.setAttribute("aria-label", "Increase quantity");
       incBtn.textContent = "+";
+      if (l.product.stock != null && l.qty >= l.product.stock) incBtn.disabled = true;
       incBtn.onclick = function() { setQty(l.product.id, l.qty + 1); renderCart(); };
 
       qtyCtrl.appendChild(decBtn); qtyCtrl.appendChild(qtyInput); qtyCtrl.appendChild(incBtn);
@@ -154,6 +163,8 @@ summary.appendChild(checkoutLink); summary.appendChild(continueLink);
   loadProducts().then(renderCart).catch(function(err) {
     document.getElementById("cart-root").textContent = err.message;
   });
+  window.addEventListener("hubator:products-loaded", renderCart);
+  window.addEventListener("hubator:cart-changed", renderCart);
 </script>
 </body>
 </html>
