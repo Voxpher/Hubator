@@ -11,7 +11,7 @@
 
   const source = document.currentScript
     ? document.currentScript.src
-    : new URL("js/page-ui.js", document.baseURI).href;
+    : new URL("/js/page-ui.js", document.baseURI).href;
 
   if (!document.getElementById("hubator-page-ui-styles")) {
     const link = document.createElement("link");
@@ -290,8 +290,7 @@
   }
 
   function preparePage() {
-    const filename = location.pathname.split("/").pop() || "index.html";
-    const name = filename.replace(/\.html$/, "");
+    const name = (location.pathname.replace(/^\/|\/$/g, "") || "home").replace(/\.html$/, "");
     document.body.classList.add("page-ui", "page-" + name);
 
     const authPages = [

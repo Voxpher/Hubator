@@ -7,14 +7,14 @@
 <meta name="description" content="Secure checkout.">
 <meta name="theme-color" content="#FAF7F0">
 <meta name="robots" content="noindex,nofollow">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/css/style.css">
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 <div id="site-header"></div>
 <main id="main-content">
-  <div class="wrap breadcrumb"><a href="index.html">Home</a> / <a href="cart.html">Cart</a> / Checkout</div>
+  <div class="wrap breadcrumb"><a href="/">Home</a> / <a href="/cart">Cart</a> / Checkout</div>
   <section class="page-hero" style="border-bottom:none;padding-bottom:0;"><div class="wrap"><h1>Checkout</h1></div></section>
   <div class="wrap checkout-grid">
     <form id="checkout-form" novalidate>
@@ -85,13 +85,13 @@
   </div>
 </main>
 <div id="site-footer"></div>
-<script src="js/maintenance.js"></script>
-<script src="js/layout.js"></script>
-<script src="js/config.js"></script>
-<script src="js/products.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/checkout.js"></script>
+<script src="/js/maintenance.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/checkout.js"></script>
 <script>
   function renderSummary(){var lines=cartLines(),subtotal=cartSubtotal(),box=document.getElementById("checkout-summary"),pay=document.getElementById("pay-btn");box.innerHTML="";var h=document.createElement("h3");h.textContent="Order summary";h.style.marginBottom="16px";box.appendChild(h);if(!lines.length){var empty=document.createElement("p");empty.textContent="Your cart is empty.";box.appendChild(empty);if(pay)pay.disabled=true;return;}if(pay)pay.disabled=false;lines.forEach(function(l){var r=document.createElement("div");r.className="summary-row";var n=document.createElement("span");n.textContent=l.product.name+" \u00D7 "+l.qty;var p=document.createElement("span");p.textContent=fmt(l.product.price*l.qty);r.appendChild(n);r.appendChild(p);box.appendChild(r);});var sr=document.createElement("div");sr.className="summary-row";var sl=document.createElement("span");sl.textContent="Shipping";var sv=document.createElement("span");sv.textContent="Calculated at payment";sr.appendChild(sl);sr.appendChild(sv);box.appendChild(sr);var tr=document.createElement("div");tr.className="summary-row total";var tl=document.createElement("span");tl.textContent="Subtotal";var tv=document.createElement("span");tv.textContent=fmt(subtotal);tr.appendChild(tl);tr.appendChild(tv);box.appendChild(tr);}
   renderSummary();

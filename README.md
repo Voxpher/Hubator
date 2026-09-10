@@ -4,13 +4,20 @@ A static, no-build ecommerce front-end: home, shop, product detail, cart,
 checkout, about, contact, sign in, and sign up — plain HTML/CSS/JS, no
 framework, no build step. Cart is stored in the browser (localStorage).
 
+Public pages use clean URLs (`/shop`, `/product?id=1`, `/account`, and so
+on). Each route has a directory `index.html` entry point so direct navigation
+and refreshes work on GitHub Pages and other static hosts. The original
+`.html` files remain available for compatibility; GitHub Pages visitors are
+redirected to the corresponding clean route by `404.html`, including query
+strings and hashes.
+
 ## Files
 ```
-index.html      Home page
-shop.html       Product grid with category filters
-product.html    Product detail (?id=1..12)
-cart.html       Cart, reads/writes localStorage
-checkout.html   Checkout form with Razorpay client flow
+index.html      Home page (public URL `/`)
+shop.html       Product grid with category filters (public URL `/shop`)
+product.html    Product detail (?id=1..12; public URL `/product`)
+cart.html       Cart, reads/writes localStorage (public URL `/cart`)
+checkout.html   Checkout form with Razorpay client flow (public URL `/checkout`)
 about.html
 contact.html
 login.html
@@ -26,6 +33,10 @@ js/auth.js      Customer auth and session handling
 No build tools needed. Either:
 - Double-click `index.html`, or
 - From this folder, run `python3 -m http.server 8000` and open `http://localhost:8000`
+
+The clean route directories work with a static HTTP server. Opening individual
+HTML files directly from disk is not a supported clean-URL test because
+root-relative assets require an HTTP origin.
 
 ## 2. Push to GitHub
 ```bash

@@ -6,29 +6,29 @@
 <title>Your Cart — Hubator</title>
 <meta name="description" content="Your shopping cart at Hubator.">
 <meta name="theme-color" content="#FAF7F0">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="favicon.ico">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/favicon.ico">
 <meta property="og:title" content="Your Cart — Hubator">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Hubator">
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 <div id="site-header"></div>
 <main id="main-content">
-  <div class="wrap breadcrumb"><a href="index.html">Home</a> / Cart</div>
+  <div class="wrap breadcrumb"><a href="/">Home</a> / Cart</div>
   <section class="page-hero" style="border-bottom:none;padding-bottom:0;">
     <div class="wrap"><h1>Your cart</h1></div>
   </section>
   <div class="wrap cart-grid" id="cart-root"></div>
 </main>
 <div id="site-footer"></div>
-<script src="js/maintenance.js"></script><script src="js/layout.js"></script>
-<script src="js/config.js"></script>
-<script src="js/products.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/auth.js"></script>
+<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
 <script>
   function renderCart() {
     const lines = cartLines();
@@ -36,7 +36,7 @@
     root.innerHTML = "";
 
     if (!lines.length) {
-      root.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="es-icon" style="color:var(--ink-soft)"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div><h2>Your cart is empty</h2><p>Nothing here yet \u2014 go find something worth keeping.</p><a href="shop.html" class="btn btn-primary">Browse the shop</a></div>';
+      root.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="es-icon" style="color:var(--ink-soft)"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div><h2>Your cart is empty</h2><p>Nothing here yet \u2014 go find something worth keeping.</p><a href="/shop" class="btn btn-primary">Browse the shop</a></div>';
       return;
     }
 
@@ -56,7 +56,7 @@
       const info = document.createElement("div");
       const name = document.createElement("h4");
       const nameLink = document.createElement("a");
-      nameLink.href = "product.html?id=" + l.product.id;
+      nameLink.href = "/product?id=" + l.product.id;
       nameLink.textContent = l.product.name;
       name.appendChild(nameLink);
       const meta = document.createElement("div");
@@ -143,14 +143,14 @@
     const tv = document.createElement("span"); tv.textContent = fmt(subtotal);
     totalRow.appendChild(tl); totalRow.appendChild(tv); summary.appendChild(totalRow);
 
-    const checkoutLink = document.createElement("a"); checkoutLink.href = "checkout.html"; checkoutLink.className = "btn btn-primary btn-block"; checkoutLink.textContent = "Checkout"; checkoutLink.style.marginTop = "16px";
-    const continueLink = document.createElement("a"); continueLink.href = "shop.html"; continueLink.className = "btn btn-outline btn-block"; continueLink.textContent = "Continue shopping"; continueLink.style.marginTop = "10px";
+    const checkoutLink = document.createElement("a"); checkoutLink.href = "/checkout"; checkoutLink.className = "btn btn-primary btn-block"; checkoutLink.textContent = "Checkout"; checkoutLink.style.marginTop = "16px";
+    const continueLink = document.createElement("a"); continueLink.href = "/shop"; continueLink.className = "btn btn-outline btn-block"; continueLink.textContent = "Continue shopping"; continueLink.style.marginTop = "10px";
     // Soft sign-in nudge for guest users (never blocking)
 if (typeof isSignedIn === "function" && !isSignedIn()) {
   var nudge = document.createElement("p");
   nudge.style.cssText = "font-size:0.82rem;color:var(--ink-soft);text-align:center;margin:12px 0 0;";
   var nudgeLink = document.createElement("a");
-  nudgeLink.href = "login.html?next=cart.html";
+  nudgeLink.href = "/login?next=%2Fcart";
   nudgeLink.textContent = "Sign in";
   nudgeLink.style.color = "var(--gold-deep)";
   nudgeLink.style.fontWeight = "600";

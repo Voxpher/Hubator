@@ -182,10 +182,10 @@ function signOut() {
   clearSession();
   updateHeaderAuth();
   window.dispatchEvent(new CustomEvent("hubator:auth-changed"));
-  window.location.href = "index.html";
+  window.location.href = "/";
 }
 
-function safeNextPath(value, fallback = "index.html") {
+function safeNextPath(value, fallback = "/") {
   if (typeof value !== "string" || !value) return fallback;
   try {
     const url = new URL(value, location.href);

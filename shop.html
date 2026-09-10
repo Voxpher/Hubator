@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shop — Hubator</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="/css/style.css">
 
 <meta name="description" content="Shop curated apparel and fashion from Hubator — unique clothing and accessories">
 <meta name="theme-color" content="#FAF7F0">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="favicon.ico">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/favicon.ico">
 <meta property="og:title" content="Shop — Hubator">
 <meta property="og:description" content="Shop curated apparel and fashion from Hubator — unique clothing and accessories">
 <meta property="og:type" content="website">
@@ -21,7 +21,7 @@
 <div id="site-header"></div>
 
 <main>
-  <div class="wrap breadcrumb"><a href="index.html">Home</a> / Shop</div>
+  <div class="wrap breadcrumb"><a href="/">Home</a> / Shop</div>
   <section class="page-hero">
     <div class="wrap">
       <span class="eyebrow">All products</span>
@@ -48,21 +48,21 @@
 
 <div id="site-footer"></div>
 
-<script src="js/maintenance.js"></script><script src="js/layout.js"></script><script src="js/config.js"></script>
-<script src="js/products.js"></script>
-<script src="js/cart.js"></script><script src="js/auth.js"></script>
+<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script><script src="/js/auth.js"></script>
 <script>
   function cardHTML(p){
     const available = productIsPurchasable(p);
     return `
       <div class="product-card" data-cat="${escapeHtml(p.category)}">
-        <a href="product.html?id=${encodeURIComponent(p.id)}" class="product-media">
+        <a href="/product?id=${encodeURIComponent(p.id)}" class="product-media">
           ${p.badge ? `<span class="product-badge ticket ${p.badge==='Sale'?'on-sale':''}">${escapeHtml(p.badge)}</span>` : ""}
           <img src="${escapeHtml(safeProductImageUrl(p.img))}" alt="${escapeHtml(p.name)}">
         </a>
         <div class="product-body">
           <span class="product-cat">${escapeHtml(p.category)}</span>
-          <h4><a href="product.html?id=${encodeURIComponent(p.id)}">${escapeHtml(p.name)}</a></h4>
+          <h4><a href="/product?id=${encodeURIComponent(p.id)}">${escapeHtml(p.name)}</a></h4>
           <div class="product-foot">
             <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
             <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>

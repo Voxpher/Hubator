@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Create account — Hubator</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="/css/style.css">
 
 <meta name="description" content="Create a Hubator account for faster checkout and order tracking.">
 <meta name="theme-color" content="#FAF7F0">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="favicon.ico">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/favicon.ico">
 <meta name="robots" content="noindex,nofollow">
 <meta property="og:title" content="Create account — Hubator">
 <meta property="og:description" content="Create a Hubator account for faster checkout and order tracking.">
@@ -57,7 +57,7 @@
       </form>
 
       <p class="auth-switch" style="margin-top:20px;text-align:center;">
-        Already have an account? <a href="login.html">Sign in</a>
+        Already have an account? <a href="/login">Sign in</a>
       </p>
     </div>
   </div>
@@ -65,15 +65,15 @@
 
 <div id="site-footer"></div>
 
-<script src="js/maintenance.js"></script>
-<script src="js/layout.js"></script>
-<script src="js/config.js"></script>
-<script src="js/products.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/auth.js"></script>
+<script src="/js/maintenance.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
 <script>
   if (isSignedIn()) {
-    window.location.replace("index.html");
+    window.location.replace("/");
   }
 
   document.getElementById("signup-form").addEventListener("submit", async (event) => {
@@ -137,7 +137,7 @@
       const signInLink = document.createElement("a");
 
       emailText.textContent = email;
-      signInLink.href = "login.html";
+      signInLink.href = "/login";
       signInLink.textContent = "sign in";
 
       heading.textContent = "Check your inbox!";

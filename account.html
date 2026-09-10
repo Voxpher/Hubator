@@ -6,7 +6,7 @@
 <title>My account — Hubator</title>
 <meta name="description" content="Manage your Hubator profile, orders, addresses, and password.">
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 <div id="site-header"></div>
@@ -26,7 +26,7 @@
       <a href="#orders">Orders</a>
       <a href="#addresses">Saved addresses</a>
       <a href="#password">Password</a>
-      <a href="cart.html">Cart</a>
+      <a href="/cart">Cart</a>
       <button type="button" id="account-signout" class="btn btn-outline btn-block">Sign out</button>
     </nav>
 
@@ -35,7 +35,7 @@
       <div id="account-error" class="account-card account-error" role="alert" hidden>
         <h2>We couldn’t load your account</h2>
         <p id="account-error-text">Please sign in again.</p>
-        <a id="account-error-link" class="btn btn-primary" href="login.html">Sign in</a>
+        <a id="account-error-link" class="btn btn-primary" href="/login">Sign in</a>
       </div>
 
       <div id="account-content" hidden>
@@ -87,14 +87,14 @@
           </form>
         </section>
 
-        <section class="account-card account-next-steps" aria-labelledby="account-next-heading"><span class="eyebrow">Ready when you are</span><h2 id="account-next-heading">Continue shopping</h2><p>Browse the latest collection or review the items already in your cart.</p><div class="account-actions"><a class="btn btn-primary" href="shop.html">Shop products</a><a class="btn btn-outline" href="cart.html">View cart</a></div></section>
+        <section class="account-card account-next-steps" aria-labelledby="account-next-heading"><span class="eyebrow">Ready when you are</span><h2 id="account-next-heading">Continue shopping</h2><p>Browse the latest collection or review the items already in your cart.</p><div class="account-actions"><a class="btn btn-primary" href="/shop">Shop products</a><a class="btn btn-outline" href="/cart">View cart</a></div></section>
       </div>
     </div>
   </div>
 </main>
 
 <div id="site-footer"></div>
-<script src="js/maintenance.js"></script><script src="js/layout.js"></script><script src="js/config.js"></script><script src="js/products.js"></script><script src="js/cart.js"></script><script src="js/auth.js"></script>
+<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script><script src="/js/products.js"></script><script src="/js/cart.js"></script><script src="/js/auth.js"></script>
 <script>
 (function () {
   "use strict";
@@ -107,7 +107,7 @@
   function payload(data, key) { return Array.isArray(data) ? data : data && Array.isArray(data[key]) ? data[key] : data && data.data && Array.isArray(data.data[key]) ? data.data[key] : []; }
   function customerPayload(data) { return data && (data.customer || data.profile || data.data && (data.data.customer || data.data.profile) || data); }
   function message(id, content, good) { var el = $(id); el.textContent = content || ""; el.className = "form-message " + (good ? "is-success" : "is-error"); }
-  function showError(error) { $("account-loading").hidden = true; $("account-content").hidden = true; $("account-error").hidden = false; $("account-error-text").textContent = error.message || "Please sign in again."; $("account-error-link").href = "login.html?next=" + encodeURIComponent("account.html"); }
+  function showError(error) { $("account-loading").hidden = true; $("account-content").hidden = true; $("account-error").hidden = false; $("account-error-text").textContent = error.message || "Please sign in again."; $("account-error-link").href = "/login?next=%2Faccount"; }
   function renderCustomer(customer) {
     state.customer = customer || {};
     var name = String(state.customer.name || state.customer.email || "");
@@ -153,7 +153,7 @@
   $("password-form").addEventListener("submit", async function (event) { event.preventDefault(); if (!event.target.reportValidity()) return; if (value("new-password") !== value("confirm-password")) { message("password-message", "New passwords do not match."); return; } try { await authRequest("/api/public/account/password", "POST", { currentPassword: value("current-password"), newPassword: value("new-password") }); event.target.reset(); message("password-message", "Password updated.", true); } catch (error) { message("password-message", error.message); } });
   $("orders-prev").addEventListener("click", function () { if (state.page > 1) { state.page--; loadOrders().catch(showError); } }); $("orders-next").addEventListener("click", function () { if (state.page < state.totalPages) { state.page++; loadOrders().catch(showError); } });
   $("account-signout").addEventListener("click", function () { if (typeof signOut === "function") signOut(); });
-  document.addEventListener("DOMContentLoaded", async function () { if (!isSignedIn()) { window.location.replace("login.html?next=" + encodeURIComponent("account.html")); return; } try { renderCustomer(customerPayload(await authGet("/api/public/account/profile"))); await Promise.all([loadAddresses(), loadOrders()]); $("account-loading").hidden = true; $("account-content").hidden = false; } catch (error) { showError(error); } });
+  document.addEventListener("DOMContentLoaded", async function () { if (!isSignedIn()) { window.location.replace("/login?next=%2Faccount"); return; } try { renderCustomer(customerPayload(await authGet("/api/public/account/profile"))); await Promise.all([loadAddresses(), loadOrders()]); $("account-loading").hidden = true; $("account-content").hidden = false; } catch (error) { showError(error); } });
 }());
 </script>
 </body>

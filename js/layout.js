@@ -8,7 +8,7 @@
 
   const source = document.currentScript
     ? document.currentScript.src
-    : new URL("js/layout.js", document.baseURI).href;
+    : new URL("/js/layout.js", document.baseURI).href;
 
   if (!document.getElementById("hubator-responsive-styles")) {
     const stylesheet = document.createElement("link");
@@ -116,48 +116,48 @@
   };
 
   const NAV_LINKS = [
-    { href: "index.html", label: "Home", icon: "home" },
-    { href: "shop.html", label: "Shop", icon: "shop" },
-    { href: "about.html", label: "About", icon: "info" },
-    { href: "contact.html", label: "Contact", icon: "mail" },
-    { href: "faq.html", label: "FAQ", icon: "help" },
+    { href: "/", label: "Home", icon: "home" },
+    { href: "/shop", label: "Shop", icon: "shop" },
+    { href: "/about", label: "About", icon: "info" },
+    { href: "/contact", label: "Contact", icon: "mail" },
+    { href: "/faq", label: "FAQ", icon: "help" },
   ];
 
   const FOOTER_COLUMNS = [
     {
       heading: "Shop",
       links: [
-        { href: "shop.html", label: "All products", icon: "shop" },
-        { href: "shop.html?cat=Apparel", label: "Apparel", icon: "shirt" },
-        { href: "shop.html?cat=Home", label: "Home", icon: "home" },
-        { href: "shop.html?cat=Kitchen", label: "Kitchen", icon: "cup" },
-        { href: "shop.html?cat=Accessories", label: "Accessories", icon: "bag" },
+        { href: "/shop", label: "All products", icon: "shop" },
+        { href: "/shop?cat=Apparel", label: "Apparel", icon: "shirt" },
+        { href: "/shop?cat=Home", label: "Home", icon: "home" },
+        { href: "/shop?cat=Kitchen", label: "Kitchen", icon: "cup" },
+        { href: "/shop?cat=Accessories", label: "Accessories", icon: "bag" },
       ],
     },
     {
       heading: "Company",
       links: [
-        { href: "about.html", label: "About", icon: "info" },
-        { href: "contact.html", label: "Contact", icon: "mail" },
-        { href: "faq.html", label: "FAQ", icon: "help" },
+        { href: "/about", label: "About", icon: "info" },
+        { href: "/contact", label: "Contact", icon: "mail" },
+        { href: "/faq", label: "FAQ", icon: "help" },
       ],
     },
     {
       heading: "Account",
       links: [
-        { href: "account.html", label: "My account", icon: "user" },
-        { href: "login.html", label: "Sign in", icon: "user" },
-        { href: "signup.html", label: "Create account", icon: "user" },
-        { href: "cart.html", label: "Cart", icon: "bag" },
+        { href: "/account", label: "My account", icon: "user" },
+        { href: "/login", label: "Sign in", icon: "user" },
+        { href: "/signup", label: "Create account", icon: "user" },
+        { href: "/cart", label: "Cart", icon: "bag" },
       ],
     },
     {
       heading: "Legal",
       links: [
-        { href: "privacy-policy.html", label: "Privacy Policy", icon: "shield" },
-        { href: "terms-conditions.html", label: "Terms & Conditions", icon: "document" },
-        { href: "shipping-policy.html", label: "Shipping Policy", icon: "truck" },
-        { href: "refund-policy.html", label: "Refund Policy", icon: "return" },
+        { href: "/privacy-policy", label: "Privacy Policy", icon: "shield" },
+        { href: "/terms-conditions", label: "Terms & Conditions", icon: "document" },
+        { href: "/shipping-policy", label: "Shipping Policy", icon: "truck" },
+        { href: "/refund-policy", label: "Refund Policy", icon: "return" },
       ],
     },
   ];
@@ -227,8 +227,8 @@
   }
 
   function markActive(link, href) {
-    const page = location.pathname.split("/").pop() || "index.html";
-    const active = page === href || (href === "shop.html" && page === "product.html");
+    const page = location.pathname.replace(/\/$/, "") || "/";
+    const active = page === href || (href === "/shop" && page === "/product");
 
     if (active) link.classList.add("active");
     if (page === href) link.setAttribute("aria-current", "page");
@@ -253,7 +253,7 @@
       text: "Skip to main content",
     });
     const logo = make("a", {
-      href: "index.html",
+      href: "/",
       class: "logo",
       text: "Hubator",
       "aria-label": "Hubator home",
@@ -264,14 +264,14 @@
     );
 
     const signInLink = labeledLink(
-      "login.html",
+      "/login",
       "Sign in",
       "user",
       "btn btn-outline btn-sm header-signin"
     );
 
     const accountLink = labeledLink(
-      "account.html",
+      "/account",
       "Sign in",
       "user",
       "header-account-link"
@@ -297,7 +297,7 @@
 
     const cartLink = append(
       make("a", {
-        href: "cart.html",
+        href: "/cart",
         class: "icon-link header-cart",
         "aria-label": "Cart",
       }),
@@ -364,7 +364,7 @@
 
     const heading = append(
       make("div", { class: "mobile-nav-heading" }),
-      make("a", { href: "index.html", class: "logo", text: "Hubator" }),
+      make("a", { href: "/", class: "logo", text: "Hubator" }),
       closeButton
     );
 
@@ -402,7 +402,7 @@
         }
 
         append(account, labeledLink(
-          "account.html",
+          "/account",
           customer && (customer.name || customer.email) || "Account",
           "user",
           "btn btn-primary btn-block mobile-account-link"
@@ -424,9 +424,9 @@
       } else {
         append(
           account,
-          labeledLink("login.html", "Sign in", "user", "btn btn-primary btn-block"),
+          labeledLink("/login", "Sign in", "user", "btn btn-primary btn-block"),
           labeledLink(
-            "signup.html",
+            "/signup",
             "Create account",
             "user",
             "btn btn-outline btn-block"
@@ -436,7 +436,7 @@
 
       append(
         account,
-        labeledLink("cart.html", "View cart", "bag", "btn btn-outline btn-block")
+        labeledLink("/cart", "View cart", "bag", "btn btn-outline btn-block")
       );
     }
 
@@ -562,7 +562,7 @@
   function buildFooter() {
     const brand = append(
       make("div", { class: "footer-brand" }),
-      make("a", { href: "index.html", class: "logo", text: "Hubator" }),
+      make("a", { href: "/", class: "logo", text: "Hubator" }),
       make("p", {
         class: "footer-brand-description",
         text: "Curated apparel & fashion from independent designers.",

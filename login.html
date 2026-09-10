@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sign in — Hubator</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="/css/style.css">
 
 <meta name="description" content="Sign in to your Hubator account.">
 <meta name="theme-color" content="#FAF7F0">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="favicon.ico">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/favicon.ico">
 <meta name="robots" content="noindex,nofollow">
 <meta property="og:title" content="Sign in — Hubator">
 <meta property="og:description" content="Sign in to your Hubator account.">
@@ -35,7 +35,7 @@
         <div class="form-field">
           <label for="login-password" style="display:flex;justify-content:space-between;align-items:center;">
             <span>Password</span>
-            <a href="forgot-password.html" style="font-size:0.8rem;font-weight:400;color:#f59e0b;">Forgot password?</a>
+            <a href="/forgot-password" style="font-size:0.8rem;font-weight:400;color:#f59e0b;">Forgot password?</a>
           </label>
           <input id="login-password" name="password" type="password" required autocomplete="current-password" placeholder="••••••••">
         </div>
@@ -46,7 +46,7 @@
       </form>
 
       <p class="auth-switch" style="margin-top:20px;text-align:center;">
-        Don't have an account? <a href="signup.html">Create one</a>
+        Don't have an account? <a href="/signup">Create one</a>
       </p>
     </div>
   </div>
@@ -54,13 +54,13 @@
 
 <div id="site-footer"></div>
 
-<script src="js/maintenance.js"></script><script src="js/layout.js"></script><script src="js/config.js"></script>
-<script src="js/products.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/auth.js"></script>
+<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
 <script>
   // Already signed in → go home
-  if (isSignedIn()) window.location.href = "index.html";
+  if (isSignedIn()) window.location.href = "/";
 
   document.getElementById("login-form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -81,7 +81,7 @@
       if (err.message.toLowerCase().includes("verify")) {
         error.appendChild(document.createTextNode(" "));
         const resend = document.createElement("a");
-        resend.href = "forgot-password.html";
+        resend.href = "/forgot-password";
         resend.textContent = "Resend link?";
         error.appendChild(resend);
       }

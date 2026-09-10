@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page not found — Hubator</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <main class="section">
+    <div class="wrap" style="max-width:640px;text-align:center;">
+      <span class="eyebrow">404</span>
+      <h1>That page could not be found.</h1>
+      <p>The link may be outdated or the page may have moved.</p>
+      <a href="/" class="btn btn-primary">Back to home</a>
+    </div>
+  </main>
+  <script>
+    (function () {
+      const legacyRoutes = {
+        "index.html": "/",
+        "shop.html": "/shop",
+        "product.html": "/product",
+        "about.html": "/about",
+        "contact.html": "/contact",
+        "faq.html": "/faq",
+        "account.html": "/account",
+        "cart.html": "/cart",
+        "checkout.html": "/checkout",
+        "login.html": "/login",
+        "signup.html": "/signup",
+        "forgot-password.html": "/forgot-password",
+        "reset-password.html": "/reset-password",
+        "verify-email.html": "/verify-email",
+        "order-confirmation.html": "/order-confirmation",
+        "privacy-policy.html": "/privacy-policy",
+        "terms-conditions.html": "/terms-conditions",
+        "shipping-policy.html": "/shipping-policy",
+        "refund-policy.html": "/refund-policy",
+        "maintenance.html": "/maintenance"
+      };
+      const name = location.pathname.split("/").pop().toLowerCase();
+      const cleanPath = legacyRoutes[name];
+      if (cleanPath) {
+        location.replace(cleanPath + location.search + location.hash);
+      }
+    }());
+  </script>
+</body>
+</html>

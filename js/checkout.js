@@ -243,7 +243,7 @@ async function startCheckout(form) {
             activateGuestAccount(fullName, snap.email, snap.phone),
             new Promise(function(resolve) { setTimeout(resolve, 1500); }),
           ]);
-          window.location.href = "order-confirmation.html";
+          window.location.href = "/order-confirmation";
           resolve();
         } catch(err) { reject(err); }
       },
