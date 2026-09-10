@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Hubator</title>
+<meta name="description" content="Secure checkout.">
+<meta name="theme-color" content="#FAF7F0">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+<div id="site-header"></div>
+<main id="main-content">
+  <div class="wrap breadcrumb"><a href="/">Home</a> / <a href="/cart">Cart</a> / Checkout</div>
+  <section class="page-hero" style="border-bottom:none;padding-bottom:0;"><div class="wrap"><h1>Checkout</h1></div></section>
+  <div class="wrap checkout-grid">
+    <form id="checkout-form" novalidate>
+
+      <div class="form-section">
+        <h2 style="font-size:1.1rem;margin-bottom:14px;">Contact</h2>
+        <div class="form-field">
+          <label for="co-email">Email</label>
+          <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;">
+            <input id="co-email" name="email" type="email" required autocomplete="email" placeholder="you@email.com" style="flex:1;min-width:180px;">
+            <button type="button" id="send-otp-btn" class="btn btn-outline btn-sm" style="white-space:nowrap;">Verify email</button>
+          </div>
+          <div id="email-verified-badge" style="display:none;margin-top:8px;color:#166534;font-size:0.84rem;font-weight:600;">&#10003; Email verified</div>
+        </div>
+        <div id="otp-box" style="display:none;margin-bottom:16px;">
+          <label style="display:block;font-size:0.82rem;font-weight:600;margin-bottom:6px;">Enter the 6-digit code sent to your email</label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input id="otp-input" type="text" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="------" autocomplete="one-time-code" style="flex:1;min-width:120px;letter-spacing:0.3em;font-family:var(--font-mono);font-size:1.1rem;text-align:center;padding:11px;">
+            <button type="button" id="verify-otp-btn" class="btn btn-primary btn-sm">Confirm</button>
+          </div>
+          <p id="otp-error" role="alert" style="display:none;color:#dc2626;font-size:0.82rem;margin-top:6px;"></p>
+          <p style="font-size:0.78rem;color:var(--ink-soft);margin-top:6px;">Didn't get it? <button type="button" id="resend-otp-btn" style="background:none;border:none;color:var(--gold-deep);font-weight:600;cursor:pointer;font-size:0.78rem;padding:0;">Resend code</button></p>
+        </div>
+        <div class="form-field">
+          <label for="co-phone">Phone <span style="color:#9ca3af;font-size:0.8em;font-weight:400">(required)</span></label>
+          <input id="co-phone" name="phone" type="tel" required autocomplete="tel" placeholder="9876543210" pattern="[0-9]{10,15}">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2 style="font-size:1.1rem;margin-bottom:14px;">Shipping address</h2>
+        <div class="form-row">
+          <div class="form-field"><label for="co-fname">First name</label><input id="co-fname" name="firstName" type="text" required autocomplete="given-name"></div>
+          <div class="form-field"><label for="co-lname">Last name</label><input id="co-lname" name="lastName" type="text" required autocomplete="family-name"></div>
+        </div>
+        <div class="form-field"><label for="co-addr">Address</label><input id="co-addr" name="address" type="text" required autocomplete="address-line1" placeholder="House no., street, area"></div>
+        <div class="form-field"><label for="co-addr2">Apartment / Floor <span style="color:#9ca3af;font-size:0.8em;font-weight:400">(optional)</span></label><input id="co-addr2" name="address2" type="text" autocomplete="address-line2"></div>
+        <div class="form-row">
+          <div class="form-field"><label for="co-city">City</label><input id="co-city" name="city" type="text" required autocomplete="address-level2"></div>
+          <div class="form-field"><label for="co-state">State</label><input id="co-state" name="state" type="text" required autocomplete="address-level1" placeholder="Maharashtra"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label for="co-pin">Postal code</label><input id="co-pin" name="postalCode" type="text" required autocomplete="postal-code" pattern="[0-9]{6}" placeholder="400001"></div>
+          <div class="form-field">
+            <label for="co-country">Country</label>
+            <select id="co-country" name="country" required autocomplete="country-name">
+              <option value="" disabled selected>Select country</option>
+              <option value="India">India</option>
+              <option value="United States">United States</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2 style="font-size:1.1rem;margin-bottom:14px;">Payment</h2>
+        <p style="font-size:0.88rem;color:#6b7280;margin:0 0 0.75rem;">Pay securely via <strong>UPI, Cards, Net Banking, or Wallets</strong> through Razorpay.</p>
+        <p style="font-size:0.8rem;color:#6b7280;margin:0;">&#128274; Secured by <strong style="color:#072654;">Razorpay</strong></p>
+      </div>
+
+      <p id="checkout-form-error" role="alert" style="display:none;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.88rem;margin-bottom:1rem;"></p>
+      <button type="submit" id="pay-btn" class="btn btn-primary btn-block">Pay securely &#8594;</button>
+      <p style="text-align:center;font-size:0.78rem;color:#9ca3af;margin-top:0.5rem;">Redirected to Razorpay's secure checkout</p>
+    </form>
+    <div class="summary-box" id="checkout-summary"></div>
+  </div>
+</main>
+<div id="site-footer"></div>
+<script src="/js/maintenance.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/checkout.js"></script>
+<script>
+  function renderSummary(){var lines=cartLines(),subtotal=cartSubtotal(),box=document.getElementById("checkout-summary"),pay=document.getElementById("pay-btn");box.innerHTML="";var h=document.createElement("h3");h.textContent="Order summary";h.style.marginBottom="16px";box.appendChild(h);if(!lines.length){var empty=document.createElement("p");empty.textContent="Your cart is empty.";box.appendChild(empty);if(pay)pay.disabled=true;return;}if(pay)pay.disabled=false;lines.forEach(function(l){var r=document.createElement("div");r.className="summary-row";var n=document.createElement("span");n.textContent=l.product.name+" \u00D7 "+l.qty;var p=document.createElement("span");p.textContent=fmt(l.product.price*l.qty);r.appendChild(n);r.appendChild(p);box.appendChild(r);});var sr=document.createElement("div");sr.className="summary-row";var sl=document.createElement("span");sl.textContent="Shipping";var sv=document.createElement("span");sv.textContent="Calculated at payment";sr.appendChild(sl);sr.appendChild(sv);box.appendChild(sr);var tr=document.createElement("div");tr.className="summary-row total";var tl=document.createElement("span");tl.textContent="Subtotal";var tv=document.createElement("span");tv.textContent=fmt(subtotal);tr.appendChild(tl);tr.appendChild(tv);box.appendChild(tr);}
+  renderSummary();
+  loadProducts().then(renderSummary).catch(function(){ renderSummary(); });
+  window.addEventListener("hubator:products-loaded", renderSummary);
+  window.addEventListener("hubator:cart-changed", renderSummary);
+  document.getElementById("checkout-form").addEventListener("submit",function(e){e.preventDefault();startCheckout(e.currentTarget).catch(function(err){var el=document.getElementById("checkout-form-error");el.textContent=err.message;el.style.display="block";document.getElementById("pay-btn").disabled=false;document.getElementById("pay-btn").textContent="Pay securely \u2192";});});
+</script>
+</body>
+</html>

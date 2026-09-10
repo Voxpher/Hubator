@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forgot password — Hubator</title>
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="description" content="Reset your Hubator account password.">
+<meta name="theme-color" content="#FAF7F0">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/favicon.ico">
+<meta name="robots" content="noindex,nofollow">
+<meta property="og:title" content="Forgot password — Hubator">
+<meta property="og:description" content="Reset your Hubator account password.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hubator">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<main>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h2 style="margin-bottom:6px;">Forgot your password?</h2>
+      <p style="margin-bottom:26px;color:#6b7280;">
+        Enter your email and we'll send you a link to reset your password.
+        The link expires in 1 hour.
+      </p>
+
+      <!-- Form (hidden after submission) -->
+      <form id="forgot-form" novalidate>
+        <div class="form-field">
+          <label for="forgot-email">Email address</label>
+          <input id="forgot-email" type="email" required autocomplete="email" placeholder="you@email.com">
+        </div>
+
+        <p id="forgot-form-error" role="alert" style="display:none;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:0.5rem 0.75rem;font-size:0.85rem;margin-bottom:0.75rem;"></p>
+
+        <button type="submit" id="forgot-btn" class="btn btn-primary btn-block">Send reset link</button>
+      </form>
+
+      <!-- Success state (shown after submit) -->
+      <div id="forgot-success" style="display:none;text-align:center;padding:1rem 0;">
+        <div style="margin-bottom:0.75rem;color:var(--gold,#C99A2E)"><svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
+        <h3 style="margin:0 0 0.5rem;">Check your inbox</h3>
+        <p style="color:#6b7280;font-size:0.9rem;margin:0 0 1.5rem;">
+          If an account exists for that email, we've sent a reset link.<br>
+          Check your spam folder if you don't see it within a few minutes.
+        </p>
+        <a href="/login" class="btn btn-outline btn-block">Back to sign in</a>
+      </div>
+
+      <p class="auth-switch" style="margin-top:20px;text-align:center;">
+        <a href="/login">← Back to sign in</a>
+      </p>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  document.getElementById("forgot-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearAuthError("forgot-form");
+    const btn = document.getElementById("forgot-btn");
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+
+    try {
+      await forgotPassword(document.getElementById("forgot-email").value.trim());
+      document.getElementById("forgot-form").style.display = "none";
+      document.getElementById("forgot-success").style.display = "block";
+    } catch (err) {
+      showAuthError("forgot-form", err.message);
+      btn.disabled = false;
+      btn.textContent = "Send reset link";
+    }
+  });
+</script>
+</body>
+</html>

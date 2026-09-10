@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify email — Hubator</title>
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="description" content="Verify your Hubator email address.">
+<meta name="theme-color" content="#FAF7F0">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/favicon.ico">
+<meta name="robots" content="noindex,nofollow">
+<meta property="og:title" content="Verify email — Hubator">
+<meta property="og:description" content="Verify your Hubator email address.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hubator">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<main>
+  <div class="auth-wrap">
+    <div class="auth-card" style="text-align:center;">
+
+      <!-- Loading state -->
+      <div id="verify-loading">
+        <div class="status-mark" aria-hidden="true">...</div>
+        <h2 style="margin:0 0 0.5rem;">Verifying your email…</h2>
+        <p style="color:#6b7280;">Please wait a moment.</p>
+      </div>
+
+      <!-- Success state -->
+      <div id="verify-success" style="display:none;">
+        <div class="status-mark status-mark-success" aria-hidden="true">✓</div>
+        <h2 style="margin:0 0 0.5rem;">Email verified!</h2>
+        <p style="color:#6b7280;margin:0 0 1.5rem;">
+          Your account is now active. You're signed in and being redirected to the homepage…
+        </p>
+      </div>
+
+      <!-- Error state -->
+      <div id="verify-error" style="display:none;">
+        <div class="status-mark status-mark-error" aria-hidden="true">!</div>
+        <h2 style="margin:0 0 0.5rem;">Verification failed</h2>
+        <p id="verify-error-msg" style="color:#6b7280;margin:0 0 1.5rem;"></p>
+        <a href="/signup" class="btn btn-primary btn-block">Create a new account</a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  (async function () {
+    const token = new URLSearchParams(location.search).get("token");
+
+    if (!token || !/^[a-zA-Z0-9_-]{32,}$/.test(token)) {
+      document.getElementById("verify-loading").style.display = "none";
+      document.getElementById("verify-error").style.display = "block";
+      document.getElementById("verify-error-msg").textContent =
+        "Invalid verification link. Please sign up again or contact support.";
+      return;
+    }
+
+    try {
+      const url = hubatorApiUrl("/api/public/auth/verify-email");
+      if (!url) throw new Error("Store API URL is not configured.");
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) throw new Error(data.error || "Verification failed.");
+
+      // Save session and redirect
+      if (typeof saveSession === "function") saveSession(data.token, data.customer);
+
+      document.getElementById("verify-loading").style.display = "none";
+      document.getElementById("verify-success").style.display = "block";
+
+      setTimeout(() => { window.location.href = "/"; }, 2000);
+    } catch (err) {
+      document.getElementById("verify-loading").style.display = "none";
+      document.getElementById("verify-error").style.display = "block";
+      document.getElementById("verify-error-msg").textContent = err.message;
+    }
+  })();
+</script>
+</body>
+</html>

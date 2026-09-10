@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — Hubator</title>
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="description" content="Sign in to your Hubator account.">
+<meta name="theme-color" content="#FAF7F0">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/favicon.ico">
+<meta name="robots" content="noindex,nofollow">
+<meta property="og:title" content="Sign in — Hubator">
+<meta property="og:description" content="Sign in to your Hubator account.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hubator">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<main>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h2 style="margin-bottom:6px;">Welcome back</h2>
+      <p style="margin-bottom:26px;color:#6b7280;">Sign in to check out faster and track your orders.</p>
+
+      <form id="login-form" novalidate>
+        <div class="form-field">
+          <label for="login-email">Email</label>
+          <input id="login-email" name="email" type="email" required autocomplete="email" placeholder="you@email.com">
+        </div>
+        <div class="form-field">
+          <label for="login-password" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>Password</span>
+            <a href="/forgot-password" style="font-size:0.8rem;font-weight:400;color:#f59e0b;">Forgot password?</a>
+          </label>
+          <input id="login-password" name="password" type="password" required autocomplete="current-password" placeholder="••••••••">
+        </div>
+
+        <p id="login-form-error" role="alert" style="display:none;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:0.5rem 0.75rem;font-size:0.85rem;margin-bottom:0.75rem;"></p>
+
+        <button type="submit" id="login-btn" class="btn btn-primary btn-block">Sign in</button>
+      </form>
+
+      <p class="auth-switch" style="margin-top:20px;text-align:center;">
+        Don't have an account? <a href="/signup">Create one</a>
+      </p>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  // Already signed in → go home
+  if (isSignedIn()) window.location.href = "/";
+
+  document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearAuthError("login-form");
+    const btn = document.getElementById("login-btn");
+    btn.disabled = true;
+    btn.textContent = "Signing in…";
+    try {
+      await signIn(
+        document.getElementById("login-email").value.trim(),
+        document.getElementById("login-password").value
+      );
+      const next = safeNextPath(new URLSearchParams(location.search).get("next"));
+      window.location.href = next;
+    } catch (err) {
+      const error = document.getElementById("login-form-error");
+      error.textContent = err.message;
+      if (err.message.toLowerCase().includes("verify")) {
+        error.appendChild(document.createTextNode(" "));
+        const resend = document.createElement("a");
+        resend.href = "/forgot-password";
+        resend.textContent = "Resend link?";
+        error.appendChild(resend);
+      }
+      error.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "Sign in";
+    }
+  });
+</script>
+</body>
+</html>

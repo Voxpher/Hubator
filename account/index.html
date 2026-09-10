@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My account — Hubator</title>
+<meta name="description" content="Manage your Hubator profile, orders, addresses, and password.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main id="main-content">
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow">Your Hubator account</span>
+      <h1>Welcome back<span id="account-heading-name"></span></h1>
+      <p>Manage your details, delivery addresses, and orders securely.</p>
+    </div>
+  </section>
+
+  <div class="wrap account-layout">
+    <nav class="account-sidebar" aria-label="Account navigation">
+      <a href="#profile" class="active" aria-current="page">Profile</a>
+      <a href="#orders">Orders</a>
+      <a href="#addresses">Saved addresses</a>
+      <a href="#password">Password</a>
+      <a href="/cart">Cart</a>
+      <button type="button" id="account-signout" class="btn btn-outline btn-block">Sign out</button>
+    </nav>
+
+    <div class="account-content">
+      <div id="account-loading" class="account-card" aria-live="polite"><p class="account-loading-text">Loading your account…</p></div>
+      <div id="account-error" class="account-card account-error" role="alert" hidden>
+        <h2>We couldn’t load your account</h2>
+        <p id="account-error-text">Please sign in again.</p>
+        <a id="account-error-link" class="btn btn-primary" href="/login">Sign in</a>
+      </div>
+
+      <div id="account-content" hidden>
+        <section id="profile" class="account-card" aria-labelledby="profile-heading">
+          <div class="account-section-heading"><div><span class="eyebrow">Account details</span><h2 id="profile-heading">Profile</h2></div><span class="account-status">Signed in</span></div>
+          <p>Update the name and phone number used for your orders. Your email cannot be changed here.</p>
+          <form id="profile-form" class="account-form" novalidate>
+            <div class="form-row">
+              <div class="form-field"><label for="profile-name">Name</label><input id="profile-name" name="name" type="text" autocomplete="name" required maxlength="100"></div>
+              <div class="form-field"><label for="profile-phone">Phone <span class="field-hint">(optional)</span></label><input id="profile-phone" name="phone" type="tel" autocomplete="tel" maxlength="30"></div>
+            </div>
+            <div class="form-field"><label>Email</label><p id="account-email" class="account-readonly"></p></div>
+            <button class="btn btn-primary" type="submit">Save profile</button>
+            <p id="profile-message" class="form-message" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section id="orders" class="account-card" aria-labelledby="orders-heading">
+          <div class="account-section-heading"><div><span class="eyebrow">Your purchases</span><h2 id="orders-heading">Order history</h2></div></div>
+          <div id="orders-list" class="orders-list" aria-live="polite"></div>
+          <div id="orders-pagination" class="account-pagination" hidden><button type="button" id="orders-prev" class="btn btn-outline btn-sm">Previous</button><span id="orders-page" aria-live="polite"></span><button type="button" id="orders-next" class="btn btn-outline btn-sm">Next</button></div>
+          <div id="order-details" class="order-details" hidden></div>
+        </section>
+
+        <section id="addresses" class="account-card" aria-labelledby="addresses-heading">
+          <div class="account-section-heading"><div><span class="eyebrow">Faster checkout</span><h2 id="addresses-heading">Saved addresses</h2></div><button type="button" id="address-new" class="btn btn-outline btn-sm">Add address</button></div>
+          <p>Keep delivery details ready for your next order.</p>
+          <div id="account-addresses" class="address-grid" aria-live="polite"></div>
+          <form id="address-form" class="account-form address-form" hidden novalidate>
+            <h3 id="address-form-heading">Add address</h3>
+            <input type="hidden" id="address-id">
+            <div class="form-row"><div class="form-field"><label for="address-name">Label</label><input id="address-name" required maxlength="60" placeholder="Home"></div><div class="form-field"><label for="address-phone">Phone</label><input id="address-phone" type="tel" required maxlength="30"></div></div>
+            <div class="form-field"><label for="address-line1">Address line 1</label><input id="address-line1" required maxlength="160" autocomplete="street-address"></div>
+            <div class="form-field"><label for="address-line2">Address line 2 <span class="field-hint">(optional)</span></label><input id="address-line2" maxlength="160"></div>
+            <div class="form-row"><div class="form-field"><label for="address-city">City</label><input id="address-city" required maxlength="80" autocomplete="address-level2"></div><div class="form-field"><label for="address-state">State</label><input id="address-state" required maxlength="80" autocomplete="address-level1"></div></div>
+            <div class="form-row"><div class="form-field"><label for="address-postal">Postal code</label><input id="address-postal" required maxlength="20" autocomplete="postal-code"></div><div class="form-field"><label for="address-country">Country</label><input id="address-country" required maxlength="80" autocomplete="country-name" value="India"></div></div>
+            <button class="btn btn-primary" type="submit">Save address</button> <button class="btn btn-outline" type="button" id="address-cancel">Cancel</button>
+            <p id="address-message" class="form-message" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section id="password" class="account-card" aria-labelledby="password-heading">
+          <div class="account-section-heading"><div><span class="eyebrow">Keep it secure</span><h2 id="password-heading">Change password</h2></div></div>
+          <form id="password-form" class="account-form" novalidate>
+            <div class="form-field"><label for="current-password">Current password</label><input id="current-password" type="password" autocomplete="current-password" required></div>
+            <div class="form-row"><div class="form-field"><label for="new-password">New password</label><input id="new-password" type="password" autocomplete="new-password" minlength="8" required></div><div class="form-field"><label for="confirm-password">Confirm new password</label><input id="confirm-password" type="password" autocomplete="new-password" minlength="8" required></div></div>
+            <button class="btn btn-primary" type="submit">Update password</button>
+            <p id="password-message" class="form-message" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="account-card account-next-steps" aria-labelledby="account-next-heading"><span class="eyebrow">Ready when you are</span><h2 id="account-next-heading">Continue shopping</h2><p>Browse the latest collection or review the items already in your cart.</p><div class="account-actions"><a class="btn btn-primary" href="/shop">Shop products</a><a class="btn btn-outline" href="/cart">View cart</a></div></section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script><script src="/js/products.js"></script><script src="/js/cart.js"></script><script src="/js/auth.js"></script>
+<script>
+(function () {
+  "use strict";
+  var state = { customer: null, addresses: [], page: 1, totalPages: 1 };
+  var $ = function (id) { return document.getElementById(id); };
+  var value = function (id) { return $(id).value.trim(); };
+  var text = function (node, content) { node.textContent = content == null || content === "" ? "—" : String(content); };
+  var date = function (input) { var parsed = input ? new Date(input) : null; return parsed && !isNaN(parsed.getTime()) ? parsed.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—"; };
+  var money = function (amount, currency) { var number = Number(amount); return Number.isFinite(number) ? (currency || "INR") + " " + number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"; };
+  function payload(data, key) { return Array.isArray(data) ? data : data && Array.isArray(data[key]) ? data[key] : data && data.data && Array.isArray(data.data[key]) ? data.data[key] : []; }
+  function customerPayload(data) { return data && (data.customer || data.profile || data.data && (data.data.customer || data.data.profile) || data); }
+  function message(id, content, good) { var el = $(id); el.textContent = content || ""; el.className = "form-message " + (good ? "is-success" : "is-error"); }
+  function showError(error) { $("account-loading").hidden = true; $("account-content").hidden = true; $("account-error").hidden = false; $("account-error-text").textContent = error.message || "Please sign in again."; $("account-error-link").href = "/login?next=%2Faccount"; }
+  function renderCustomer(customer) {
+    state.customer = customer || {};
+    var name = String(state.customer.name || state.customer.email || "");
+    $("account-heading-name").textContent = name ? ", " + name : "";
+    $("profile-name").value = state.customer.name || "";
+    $("profile-phone").value = state.customer.phone || "";
+    text($("account-email"), state.customer.email);
+    updateHeaderAuth();
+  }
+  function renderAddresses() {
+    var target = $("account-addresses"); target.replaceChildren();
+    if (!state.addresses.length) { var empty = document.createElement("p"); empty.className = "account-message"; empty.textContent = "No saved addresses yet. Add one to speed up checkout."; target.appendChild(empty); return; }
+    state.addresses.forEach(function (address, index) {
+      var card = document.createElement("article"); card.className = "address-card" + (address.isDefault || address.default ? " is-default" : "");
+      var heading = document.createElement("h3"); heading.textContent = address.name || "Address " + (index + 1); card.appendChild(heading);
+      if (address.isDefault || address.default) { var badge = document.createElement("span"); badge.className = "address-default"; badge.textContent = "Default"; card.appendChild(badge); }
+      var details = document.createElement("p"); details.textContent = [address.line1, address.line2, address.city, address.state, address.postalCode || address.postal, address.country, address.phone].filter(Boolean).join(", "); card.appendChild(details);
+      var actions = document.createElement("div"); actions.className = "address-actions";
+      [["Edit", function () { openAddress(address); }], ["Set default", function () { setDefault(address); }], ["Delete", function () { deleteAddress(address); }]].forEach(function (item) { var button = document.createElement("button"); button.type = "button"; button.className = "btn btn-outline btn-sm"; button.textContent = item[0]; button.disabled = item[0] === "Set default" && (address.isDefault || address.default); button.addEventListener("click", item[1]); actions.appendChild(button); });
+      card.appendChild(actions); target.appendChild(card);
+    });
+  }
+  function addressBody() { return { name: value("address-name"), phone: value("address-phone"), line1: value("address-line1"), line2: value("address-line2"), city: value("address-city"), state: value("address-state"), postalCode: value("address-postal"), country: value("address-country") }; }
+  function openAddress(address) {
+    $("address-form").hidden = false; $("address-form-heading").textContent = address ? "Edit address" : "Add address"; $("address-id").value = address ? (address.id || address._id || "") : "";
+    ["name", "phone", "line1", "line2", "city", "state", "country"].forEach(function (key) { $("address-" + key).value = address && address[key] || ""; }); $("address-postal").value = address && (address.postalCode || address.postal) || ""; $("address-name").focus();
+  }
+  async function loadAddresses() { var data = await authRequest("/api/public/account/addresses", "GET"); state.addresses = payload(data, "addresses"); renderAddresses(); }
+  async function setDefault(address) { try { await authRequest("/api/public/account/addresses/" + encodeURIComponent(address.id || address._id), "POST", {}); await loadAddresses(); } catch (error) { message("address-message", error.message); } }
+  async function deleteAddress(address) { if (!window.confirm("Delete this saved address?")) return; try { await authRequest("/api/public/account/addresses/" + encodeURIComponent(address.id || address._id), "DELETE"); await loadAddresses(); } catch (error) { message("address-message", error.message); } }
+  function renderOrders(data) {
+    var orders = payload(data, "orders"); var target = $("orders-list"); target.replaceChildren(); state.totalPages = Number(data.totalPages || data.pagination && data.pagination.totalPages || data.data && data.data.totalPages || 1) || 1; state.page = Number(data.page || data.pagination && data.pagination.page || state.page) || 1;
+    if (!orders.length) { var empty = document.createElement("p"); empty.className = "account-message"; empty.textContent = "You have not placed any orders yet."; target.appendChild(empty); $("orders-pagination").hidden = true; return; }
+    orders.forEach(function (order) { var item = document.createElement("article"); item.className = "order-row"; var title = document.createElement("h3"); title.textContent = "Order " + (order.orderNumber || order.id || order._id || ""); item.appendChild(title); var meta = document.createElement("p"); meta.textContent = [date(order.createdAt || order.created_at), order.status, money(order.total || order.amount, order.currency)].filter(Boolean).join(" · "); item.appendChild(meta); var button = document.createElement("button"); button.type = "button"; button.className = "btn btn-outline btn-sm"; button.textContent = "View details"; button.addEventListener("click", function () { showOrder(order); }); item.appendChild(button); target.appendChild(item); });
+    $("orders-pagination").hidden = state.totalPages <= 1; $("orders-page").textContent = "Page " + state.page + " of " + state.totalPages; $("orders-prev").disabled = state.page <= 1; $("orders-next").disabled = state.page >= state.totalPages;
+  }
+  function renderOrderDetails(order) { var target = $("order-details"); target.replaceChildren(); target.hidden = false; var heading = document.createElement("h3"); heading.textContent = "Order " + (order.orderNumber || order.id || order._id || "details"); target.appendChild(heading); var summary = document.createElement("p"); summary.textContent = [date(order.createdAt || order.created_at), order.status, money(order.total || order.amount, order.currency)].filter(Boolean).join(" · "); target.appendChild(summary); var list = document.createElement("ul"); (order.items || order.lineItems || []).forEach(function (line) { var li = document.createElement("li"); li.textContent = (line.name || line.title || line.productName || "Item") + " × " + (line.quantity || line.qty || 1); list.appendChild(li); }); target.appendChild(list); }
+  async function showOrder(order) { var id = order.id || order._id; if (!id) { renderOrderDetails(order); return; } var target = $("order-details"); target.hidden = false; target.textContent = "Loading order details…"; try { var data = await authRequest("/api/public/account/orders/" + encodeURIComponent(id), "GET"); renderOrderDetails(data.order || data.data || data); } catch (error) { target.textContent = error.message; } }
+  async function loadOrders() { renderOrders(await authRequest("/api/public/account/orders?page=" + state.page + "&limit=20", "GET")); }
+  $("profile-form").addEventListener("submit", async function (event) { event.preventDefault(); if (!event.target.reportValidity()) return; try { var data = await authRequest("/api/public/account/profile", "PATCH", { name: value("profile-name"), phone: value("profile-phone") }); renderCustomer(customerPayload(data)); message("profile-message", "Profile saved.", true); } catch (error) { message("profile-message", error.message); } });
+  $("address-new").addEventListener("click", function () { openAddress(null); }); $("address-cancel").addEventListener("click", function () { $("address-form").hidden = true; });
+  $("address-form").addEventListener("submit", async function (event) { event.preventDefault(); if (!event.target.reportValidity()) return; var id = value("address-id"); try { await authRequest("/api/public/account/addresses" + (id ? "/" + encodeURIComponent(id) : ""), id ? "PATCH" : "POST", addressBody()); $("address-form").hidden = true; await loadAddresses(); } catch (error) { message("address-message", error.message); } });
+  $("password-form").addEventListener("submit", async function (event) { event.preventDefault(); if (!event.target.reportValidity()) return; if (value("new-password") !== value("confirm-password")) { message("password-message", "New passwords do not match."); return; } try { await authRequest("/api/public/account/password", "POST", { currentPassword: value("current-password"), newPassword: value("new-password") }); event.target.reset(); message("password-message", "Password updated.", true); } catch (error) { message("password-message", error.message); } });
+  $("orders-prev").addEventListener("click", function () { if (state.page > 1) { state.page--; loadOrders().catch(showError); } }); $("orders-next").addEventListener("click", function () { if (state.page < state.totalPages) { state.page++; loadOrders().catch(showError); } });
+  $("account-signout").addEventListener("click", function () { if (typeof signOut === "function") signOut(); });
+  document.addEventListener("DOMContentLoaded", async function () { if (!isSignedIn()) { window.location.replace("/login?next=%2Faccount"); return; } try { renderCustomer(customerPayload(await authGet("/api/public/account/profile"))); await Promise.all([loadAddresses(), loadOrders()]); $("account-loading").hidden = true; $("account-content").hidden = false; } catch (error) { showError(error); } });
+}());
+</script>
+</body>
+</html>

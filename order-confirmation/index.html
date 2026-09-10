@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Confirmed — Hubator</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#FAF7F0">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+<main id="main-content">
+  <div class="wrap" style="max-width:640px;padding-top:48px;padding-bottom:80px;">
+
+    <div style="text-align:center;margin-bottom:36px;">
+      <div style="margin-bottom:16px;color:var(--sage,#7C9473)"><svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <h1 style="font-size:2rem;margin-bottom:8px;">Order confirmed!</h1>
+      <p id="conf-order-number" style="font-family:var(--font-mono);font-size:0.9rem;color:var(--ink-soft);"></p>
+      <p style="color:var(--ink-soft);max-width:42ch;margin:8px auto 0;">A confirmation email has been sent to <strong id="conf-email"></strong></p>
+    </div>
+
+    <!-- Items -->
+    <div style="border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:24px;">
+      <div style="background:var(--paper-dim);padding:14px 18px;border-bottom:1px solid var(--line);">
+        <h2 style="font-size:1rem;margin:0;">Items ordered</h2>
+      </div>
+      <div id="conf-items" style="padding:0 18px;"></div>
+    </div>
+
+    <!-- Totals -->
+    <div style="border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:24px;">
+      <div id="conf-totals"></div>
+    </div>
+
+    <!-- Payment + Shipping -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;">
+      <div style="border:1px solid var(--line);border-radius:8px;padding:16px;">
+        <h3 style="font-size:0.82rem;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;color:var(--ink-soft);">Payment</h3>
+        <p id="conf-payment" style="margin:0;font-size:0.9rem;"></p>
+      </div>
+      <div style="border:1px solid var(--line);border-radius:8px;padding:16px;">
+        <h3 style="font-size:0.82rem;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;color:var(--ink-soft);">Shipping to</h3>
+        <p id="conf-address" style="margin:0;font-size:0.9rem;line-height:1.5;"></p>
+      </div>
+    </div>
+
+    <div style="text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;">
+      <a href="/shop" class="btn btn-primary" style="min-width:220px;">Continue shopping</a>
+      <a href="/" class="btn btn-outline" style="min-width:220px;">Back to home</a>
+    </div>
+
+  </div>
+</main>
+<div id="site-footer"></div>
+<script src="/js/maintenance.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+(function () {
+  // Read order data stored by checkout.js before redirect
+  var raw = sessionStorage.getItem("hubator_last_order");
+  if (!raw) {
+    // No data — redirect to home rather than show blank page
+    window.location.replace("/");
+    return;
+  }
+  sessionStorage.removeItem("hubator_last_order");
+  var d;
+  try { d = JSON.parse(raw); } catch { window.location.replace("/"); return; }
+
+  // Order number + email
+  var onEl = document.getElementById("conf-order-number");
+  if (onEl) onEl.textContent = "Order " + d.orderNumber;
+  var emEl = document.getElementById("conf-email");
+  if (emEl) emEl.textContent = d.email || "";
+
+  // Items
+  var itemsEl = document.getElementById("conf-items");
+  if (itemsEl && d.items && d.items.length) {
+    d.items.forEach(function(item) {
+      var row = document.createElement("div");
+      row.style.cssText = "display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:0.9rem;";
+      var left = document.createElement("span");
+      left.textContent = item.name + (item.qty > 1 ? " x" + item.qty : "");
+      var right = document.createElement("span");
+      right.style.fontFamily = "var(--font-mono)";
+      right.textContent = "Rs." + (item.price * item.qty).toFixed(0);
+      row.appendChild(left); row.appendChild(right); itemsEl.appendChild(row);
+    });
+    // Remove last border
+    var rows = itemsEl.querySelectorAll("div");
+    if (rows.length) rows[rows.length - 1].style.borderBottom = "none";
+  }
+
+  // Totals
+  var totalsEl = document.getElementById("conf-totals");
+  if (totalsEl) {
+    function totRow(label, value, bold) {
+      var r = document.createElement("div");
+      r.style.cssText = "display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.9rem;" + (bold ? "font-weight:700;font-size:1rem;border-top:1px solid var(--line);padding-top:10px;margin-top:10px;" : "");
+      var l = document.createElement("span"); l.textContent = label;
+      var v = document.createElement("span"); v.style.fontFamily = "var(--font-mono)"; v.textContent = value;
+      r.appendChild(l); r.appendChild(v); totalsEl.appendChild(r);
+    }
+    totRow("Subtotal", "Rs." + Number(d.subtotal || 0).toFixed(0));
+    if (d.discountAmount > 0) totRow("Discount", "-Rs." + Number(d.discountAmount).toFixed(0));
+    totRow("Shipping", d.shippingAmount === 0 ? "Free" : "Rs." + Number(d.shippingAmount).toFixed(0));
+    totRow("Total", "Rs." + Number(d.total).toFixed(0), true);
+  }
+
+  // Payment
+  var payEl = document.getElementById("conf-payment");
+  if (payEl) {
+    if (d.paymentMethod === "razorpay") {
+      payEl.textContent = "Paid online";
+      if (d.paymentId) {
+        var small = document.createElement("div");
+        small.style.cssText = "font-size:0.75rem;color:var(--ink-soft);font-family:var(--font-mono);margin-top:4px;word-break:break-all;";
+        small.textContent = "ID: " + d.paymentId;
+        payEl.appendChild(small);
+      }
+    } else {
+      payEl.textContent = "Cash on Delivery";
+      var note = document.createElement("div");
+      note.style.cssText = "font-size:0.78rem;color:var(--ink-soft);margin-top:4px;";
+      note.textContent = "Pay when your order arrives";
+      payEl.appendChild(note);
+    }
+  }
+
+  // Address
+  var addrEl = document.getElementById("conf-address");
+  if (addrEl && d.shippingAddress) {
+    var a = d.shippingAddress;
+    addrEl.textContent = [a.line1, a.line2, a.city, a.state, a.postalCode, a.country].filter(Boolean).join(", ");
+  }
+})();
+
+  // Update header auth to show customer name if auto-signed-in
+  if (typeof updateHeaderAuth === "function") {
+    updateHeaderAuth();
+  }
+</script>
+</body>
+</html>

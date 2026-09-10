@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>We'll be back soon — Hubator</title>
+<meta name="description" content="Hubator is currently undergoing scheduled maintenance. We'll be back shortly.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#FAF7F0">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap');
+
+  :root {
+    --paper: #FAF7F0;
+    --ink: #16231F;
+    --ink-soft: #4A554F;
+    --gold: #C99A2E;
+    --gold-deep: #9C7620;
+    --line: #D8D2C4;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Work Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 24px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  main {
+    width: 100%;
+    max-width: 640px;
+    margin-block: auto;
+    padding-block: 28px;
+  }
+
+  a {
+    color: var(--gold-deep);
+    text-underline-offset: 4px;
+  }
+
+  a:focus-visible {
+    outline: 2px solid var(--gold-deep);
+    outline-offset: 4px;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-bottom: 32px;
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .maintenance-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 24px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    color: var(--gold-deep);
+  }
+
+  .maintenance-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    max-width: 100%;
+    margin-bottom: 28px;
+    padding: 9px 18px;
+    border-radius: 100px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .badge svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--gold);
+  }
+
+  h1 {
+    margin: 0 0 16px;
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 7vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    max-width: 42ch;
+    margin: 0 auto 32px;
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+  }
+
+  .divider {
+    width: 48px;
+    height: 2px;
+    margin: 0 auto 28px;
+    border-radius: 2px;
+    background: var(--gold);
+  }
+
+  .contact {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+
+  .contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 20px;
+  }
+
+  .contact-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    max-width: 100%;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .contact-links a span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .contact-links svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .footer {
+    padding-top: 24px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+
+  .footer p {
+    margin: 0;
+  }
+
+  @media (max-width: 480px) {
+    body {
+      padding-inline: 16px;
+    }
+
+    main {
+      padding-block: 20px;
+    }
+
+    .logo {
+      margin-bottom: 24px;
+    }
+
+    .contact-links {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<main id="main-content">
+  <a href="/" class="logo" aria-label="Hubator home">Hubator</a>
+
+  <div class="maintenance-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+      <path d="M14 6a6 6 0 0 0-7 7l-4 4a3 3 0 0 0 4 4l4-4a6 6 0 0 0 7-7l-4 3-3-3 3-4Z"></path>
+    </svg>
+  </div>
+
+  <div class="badge">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M12 6v6l4 2"></path>
+    </svg>
+    <span>Scheduled maintenance</span>
+  </div>
+
+  <h1>We'll be back<br>very soon.</h1>
+
+  <p class="subtitle">
+    We're making some improvements to give you a better experience.
+    This won't take long — check back in a little while.
+  </p>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <p class="contact">Need help while we're away? Get in touch:</p>
+
+  <div class="contact-links">
+    <a href="mailto:support@hubator.com">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M3 5h18v14H3Z"></path>
+        <path d="m3 6 9 7 9-7"></path>
+      </svg>
+      <span>support@hubator.com</span>
+    </a>
+    <a href="https://wa.me/919242036989" aria-label="WhatsApp us at +91 9242036989">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M5 3h4l2 5-3 2a16 16 0 0 0 6 6l2-3 5 2v4a2 2 0 0 1-2 2C10 21 3 14 3 5a2 2 0 0 1 2-2Z"></path>
+      </svg>
+      <span>+91 9242036989</span>
+    </a>
+  </div>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 Hubator</p>
+</footer>
+
+</body>
+</html>

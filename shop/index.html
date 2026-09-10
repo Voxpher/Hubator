@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop — Hubator</title>
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="description" content="Shop curated apparel and fashion from Hubator — unique clothing and accessories">
+<meta name="theme-color" content="#FAF7F0">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/favicon.ico">
+<meta property="og:title" content="Shop — Hubator">
+<meta property="og:description" content="Shop curated apparel and fashion from Hubator — unique clothing and accessories">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hubator">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<main>
+  <div class="wrap breadcrumb"><a href="/">Home</a> / Shop</div>
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow">All products</span>
+      <h1 style="font-size:2.4rem;">Shop the collection</h1>
+      <p>Curated apparel and accessories from independent designers.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:36px;">
+    <div class="wrap">
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-chip active" data-cat="All" aria-pressed="true">All</button>
+        <button class="filter-chip" data-cat="Home" aria-pressed="false">Home</button>
+        <button class="filter-chip" data-cat="Kitchen" aria-pressed="false">Kitchen</button>
+        <button class="filter-chip" data-cat="Apparel" aria-pressed="false">Apparel</button>
+        <button class="filter-chip" data-cat="Accessories" aria-pressed="false">Accessories</button>
+        <button class="filter-chip" data-cat="Bags" aria-pressed="false">Bags</button>
+        <button class="filter-chip" data-cat="Footwear" aria-pressed="false">Footwear</button>
+      </div>
+      <div class="product-grid" id="shop-grid"></div>
+    </div>
+  </section>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script><script src="/js/auth.js"></script>
+<script>
+  function cardHTML(p){
+    const available = productIsPurchasable(p);
+    return `
+      <div class="product-card" data-cat="${escapeHtml(p.category)}">
+        <a href="/product?id=${encodeURIComponent(p.id)}" class="product-media">
+          ${p.badge ? `<span class="product-badge ticket ${p.badge==='Sale'?'on-sale':''}">${escapeHtml(p.badge)}</span>` : ""}
+          <img src="${escapeHtml(safeProductImageUrl(p.img))}" alt="${escapeHtml(p.name)}">
+        </a>
+        <div class="product-body">
+          <span class="product-cat">${escapeHtml(p.category)}</span>
+          <h4><a href="/product?id=${encodeURIComponent(p.id)}">${escapeHtml(p.name)}</a></h4>
+          <div class="product-foot">
+            <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
+            <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
+          </div>
+        </div>
+      </div>`;
+  }
+  const grid = document.getElementById("shop-grid");
+  const filterBar = document.getElementById("filter-bar");
+  function render(cat){
+    const list = cat === "All" ? PRODUCTS : PRODUCTS.filter(p => p.category === cat);
+    grid.innerHTML = list.map(cardHTML).join("") || `<p>There are no products in this category yet.</p>`;
+  }
+  function selectCategory(cat) {
+    document.querySelectorAll(".filter-chip").forEach(c => {
+      const active = c.dataset.cat === cat;
+      c.classList.toggle("active", active);
+      c.setAttribute("aria-pressed", String(active));
+    });
+    render(cat);
+  }
+  filterBar.addEventListener("click", (event) => {
+    const chip = event.target.closest(".filter-chip");
+    if (chip) selectCategory(chip.dataset.cat);
+  });
+  const params = new URLSearchParams(location.search);
+  const requestedCat = (params.get("cat") || "").trim();
+  let initialCat = requestedCat || "All";
+  function syncCategories() {
+    const existing = new Set(Array.from(document.querySelectorAll(".filter-chip")).map(c => c.dataset.cat));
+    const categories = Array.from(new Set(PRODUCTS.map(p => p.category).filter(Boolean))).sort();
+    categories.forEach(category => {
+      if (existing.has(category)) return;
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "filter-chip";
+      chip.dataset.cat = category;
+      chip.setAttribute("aria-pressed", "false");
+      chip.textContent = category;
+      filterBar.appendChild(chip);
+    });
+    if (!categories.includes(initialCat) && initialCat !== "All") initialCat = "All";
+    selectCategory(initialCat);
+  }
+  loadProducts().then(syncCategories).catch(err => {
+    console.error("[Hubator] shop:", err);
+    grid.innerHTML = "<p>We couldn't load the collection. Please refresh and try again.</p>";
+  });
+  window.addEventListener("hubator:products-loaded", () => {
+    syncCategories();
+    const active = document.querySelector(".filter-chip.active");
+    render(active ? active.dataset.cat : "All");
+  });
+  window.addEventListener("hubator:cart-changed", updateCartBadge);
+</script>
+</body>
+</html>
