@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My account — Hubator</title>
+<meta name="description" content="Manage your Hubator customer account and saved addresses.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main id="main-content">
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow">Your Hubator account</span>
+      <h1>Account</h1>
+      <p>Review your account details and saved delivery addresses.</p>
+    </div>
+  </section>
+
+  <div class="wrap account-layout">
+    <nav class="account-sidebar" aria-label="Account navigation">
+      <a href="#profile" class="active" aria-current="page">Profile</a>
+      <a href="#addresses">Saved addresses</a>
+      <a href="cart.html">Cart</a>
+      <button type="button" id="account-signout" class="btn btn-outline btn-block" style="margin-top:10px;">Sign out</button>
+    </nav>
+
+    <div class="account-content">
+      <div id="account-loading" class="account-card" aria-live="polite">
+        <p style="margin:0;">Loading your account…</p>
+      </div>
+
+      <div id="account-error" class="account-card account-error" role="alert" hidden>
+        <h2>We couldn’t load your account</h2>
+        <p id="account-error-text">Please sign in again.</p>
+        <a id="account-error-link" class="btn btn-primary" href="login.html">Sign in</a>
+      </div>
+
+      <div id="account-content" hidden>
+        <section id="profile" class="account-card" aria-labelledby="profile-heading">
+          <h2 id="profile-heading">Profile details</h2>
+          <p>Your account information is kept private and is used to process your orders.</p>
+          <dl class="account-meta">
+            <div><dt>Name</dt><dd id="account-name"></dd></div>
+            <div><dt>Email</dt><dd id="account-email"></dd></div>
+            <div><dt>Phone</dt><dd id="account-phone"></dd></div>
+            <div><dt>Member since</dt><dd id="account-member-since"></dd></div>
+          </dl>
+        </section>
+
+        <section id="addresses" class="account-card" aria-labelledby="addresses-heading">
+          <h2 id="addresses-heading">Saved addresses</h2>
+          <p>These addresses are available for faster checkout. Address editing is not currently supported by the store API.</p>
+          <div id="account-addresses" class="address-grid"></div>
+        </section>
+
+        <div class="account-message">
+          Order history, wishlist, password changes, and address editing will appear here when supported by the customer API. They are not shown until secure customer endpoints are available.
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="js/maintenance.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  function text(value, fallback) {
+    return value == null || value === "" ? fallback : String(value);
+  }
+
+  function renderAddresses(addresses) {
+    var target = document.getElementById("account-addresses");
+    if (!target) return;
+    target.replaceChildren();
+    if (!Array.isArray(addresses) || !addresses.length) {
+      var empty = document.createElement("p");
+      empty.className = "account-message";
+      empty.textContent = "You do not have any saved addresses yet. Your next checkout address will be saved automatically.";
+      target.appendChild(empty);
+      return;
+    }
+
+    addresses.forEach(function (address, index) {
+      var card = document.createElement("article");
+      card.className = "address-card";
+      var heading = document.createElement("h3");
+      heading.textContent = address.name || "Delivery address " + (index + 1);
+      var details = document.createElement("p");
+      details.textContent = [
+        address.line1, address.line2, address.city, address.state,
+        address.postalCode, address.country, address.phone
+      ].filter(Boolean).join(", ");
+      card.appendChild(heading);
+      card.appendChild(details);
+      target.appendChild(card);
+    });
+  }
+
+  function renderCustomer(customer) {
+    document.getElementById("account-name").textContent = text(customer.name, "—");
+    document.getElementById("account-email").textContent = text(customer.email, "—");
+    document.getElementById("account-phone").textContent = text(customer.phone, "Not provided");
+    var date = customer.memberSince ? new Date(customer.memberSince) : null;
+    document.getElementById("account-member-since").textContent =
+      date && !isNaN(date.getTime()) ? date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) : "—";
+    renderAddresses(customer.addresses);
+  }
+
+  function showError(error) {
+    document.getElementById("account-loading").hidden = true;
+    document.getElementById("account-content").hidden = true;
+    document.getElementById("account-error").hidden = false;
+    document.getElementById("account-error-text").textContent = error.message || "Please sign in again.";
+    var next = encodeURIComponent("account.html");
+    document.getElementById("account-error-link").href = "login.html?next=" + next;
+  }
+
+  document.getElementById("account-signout").addEventListener("click", function () {
+    if (typeof signOut === "function") signOut();
+  });
+
+  document.addEventListener("DOMContentLoaded", async function () {
+    if (!isSignedIn()) {
+      window.location.replace("login.html?next=" + encodeURIComponent("account.html"));
+      return;
+    }
+    try {
+      var customer = await fetchCurrentCustomer();
+      renderCustomer(customer);
+      document.getElementById("account-loading").hidden = true;
+      document.getElementById("account-content").hidden = false;
+    } catch (error) {
+      showError(error);
+    }
+  });
+})();
+</script>
+</body>
+</html>

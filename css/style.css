@@ -395,6 +395,25 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:var(--line);}
 .social-row{display:flex;flex-direction:column;gap:10px;}
 
+/* ── Customer account ───────────────────────────────────── */
+.account-layout{display:grid;grid-template-columns:230px 1fr;gap:36px;padding:34px 0 80px;align-items:start;}
+.account-sidebar{border:1px solid var(--line);border-radius:8px;background:var(--white);padding:10px;}
+.account-sidebar a{display:block;padding:12px 13px;border-radius:var(--radius);font-size:.88rem;font-weight:600;}
+.account-sidebar a:hover,.account-sidebar a.active{background:var(--paper-dim);color:var(--gold-deep);}
+.account-content{min-width:0;}
+.account-card{border:1px solid var(--line);border-radius:8px;background:var(--white);padding:24px;margin-bottom:20px;}
+.account-card h2{font-size:1.35rem;margin-bottom:5px;}
+.account-card h3{font-size:1rem;margin:0 0 14px;}
+.account-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px;}
+.account-meta div{border-top:1px solid var(--line);padding-top:10px;}
+.account-meta dt{font-family:var(--font-mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);}
+.account-meta dd{margin:4px 0 0;font-size:.92rem;overflow-wrap:anywhere;}
+.address-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+.address-card{border:1px solid var(--line);border-radius:6px;padding:16px;background:var(--paper);}
+.address-card p{margin:0;font-size:.88rem;line-height:1.55;}
+.account-message{padding:14px 16px;border:1px dashed var(--line);border-radius:6px;background:var(--paper-dim);font-size:.88rem;color:var(--ink-soft);}
+.account-error{border-color:#d8a49a;background:#fff6f3;color:var(--rust);}
+
 /* ── About / Contact ─────────────────────────────────────── */
 .about-hero{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding:44px 0 64px;}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:36px 0;border-top:1px solid var(--line);}

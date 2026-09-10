@@ -123,6 +123,21 @@ textarea:focus-visible {
   min-width: 0;
 }
 
+.header-account-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--touch-target);
+  color: var(--gold-deep);
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.header-account-link:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
 .header-user-name {
   display: block;
   max-width: 100px;
@@ -616,7 +631,8 @@ body.nav-drawer-open {
   .checkout-grid,
   .contact-grid,
   .about-hero,
-  .newsletter {
+  .newsletter,
+  .account-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -650,6 +666,23 @@ body.nav-drawer-open {
   .cart-line > .ticket {
     grid-column: auto;
   }
+
+  .account-sidebar {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 6px;
+  }
+
+  .account-sidebar a,
+  .account-sidebar button {
+    flex: 0 0 auto;
+  }
+
+  .account-sidebar button {
+    width: auto;
+    margin: 0 !important;
+  }
 }
 
 /* Phones */
@@ -672,6 +705,16 @@ body.nav-drawer-open {
   .header-actions .btn-sm {
     display: inline-flex;
     padding-inline: 10px;
+  }
+
+  .header-account-link {
+    font-size: 0;
+    gap: 0;
+  }
+
+  .header-account-link .ui-icon {
+    width: 22px;
+    height: 22px;
   }
 
   .hero {
@@ -701,6 +744,15 @@ body.nav-drawer-open {
 
   .cat-card {
     padding: 18px 14px;
+  }
+
+  .account-card {
+    padding: 18px;
+  }
+
+  .account-meta,
+  .address-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .product-grid {

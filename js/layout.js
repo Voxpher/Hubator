@@ -273,6 +273,12 @@
       class: "header-user-name",
       "aria-live": "polite",
     });
+    const accountLink = labeledLink(
+      "account.html",
+      "Account",
+      "user",
+      "header-account-link"
+    );
     const signOutButton = append(
       make("button", {
         type: "button",
@@ -288,6 +294,7 @@
     const userMenu = append(
       make("div", { class: "header-user" }),
       userName,
+      accountLink,
       signOutButton
     );
     userMenu.style.display = "none";
@@ -397,6 +404,11 @@
             text: "Signed in as " + customer.name,
           }));
         }
+
+        append(
+          account,
+          labeledLink("account.html", "Account", "user", "btn btn-primary btn-block")
+        );
 
         const button = append(
           make("button", {

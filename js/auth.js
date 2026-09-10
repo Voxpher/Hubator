@@ -98,6 +98,51 @@ async function authPost(path, body) {
   return data;
 }
 
+async function authGet(path) {
+  const url = hubatorApiUrl(path);
+  if (!url) throw new Error("Store API URL is not configured.");
+
+  let res;
+  try {
+    res = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: "Bearer " + getToken() },
+    });
+  } catch {
+    throw new Error("Network error — check your connection and try again.");
+  }
+
+  const text = await res.text();
+  let data = {};
+  try { data = JSON.parse(text); } catch { /* non-JSON */ }
+
+  if (res.status === 401 || res.status === 404) {
+    clearSession();
+    window.dispatchEvent(new CustomEvent("hubator:auth-changed"));
+    throw new Error(res.status === 404
+      ? "This account is no longer available. Please sign in again."
+      : "Your session has expired. Please sign in again.");
+  }
+  if (!res.ok) throw new Error(data.error || "Unable to load your account.");
+  return data;
+}
+
+async function fetchCurrentCustomer() {
+  if (!isSignedIn()) throw new Error("Please sign in to view your account.");
+  const data = await authGet("/api/public/auth/me");
+  if (!data.customer || !data.customer.email) {
+    throw new Error("Your account could not be loaded. Please sign in again.");
+  }
+  try {
+    sessionStorage.setItem(CUSTOMER_KEY, JSON.stringify({
+      id: data.customer.id,
+      name: data.customer.name,
+      email: data.customer.email,
+    }));
+  } catch { /* The API response is still usable for this page. */ }
+  return data.customer;
+}
+
 // ── Public auth functions ─────────────────────────────────────────────────────
 
 async function signUp(name, email, password) {
