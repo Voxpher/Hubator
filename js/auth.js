@@ -99,14 +99,22 @@ async function authPost(path, body) {
 }
 
 async function authGet(path) {
+  return authRequest(path, "GET");
+}
+
+async function authRequest(path, method, body) {
   const url = hubatorApiUrl(path);
   if (!url) throw new Error("Store API URL is not configured.");
 
   let res;
   try {
     res = await fetch(url, {
-      method: "GET",
-      headers: { Authorization: "Bearer " + getToken() },
+      method: method || "GET",
+      headers: Object.assign(
+        { Authorization: "Bearer " + getToken() },
+        body === undefined ? {} : { "Content-Type": "application/json" }
+      ),
+      body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
     throw new Error("Network error — check your connection and try again.");
@@ -123,7 +131,7 @@ async function authGet(path) {
       ? "This account is no longer available. Please sign in again."
       : "Your session has expired. Please sign in again.");
   }
-  if (!res.ok) throw new Error(data.error || "Unable to load your account.");
+  if (!res.ok) throw new Error(data.error || "Unable to complete that account request.");
   return data;
 }
 

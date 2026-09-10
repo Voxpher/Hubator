@@ -272,7 +272,7 @@
 
     const accountLink = labeledLink(
       "account.html",
-      "Account",
+      "Sign in",
       "user",
       "header-account-link"
     );

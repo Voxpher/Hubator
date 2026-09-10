@@ -756,6 +756,16 @@ body.nav-drawer-open {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .order-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .order-row p,
+  .order-row .btn {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
   .product-grid {
     gap: 14px;
   }
