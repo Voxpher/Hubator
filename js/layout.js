@@ -145,6 +145,7 @@
     {
       heading: "Account",
       links: [
+        { href: "account.html", label: "My account", icon: "user" },
         { href: "login.html", label: "Sign in", icon: "user" },
         { href: "signup.html", label: "Create account", icon: "user" },
         { href: "cart.html", label: "Cart", icon: "bag" },
@@ -269,10 +270,6 @@
       "btn btn-outline btn-sm header-signin"
     );
 
-    const userName = make("span", {
-      class: "header-user-name",
-      "aria-live": "polite",
-    });
     const accountLink = labeledLink(
       "account.html",
       "Account",
@@ -293,7 +290,6 @@
 
     const userMenu = append(
       make("div", { class: "header-user" }),
-      userName,
       accountLink,
       signOutButton
     );
@@ -405,10 +401,12 @@
           }));
         }
 
-        append(
-          account,
-          labeledLink("account.html", "Account", "user", "btn btn-primary btn-block")
-        );
+        append(account, labeledLink(
+          "account.html",
+          customer && (customer.name || customer.email) || "Account",
+          "user",
+          "btn btn-primary btn-block mobile-account-link"
+        ));
 
         const button = append(
           make("button", {

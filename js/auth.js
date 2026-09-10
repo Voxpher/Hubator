@@ -194,12 +194,16 @@ function updateHeaderAuth() {
   const customer  = currentCustomer();
   const signInEl  = document.querySelector(".header-signin");
   const userEl    = document.querySelector(".header-user");
-  const nameEl    = document.querySelector(".header-user-name");
+  const accountEl = document.querySelector(".header-account-link");
 
   if (customer && isSignedIn()) {
     if (signInEl) signInEl.style.display = "none";
     if (userEl)   userEl.style.display   = "flex";
-    if (nameEl) nameEl.textContent     = String(customer.name || customer.email).split(" ")[0];
+    const displayName = String(customer.name || customer.email);
+    if (accountEl) {
+      accountEl.querySelector("span").textContent = displayName;
+      accountEl.setAttribute("aria-label", "Open account for " + displayName);
+    }
   } else {
     clearSession(); // wipe any expired token silently
     if (signInEl) signInEl.style.display = "";
