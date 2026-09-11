@@ -78,11 +78,26 @@
     } catch (err) {
       const error = document.getElementById("login-form-error");
       error.textContent = err.message;
-      if (err.message.toLowerCase().includes("verify")) {
+      if (err.code === "EMAIL_NOT_VERIFIED" || /verify your email/i.test(err.message)) {
         error.appendChild(document.createTextNode(" "));
-        const resend = document.createElement("a");
-        resend.href = "/forgot-password";
-        resend.textContent = "Resend link?";
+        const resend = document.createElement("button");
+        resend.type = "button";
+        resend.className = "link-button";
+        resend.textContent = "Resend verification email";
+        resend.addEventListener("click", async () => {
+          resend.disabled = true;
+          resend.textContent = "Sending…";
+          try {
+            await resendVerification(document.getElementById("login-email").value.trim());
+            error.replaceChildren(
+              document.createTextNode("If this account needs verification, a new link is on its way.")
+            );
+          } catch (resendError) {
+            error.replaceChildren(document.createTextNode(resendError.message));
+            resend.disabled = false;
+            resend.textContent = "Resend verification email";
+          }
+        });
         error.appendChild(resend);
       }
       error.style.display = "block";

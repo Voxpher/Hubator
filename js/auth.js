@@ -94,7 +94,11 @@ async function authPost(path, body) {
   let data = {};
   try { data = JSON.parse(text); } catch { /* non-JSON */ }
 
-  if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+  if (!res.ok) {
+    const error = new Error(data.error || "Something went wrong. Please try again.");
+    if (data.code) error.code = data.code;
+    throw error;
+  }
   return data;
 }
 
@@ -157,6 +161,10 @@ async function signUp(name, email, password) {
   const data = await authPost("/api/public/auth/signup", { name, email, password });
   // Signup doesn't log in — verification email sent first
   return data;
+}
+
+async function resendVerification(email) {
+  return authPost("/api/public/auth/send-verification", { email });
 }
 
 async function signIn(email, password) {
