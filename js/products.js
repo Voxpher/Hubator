@@ -59,7 +59,7 @@ function productForStorefront(product) {
     sortOrder: Number(product.sortOrder) || 0,
     // Derived: lowest variant stock, overall purchasability
     hasVariants: variants.length > 0,
-    lowestVariantStock: variants.length > 0 ? Math.min(...variants.map((v) => v.stock ?? product.stock || 0)) : null,
+    lowestVariantStock: variants.length > 0 ? Math.min(...variants.map(function(v) { return v.stock != null ? v.stock : (product.stock || 0); })) : null,
   };
 }
 
