@@ -20,9 +20,27 @@ function productForStorefront(product) {
   const images = Array.isArray(product.images)
     ? product.images.filter((image) => image && typeof image === "object")
     : [];
-  const primaryImage = images
-    .slice()
-    .sort((a, b) => (a.position || 0) - (b.position || 0))[0];
+  const sortedImages = images.slice().sort((a, b) => (a.position || 0) - (b.position || 0));
+  const primaryImage = sortedImages[0];
+  const allImageUrls = sortedImages.map((img) => img.url).filter((u) => typeof u === "string");
+
+  const variants = product.variants || [];
+  const variantMap = new Map();
+  variants.forEach((v) => {
+    const key = `${v.color || ""}-${v.size || ""}`.trim("-") || "base";
+    variantMap.set(key, {
+      color: v.color,
+      colorHex: v.colorHex,
+      size: v.size,
+      sku: v.sku,
+      priceOverride: v.priceOverride,
+      stock: v.stock,
+      lowStockThreshold: v.lowStockThreshold,
+      backorderAllowed: v.backorderAllowed,
+      qikinkSku: v.qikinkSku,
+    });
+  });
+
   return {
     id: String(product._id),
     name: String(product.title || "Untitled product"),
@@ -30,14 +48,18 @@ function productForStorefront(product) {
     price: Number.isFinite(Number(product.price)) ? Number(product.price) : 0,
     oldPrice: Number(product.compareAtPrice) > 0 ? Number(product.compareAtPrice) : null,
     img: typeof primaryImage?.url === "string" ? primaryImage.url : "",
+    gallery: allImageUrls.length > 0 ? allImageUrls : [],
     badge: Number(product.compareAtPrice) > 0 ? "Sale" : null,
     desc: String(product.description || product.shortDescription || ""),
-    variants: product.variants || [],
+    variants: variantMap,
     allowCOD: product.allowCOD !== false,
     allowPrepaid: product.allowPrepaid !== false,
     placements: product.placements || [],
     stock: product.stock == null ? null : Math.max(0, Number(product.stock) || 0),
     sortOrder: Number(product.sortOrder) || 0,
+    // Derived: lowest variant stock, overall purchasability
+    hasVariants: variants.length > 0,
+    lowestVariantStock: variants.length > 0 ? Math.min(...variants.map((v: any) => v.stock ?? product.stock || 0)) : null,
   };
 }
 

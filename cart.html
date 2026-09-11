@@ -89,12 +89,12 @@
       decBtn.setAttribute("type", "button");
       decBtn.setAttribute("aria-label", "Decrease quantity");
       decBtn.textContent = "−";
-      decBtn.onclick = function() { setQty(l.product.id, l.qty - 1); renderCart(); };
+      decBtn.onclick = function() { setQty(l.product.id, l.qty - 1, l.variantKey); renderCart(); };
 
       const qtyInput = document.createElement("input");
       qtyInput.type = "number"; // semantic fix: was type="text"
       qtyInput.value = String(l.qty);
-      qtyInput.min = "1"; qtyInput.max = "20";
+      qtyInput.min = "1"; qtyInput.max = "99";
       qtyInput.setAttribute("aria-label", "Quantity for " + l.product.name);
       qtyInput.setAttribute("readonly", "");
       qtyInput.style.cssText = "width:44px;text-align:center;border:none;background:none;font-family:var(--font-mono);";
@@ -103,8 +103,9 @@
       incBtn.setAttribute("type", "button");
       incBtn.setAttribute("aria-label", "Increase quantity");
       incBtn.textContent = "+";
-      if (l.product.stock != null && l.qty >= l.product.stock) incBtn.disabled = true;
-      incBtn.onclick = function() { setQty(l.product.id, l.qty + 1); renderCart(); };
+      const stockLimit = l.product.lowestVariantStock != null ? Math.max(1, l.product.lowestVariantStock) : 99;
+      if (l.qty >= stockLimit) incBtn.disabled = true;
+      incBtn.onclick = function() { setQty(l.product.id, l.qty + 1, l.variantKey); renderCart(); };
 
       qtyCtrl.appendChild(decBtn); qtyCtrl.appendChild(qtyInput); qtyCtrl.appendChild(incBtn);
 

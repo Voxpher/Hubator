@@ -4,6 +4,8 @@
  * - Guest users: must verify email with OTP before payment
  */
 
+/* globals window */
+
 var _emailVerified = false; // tracks OTP state for guest users
 var _verifiedEmail = "";
 var _otpEmail = "";
@@ -100,7 +102,7 @@ function _initOtpFlow() {
     if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.textContent = "Verifying…"; }
     try {
       var url = hubatorApiUrl("/api/public/auth/verify-otp");
-      if (!url) throw new Error("Store API URL is not configured.");
+      if (!url) throw new Error("Store API URL not configured.");
       var res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, otp }) });
       var data = await res.json().catch(function() { return {}; });
       if (!res.ok) {
@@ -186,7 +188,15 @@ async function startCheckout(form) {
   try {
     var url = hubatorApiUrl("/api/public/orders/razorpay-create");
     if (!url) throw new Error("Store API URL not configured.");
-    var res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: lines.map(function(l) { return { productId: l.product.id, quantity: l.qty }; }) }) });
+    var items = lines.map(function(l) {
+      const variantKey = l.snapshot && l.snapshot.variantKey ? l.snapshot.variantKey : null;
+      const product = l.product;
+      const variant = variantKey && product.variants?.has
+        ? product.variants.get(variantKey) || null
+        : null;
+      return { productId: l.product.id, quantity: l.qty, variantId: variant ? variant.sku : "" };
+    });
+    var res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });
     var text = await res.text();
     try { rzpData = JSON.parse(text); } catch(e) { rzpData = {}; }
     if (!res.ok) throw new Error(rzpData.error || ("Payment initiation failed (" + res.status + ")"));

@@ -1,7 +1,7 @@
 /**
  * js/cart.js
  *
- * Cart storage format: [{ id, qty, snapshot: { name, price, img, category } }]
+ * Cart storage format: [{ id, qty, snapshot: { name, price, img, category, variantKey } }]
  *
  * The snapshot ensures cart items always display correctly — even before
  * window.PRODUCTS has finished loading from the API. Once products load,
@@ -27,6 +27,7 @@ function getCart() {
               price: Math.max(0, Number(line.snapshot.price) || 0),
               img: typeof line.snapshot.img === "string" ? line.snapshot.img : "",
               category: String(line.snapshot.category || ""),
+              variantKey: line.snapshot.variantKey || null,
             }
           : null,
       }))
@@ -57,7 +58,7 @@ function saveCart(cart) {
 
 // ── Mutation ──────────────────────────────────────────────────────────────────
 
-function addToCart(id, qty = 1) {
+function addToCart(id, qty = 1, variantKey = null) {
   const productId = String(id);
   const live = typeof getProductById === "function" ? getProductById(productId) : null;
   if (live && typeof productIsPurchasable === "function" && !productIsPurchasable(live)) {
@@ -69,15 +70,24 @@ function addToCart(id, qty = 1) {
   const cart = getCart();
   const item = cart.find((line) => line.id === productId);
 
-  // Capture a snapshot from live product data if available
-  const snapshot = live ? { name: live.name, price: live.price, img: live.img, category: live.category } : null;
+  // Determine which variant snapshot to use
+  let snapshot;
+  if (live && live.variants && typeof live.variants.has === "function" && variantKey) {
+    const variant = live.variants.get(variantKey);
+    if (variant) {
+      snapshot = { name: live.name, price: variant.priceOverride != null ? Number(variant.priceOverride) : live.price, img: typeof primaryImage?.url === "string" ? primaryImage.url : "", category: live.category, variantKey };
+    }
+  }
+  if (!snapshot && live) {
+    snapshot = { name: live.name, price: live.price, img: live.img, category: live.category, variantKey: null };
+  }
 
   if (item) {
     item.qty += amount;
-    if (live && live.stock != null) item.qty = Math.min(item.qty, Math.max(1, live.stock));
+    if (live && live.lowestVariantStock != null) item.qty = Math.min(item.qty, Math.max(1, live.lowestVariantStock));
     if (snapshot) item.snapshot = snapshot; // refresh snapshot
   } else {
-    cart.push({ id: productId, qty: live && live.stock != null ? Math.min(amount, Math.max(1, live.stock)) : amount, snapshot });
+    cart.push({ id: productId, qty: amount, snapshot });
   }
 
   if (!saveCart(cart)) return false;
@@ -89,13 +99,17 @@ function removeFromCart(id) {
   saveCart(getCart().filter((line) => line.id !== String(id)));
 }
 
-function setQty(id, qty) {
+function setQty(id, qty, variantKey = null) {
   const cart = getCart();
   const item = cart.find((line) => line.id === String(id));
   if (!item) return;
   const live = typeof getProductById === "function" ? getProductById(id) : null;
-  const max = live && live.stock != null ? Math.max(1, live.stock) : 99;
+  const max = live && live.lowestVariantStock != null ? Math.max(1, live.lowestVariantStock) : 99;
   item.qty = Math.max(1, Math.min(max, Math.floor(Number(qty) || 1)));
+  // Preserve variantKey when refreshing snapshot
+  if (item.snapshot) {
+    item.snapshot.variantKey = variantKey !== undefined ? variantKey : item.snapshot.variantKey;
+  }
   saveCart(cart);
 }
 
@@ -114,26 +128,40 @@ function cartLines() {
   return getCart()
     .map((line) => {
       const live = typeof getProductById === "function" ? getProductById(line.id) : null;
+      const variantKey = line.snapshot && line.snapshot.variantKey ? line.snapshot.variantKey : null;
       const product = live || (line.snapshot ? {
         id: line.id,
         name: line.snapshot.name || "Product",
         price: line.snapshot.price || 0,
         img: line.snapshot.img || "",
         category: line.snapshot.category || "",
+        variants: live?.variants || new Map(),
+        lowestVariantStock: live?.lowestVariantStock,
       } : null);
-      return product ? { ...line, product } : null;
+      const variant = variantKey && product.variants?.has
+        ? product.variants.get(variantKey) || null
+        : null;
+      return product ? { ...line, product, variant, variantKey } : null;
     })
     .filter(Boolean);
 }
 
 function cartHasUnavailableItems() {
-  return cartLines().some((line) => (
-    line.product.stock != null && line.product.stock < line.qty
-  ));
+  return cartLines().some((line) => {
+    if (line.variantKey != null && line.product.stock != null) {
+      // Check variant stock when a specific variant was selected
+      const variant = line.product.variants?.get(line.variantKey);
+      if (variant && variant.stock != null) return variant.stock < line.qty;
+    }
+    return line.product.stock != null && line.product.stock < line.qty;
+  });
 }
 
 function cartSubtotal() {
-  return cartLines().reduce((total, line) => total + line.product.price * line.qty, 0);
+  return cartLines().reduce((total, line) => {
+    const variantPrice = line.variant && line.variant.priceOverride != null ? Number(line.variant.priceOverride) : line.product.price;
+    return total + variantPrice * line.qty;
+  }, 0);
 }
 
 // ── When live products load, refresh snapshots in cart ────────────────────────
@@ -144,7 +172,9 @@ window.addEventListener("hubator:products-loaded", function () {
   cart.forEach((line) => {
     const live = typeof getProductById === "function" ? getProductById(line.id) : null;
     if (live) {
-      line.snapshot = { name: live.name, price: live.price, img: live.img, category: live.category };
+      // Preserve variantKey if the item had a selected variant
+      const existingVariantKey = line.snapshot ? line.snapshot.variantKey : null;
+      line.snapshot = { name: live.name, price: live.price, img: live.img, category: live.category, variantKey: existingVariantKey };
       updated = true;
     }
   });

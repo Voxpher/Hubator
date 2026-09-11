@@ -54,6 +54,7 @@
 <script>
   function cardHTML(p){
     const available = productIsPurchasable(p);
+    const hasVariants = p.variants && p.variants.size > 0;
     return `
       <div class="product-card" data-cat="${escapeHtml(p.category)}">
         <a href="/product?id=${encodeURIComponent(p.id)}" class="product-media">
@@ -65,6 +66,7 @@
           <h4><a href="/product?id=${encodeURIComponent(p.id)}">${escapeHtml(p.name)}</a></h4>
           <div class="product-foot">
             <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
+            ${hasVariants ? `<div class="product-variants">${Array.from(p.variants.keys()).slice(0,2).map((k) => { const v = p.variants.get(k); return `<span>${v.color ? `Color: ${v.color}` : ""}${v.size ? ` Size: ${v.size}` : ""}</span>`.trim();}).join(" ")}</div>` : ""}
             <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
           </div>
         </div>
