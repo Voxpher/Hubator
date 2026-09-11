@@ -5,29 +5,31 @@
  */
 
 window.PRODUCTS = [];
-let _allProductsRequest = null;
-const PRODUCT_CACHE_KEY = "hubator_product_cache_v1";
-const PRODUCT_CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
+var _allProductsRequest = null;
+var PRODUCT_CACHE_KEY = "hubator_product_cache_v1";
+var PRODUCT_CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
 
 function hubatorApiUrl(path) {
-  const base = (window.HUBATOR_API_BASE || "").replace(/\/$/, "");
+  var base = (window.HUBATOR_API_BASE || "").replace(/\/$/, "");
   if (!base || typeof path !== "string" || !path.startsWith("/")) return null;
   return base + path;
 }
 
 function productForStorefront(product) {
   if (!product || product._id == null) return null;
-  const images = Array.isArray(product.images)
-    ? product.images.filter((image) => image && typeof image === "object")
-    : [];
-  const sortedImages = images.slice().sort((a, b) => (a.position || 0) - (b.position || 0));
-  const primaryImage = sortedImages[0];
-  const allImageUrls = sortedImages.map((img) => img.url).filter((u) => typeof u === "string");
 
-  const variants = product.variants || [];
-  const variantMap = new Map();
-  variants.forEach((v) => {
-    const key = `${v.color || ""}-${v.size || ""}`.trim("-") || "base";
+  var images = Array.isArray(product.images)
+    ? product.images.filter(function(img) { return img && typeof img === "object"; })
+    : [];
+  var sortedImages = images.slice().sort(function(a, b) { return (a.position || 0) - (b.position || 0); });
+  var primaryImage = sortedImages[0];
+  var allImageUrls = sortedImages.map(function(img) { return img.url; }).filter(function(u) { return typeof u === "string"; });
+
+  var variants = product.variants || [];
+  var variantMap = new Map();
+  variants.forEach(function(v) {
+    var key = (v.color || "") + "-" + (v.size || "");
+    key = key.replace(/^-|-$/g, "") || "base";
     variantMap.set(key, {
       color: v.color,
       colorHex: v.colorHex,
@@ -41,13 +43,23 @@ function productForStorefront(product) {
     });
   });
 
+  var lowestVariantStock = null;
+  if (variants.length > 0) {
+    var stocks = variants.map(function(v) {
+      return v.stock != null ? Number(v.stock) : (product.stock || 0);
+    });
+    lowestVariantStock = Math.min.apply(null, stocks);
+  }
+
+  var primaryUrl = primaryImage && typeof primaryImage.url === "string" ? primaryImage.url : "";
+
   return {
     id: String(product._id),
     name: String(product.title || "Untitled product"),
     category: String(product.category || "Uncategorized"),
     price: Number.isFinite(Number(product.price)) ? Number(product.price) : 0,
     oldPrice: Number(product.compareAtPrice) > 0 ? Number(product.compareAtPrice) : null,
-    img: typeof primaryImage?.url === "string" ? primaryImage.url : "",
+    img: primaryUrl,
     gallery: allImageUrls.length > 0 ? allImageUrls : [],
     badge: Number(product.compareAtPrice) > 0 ? "Sale" : null,
     desc: String(product.description || product.shortDescription || ""),
@@ -57,103 +69,97 @@ function productForStorefront(product) {
     placements: product.placements || [],
     stock: product.stock == null ? null : Math.max(0, Number(product.stock) || 0),
     sortOrder: Number(product.sortOrder) || 0,
-    // Derived: lowest variant stock, overall purchasability
     hasVariants: variants.length > 0,
-    lowestVariantStock: variants.length > 0 ? Math.min(...variants.map(function(v) { return v.stock != null ? v.stock : (product.stock || 0); })) : null,
+    lowestVariantStock: lowestVariantStock,
   };
 }
 
 function readProductCache(key) {
   try {
-    const cached = JSON.parse(localStorage.getItem(PRODUCT_CACHE_KEY));
+    var cached = JSON.parse(localStorage.getItem(PRODUCT_CACHE_KEY));
     if (!cached || typeof cached !== "object" || !Array.isArray(cached[key])) return null;
     if (Date.now() - Number(cached[key + "At"]) > PRODUCT_CACHE_MAX_AGE) return null;
     return cached[key];
-  } catch {
+  } catch (e) {
     return null;
   }
 }
 
 function writeProductCache(key, products) {
   try {
-    const cached = JSON.parse(localStorage.getItem(PRODUCT_CACHE_KEY));
-    const next = cached && typeof cached === "object" ? cached : {};
-    next[key] = products;
-    next[key + "At"] = Date.now();
-    localStorage.setItem(PRODUCT_CACHE_KEY, JSON.stringify(next));
-  } catch {
-    // Catalog rendering must not fail when browser storage is unavailable.
+    var existing = localStorage.getItem(PRODUCT_CACHE_KEY);
+    var cached = existing ? JSON.parse(existing) : {};
+    if (!cached || typeof cached !== "object") cached = {};
+    cached[key] = products;
+    cached[key + "At"] = Date.now();
+    localStorage.setItem(PRODUCT_CACHE_KEY, JSON.stringify(cached));
+  } catch (e) {
+    // Storage unavailable — silent fail
   }
 }
 
-async function _fetchProducts(path) {
-  const url = hubatorApiUrl(path);
-  if (!url) throw new Error("Store API URL is not configured.");
-  let res;
-  try {
-    res = await fetch(url);
-  } catch {
-    const cacheKey = path.includes("?placement=") ? "placement:" + path.split("=")[1] : "all";
-    const cached = readProductCache(cacheKey);
+function _fetchProducts(path) {
+  var url = hubatorApiUrl(path);
+  if (!url) return Promise.reject(new Error("Store API URL is not configured."));
+
+  var cacheKey = path.indexOf("?placement=") !== -1 ? "placement:" + path.split("=")[1] : "all";
+
+  return fetch(url).then(function(res) {
+    if (!res.ok) {
+      var cached = readProductCache(cacheKey);
+      if (cached) return cached;
+      return Promise.reject(new Error("Could not load products right now. Please refresh."));
+    }
+    return res.json().then(function(data) {
+      var products = Array.isArray(data) ? data : data.products;
+      if (!Array.isArray(products)) return Promise.reject(new Error("The product catalogue returned an invalid response."));
+      var normalized = products.map(productForStorefront).filter(Boolean);
+      writeProductCache(cacheKey, normalized);
+      return normalized;
+    });
+  }).catch(function(err) {
+    var cached = readProductCache(cacheKey);
     if (cached) return cached;
-    throw new Error("Unable to load products. Check your connection and try again.");
-  }
-  if (!res.ok) {
-    const cacheKey = path.includes("?placement=") ? "placement:" + path.split("=")[1] : "all";
-    const cached = readProductCache(cacheKey);
-    if (cached) return cached;
-    throw new Error("Could not load products right now. Please refresh.");
-  }
-  const data = await res.json();
-  const products = Array.isArray(data) ? data : data.products;
-  if (!Array.isArray(products)) throw new Error("The product catalogue returned an invalid response.");
-  const normalized = products.map(productForStorefront).filter(Boolean);
-  const cacheKey = path.includes("?placement=") ? "placement:" + path.split("=")[1] : "all";
-  writeProductCache(cacheKey, normalized);
-  return normalized;
+    throw err;
+  });
 }
 
 function _mergeProducts(products) {
-  const byId = new Map(window.PRODUCTS.map((product) => [product.id, product]));
-  products.forEach((product) => byId.set(product.id, product));
-  window.PRODUCTS = Array.from(byId.values()).sort((a, b) => a.sortOrder - b.sortOrder);
+  var byId = new Map(window.PRODUCTS.map(function(p) { return [p.id, p]; }));
+  products.forEach(function(p) { byId.set(p.id, p); });
+  window.PRODUCTS = Array.from(byId.values()).sort(function(a, b) { return a.sortOrder - b.sortOrder; });
   window.dispatchEvent(new CustomEvent("hubator:products-loaded", { detail: window.PRODUCTS }));
   return window.PRODUCTS;
 }
 
-/** Load ALL published products — populates window.PRODUCTS */
-async function loadProducts() {
+function loadProducts() {
   if (_allProductsRequest) return _allProductsRequest;
 
-  _allProductsRequest = _fetchProducts("/api/public/products")
-    .then((products) => {
-      window.PRODUCTS = products.sort((a, b) => a.sortOrder - b.sortOrder);
-      window.dispatchEvent(new CustomEvent("hubator:products-loaded", { detail: window.PRODUCTS }));
-      return window.PRODUCTS;
-    })
-    .catch((err) => {
-      _allProductsRequest = null;
-      console.error("[Hubator] loadProducts:", err.message);
-      throw err;
-    });
+  _allProductsRequest = _fetchProducts("/api/public/products").then(function(products) {
+    window.PRODUCTS = products.sort(function(a, b) { return a.sortOrder - b.sortOrder; });
+    window.dispatchEvent(new CustomEvent("hubator:products-loaded", { detail: window.PRODUCTS }));
+    return window.PRODUCTS;
+  }).catch(function(err) {
+    _allProductsRequest = null;
+    console.error("[Hubator] loadProducts:", err.message);
+    throw err;
+  });
 
   return _allProductsRequest;
 }
 
-/** Load products for a specific storefront placement */
-async function loadProductsByPlacement(placement) {
-  try {
-    const products = await _fetchProducts("/api/public/products?placement=" + encodeURIComponent(placement));
+function loadProductsByPlacement(placement) {
+  return _fetchProducts("/api/public/products?placement=" + encodeURIComponent(placement)).then(function(products) {
     _mergeProducts(products);
     return products;
-  } catch (err) {
+  }).catch(function(err) {
     console.error("[Hubator] loadProductsByPlacement:", err.message);
     throw err;
-  }
+  });
 }
 
 function getProductById(id) {
-  return window.PRODUCTS.find((p) => p.id === String(id)) || null;
+  return window.PRODUCTS.find(function(p) { return p.id === String(id); }) || null;
 }
 
 function productIsPurchasable(product) {
@@ -161,18 +167,14 @@ function productIsPurchasable(product) {
 }
 
 function safeProductImageUrl(url) {
-  const value = String(url || "").trim();
+  var value = String(url || "").trim();
   return /^(https:\/\/|\/(?!\/)|\.\/)/i.test(value) ? value : "";
 }
 
 function escapeHtml(value) {
-  return String(value == null ? "" : value).replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[character]));
+  return String(value == null ? "" : value).replace(/[&<>"']/g, function(c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
 }
 
 function fmt(amount) {

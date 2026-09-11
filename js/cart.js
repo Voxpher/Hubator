@@ -1,24 +1,19 @@
 /**
  * js/cart.js
  *
- * Cart storage format: [{ id, qty, snapshot: { name, price, img, category, variantKey } }]
- *
- * The snapshot ensures cart items always display correctly — even before
- * window.PRODUCTS has finished loading from the API. Once products load,
- * live data is used instead. This permanently fixes the "cart goes empty"
- * bug caused by the race condition between page load and API response.
+ * Cart storage: [{ id, qty, snapshot: { name, price, img, category, variantKey } }]
  */
 
-const CART_KEY = "hubator_cart";
+var CART_KEY = "hubator_cart";
 
 // ── Storage helpers ───────────────────────────────────────────────────────────
 
 function getCart() {
   try {
-    const cart = JSON.parse(localStorage.getItem(CART_KEY));
+    var cart = JSON.parse(localStorage.getItem(CART_KEY));
     if (!Array.isArray(cart)) return [];
-    return cart
-      .map((line) => ({
+    return cart.map(function(line) {
+      return {
         id: String(line && line.id != null ? line.id : ""),
         qty: Math.max(1, Math.min(99, Math.floor(Number(line && line.qty) || 0))),
         snapshot: line && line.snapshot && typeof line.snapshot === "object"
@@ -30,24 +25,24 @@ function getCart() {
               variantKey: line.snapshot.variantKey || null,
             }
           : null,
-      }))
-      .filter((line) => line.id && line.qty > 0);
-  } catch {
+      };
+    }).filter(function(line) { return line.id && line.qty > 0; });
+  } catch (e) {
     return [];
   }
 }
 
 function saveCart(cart) {
-  const normalized = cart
-    .filter((line) => line && line.id != null)
-    .map((line) => ({
+  var normalized = cart.filter(function(line) { return line && line.id != null; }).map(function(line) {
+    return {
       id: String(line.id),
       qty: Math.max(1, Math.min(99, Math.floor(Number(line.qty) || 1))),
       snapshot: line.snapshot || null,
-    }));
+    };
+  });
   try {
     localStorage.setItem(CART_KEY, JSON.stringify(normalized));
-  } catch {
+  } catch (e) {
     showToast("Unable to save your cart in this browser.");
     return false;
   }
@@ -58,36 +53,41 @@ function saveCart(cart) {
 
 // ── Mutation ──────────────────────────────────────────────────────────────────
 
-function addToCart(id, qty = 1, variantKey = null) {
-  const productId = String(id);
-  const live = typeof getProductById === "function" ? getProductById(productId) : null;
+function addToCart(id, qty, variantKey) {
+  qty = qty || 1;
+  variantKey = variantKey || null;
+  var productId = String(id);
+  var live = typeof getProductById === "function" ? getProductById(productId) : null;
   if (live && typeof productIsPurchasable === "function" && !productIsPurchasable(live)) {
     showToast("This product is currently out of stock.");
     return false;
   }
 
-  const amount = Math.max(1, Math.floor(Number(qty) || 1));
-  const cart = getCart();
-  const item = cart.find((line) => line.id === productId);
-
-  // Determine which variant snapshot to use
-  let snapshot;
-  if (live && live.variants && typeof live.variants.has === "function" && variantKey) {
-    const variant = live.variants.get(variantKey);
-    if (variant) {
-      snapshot = { name: live.name, price: variant.priceOverride != null ? Number(variant.priceOverride) : live.price, img: typeof primaryImage?.url === "string" ? primaryImage.url : "", category: live.category, variantKey };
-    }
+  var amount = Math.max(1, Math.floor(Number(qty) || 1));
+  var cart = getCart();
+  var item = null;
+  for (var i = 0; i < cart.length; i++) {
+    if (cart[i].id === productId) { item = cart[i]; break; }
   }
-  if (!snapshot && live) {
-    snapshot = { name: live.name, price: live.price, img: live.img, category: live.category, variantKey: null };
+
+  var snapshot = null;
+  if (live) {
+    var variantPrice = live.price;
+    if (variantKey && live.variants && typeof live.variants.get === "function") {
+      var variant = live.variants.get(variantKey);
+      if (variant && variant.priceOverride != null) variantPrice = Number(variant.priceOverride);
+    }
+    snapshot = { name: live.name, price: variantPrice, img: live.img || "", category: live.category, variantKey: variantKey };
   }
 
   if (item) {
     item.qty += amount;
-    if (live && live.lowestVariantStock != null) item.qty = Math.min(item.qty, Math.max(1, live.lowestVariantStock));
-    if (snapshot) item.snapshot = snapshot; // refresh snapshot
+    if (live && live.lowestVariantStock != null) {
+      item.qty = Math.min(item.qty, Math.max(1, live.lowestVariantStock));
+    }
+    if (snapshot) item.snapshot = snapshot;
   } else {
-    cart.push({ id: productId, qty: amount, snapshot });
+    cart.push({ id: productId, qty: amount, snapshot: snapshot });
   }
 
   if (!saveCart(cart)) return false;
@@ -96,19 +96,21 @@ function addToCart(id, qty = 1, variantKey = null) {
 }
 
 function removeFromCart(id) {
-  saveCart(getCart().filter((line) => line.id !== String(id)));
+  saveCart(getCart().filter(function(line) { return line.id !== String(id); }));
 }
 
-function setQty(id, qty, variantKey = null) {
-  const cart = getCart();
-  const item = cart.find((line) => line.id === String(id));
+function setQty(id, qty, variantKey) {
+  var cart = getCart();
+  var item = null;
+  for (var i = 0; i < cart.length; i++) {
+    if (cart[i].id === String(id)) { item = cart[i]; break; }
+  }
   if (!item) return;
-  const live = typeof getProductById === "function" ? getProductById(id) : null;
-  const max = live && live.lowestVariantStock != null ? Math.max(1, live.lowestVariantStock) : 99;
+  var live = typeof getProductById === "function" ? getProductById(id) : null;
+  var max = live && live.lowestVariantStock != null ? Math.max(1, live.lowestVariantStock) : 99;
   item.qty = Math.max(1, Math.min(max, Math.floor(Number(qty) || 1)));
-  // Preserve variantKey when refreshing snapshot
-  if (item.snapshot) {
-    item.snapshot.variantKey = variantKey !== undefined ? variantKey : item.snapshot.variantKey;
+  if (item.snapshot && variantKey !== undefined) {
+    item.snapshot.variantKey = variantKey;
   }
   saveCart(cart);
 }
@@ -116,64 +118,64 @@ function setQty(id, qty, variantKey = null) {
 // ── Read helpers ──────────────────────────────────────────────────────────────
 
 function cartCount() {
-  return getCart().reduce((total, line) => total + line.qty, 0);
+  return getCart().reduce(function(total, line) { return total + line.qty; }, 0);
 }
 
-/**
- * Returns cart lines with product data.
- * Uses live product data when available, falls back to stored snapshot.
- * This means the cart NEVER shows as empty just because products haven't loaded yet.
- */
 function cartLines() {
-  return getCart()
-    .map((line) => {
-      const live = typeof getProductById === "function" ? getProductById(line.id) : null;
-      const variantKey = line.snapshot && line.snapshot.variantKey ? line.snapshot.variantKey : null;
-      const product = live || (line.snapshot ? {
+  return getCart().map(function(line) {
+    var live = typeof getProductById === "function" ? getProductById(line.id) : null;
+    var variantKey = line.snapshot && line.snapshot.variantKey ? line.snapshot.variantKey : null;
+    var product;
+    if (live) {
+      product = live;
+    } else if (line.snapshot) {
+      product = {
         id: line.id,
         name: line.snapshot.name || "Product",
         price: line.snapshot.price || 0,
         img: line.snapshot.img || "",
         category: line.snapshot.category || "",
-        variants: live?.variants || new Map(),
-        lowestVariantStock: live?.lowestVariantStock,
-      } : null);
-      const variant = variantKey && product.variants?.has
-        ? product.variants.get(variantKey) || null
-        : null;
-      return product ? { ...line, product, variant, variantKey } : null;
-    })
-    .filter(Boolean);
+        variants: new Map(),
+        lowestVariantStock: null,
+      };
+    } else {
+      return null;
+    }
+    var variant = null;
+    if (variantKey && product.variants && typeof product.variants.get === "function") {
+      variant = product.variants.get(variantKey) || null;
+    }
+    return { id: line.id, qty: line.qty, snapshot: line.snapshot, product: product, variant: variant, variantKey: variantKey };
+  }).filter(Boolean);
 }
 
 function cartHasUnavailableItems() {
-  return cartLines().some((line) => {
-    if (line.variantKey != null && line.product.stock != null) {
-      // Check variant stock when a specific variant was selected
-      const variant = line.product.variants?.get(line.variantKey);
-      if (variant && variant.stock != null) return variant.stock < line.qty;
+  return cartLines().some(function(line) {
+    if (line.variantKey && line.variant && line.variant.stock != null) {
+      return line.variant.stock < line.qty;
     }
     return line.product.stock != null && line.product.stock < line.qty;
   });
 }
 
 function cartSubtotal() {
-  return cartLines().reduce((total, line) => {
-    const variantPrice = line.variant && line.variant.priceOverride != null ? Number(line.variant.priceOverride) : line.product.price;
-    return total + variantPrice * line.qty;
+  return cartLines().reduce(function(total, line) {
+    var price = line.variant && line.variant.priceOverride != null
+      ? Number(line.variant.priceOverride)
+      : line.product.price;
+    return total + price * line.qty;
   }, 0);
 }
 
-// ── When live products load, refresh snapshots in cart ────────────────────────
+// ── Refresh snapshots when live products load ─────────────────────────────────
 
-window.addEventListener("hubator:products-loaded", function () {
-  const cart = getCart();
-  let updated = false;
-  cart.forEach((line) => {
-    const live = typeof getProductById === "function" ? getProductById(line.id) : null;
+window.addEventListener("hubator:products-loaded", function() {
+  var cart = getCart();
+  var updated = false;
+  cart.forEach(function(line) {
+    var live = typeof getProductById === "function" ? getProductById(line.id) : null;
     if (live) {
-      // Preserve variantKey if the item had a selected variant
-      const existingVariantKey = line.snapshot ? line.snapshot.variantKey : null;
+      var existingVariantKey = line.snapshot ? line.snapshot.variantKey : null;
       line.snapshot = { name: live.name, price: live.price, img: live.img, category: live.category, variantKey: existingVariantKey };
       updated = true;
     }
@@ -184,18 +186,16 @@ window.addEventListener("hubator:products-loaded", function () {
 // ── UI ────────────────────────────────────────────────────────────────────────
 
 function updateCartBadge() {
-  const count = cartCount();
-  document.querySelectorAll(".cart-count").forEach((element) => {
-    element.textContent = count;
-    const link = element.closest("a");
-    if (link) {
-      link.setAttribute("aria-label", "Cart, " + count + " item" + (count === 1 ? "" : "s"));
-    }
+  var count = cartCount();
+  document.querySelectorAll(".cart-count").forEach(function(el) {
+    el.textContent = count;
+    var link = el.closest("a");
+    if (link) link.setAttribute("aria-label", "Cart, " + count + " item" + (count === 1 ? "" : "s"));
   });
 }
 
 function ensureToast() {
-  let toast = document.querySelector(".toast");
+  var toast = document.querySelector(".toast");
   if (!toast) {
     toast = document.createElement("div");
     toast.className = "toast";
@@ -208,11 +208,11 @@ function ensureToast() {
 }
 
 function showToast(message) {
-  const toast = ensureToast();
+  var toast = ensureToast();
   toast.textContent = message;
   toast.classList.add("show");
   clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => { toast.classList.remove("show"); }, 2200);
+  window._toastTimer = setTimeout(function() { toast.classList.remove("show"); }, 2200);
 }
 
 function initializeCartUI() {
@@ -226,8 +226,7 @@ if (document.readyState === "loading") {
   initializeCartUI();
 }
 
-// Sync cart badge across tabs
-window.addEventListener("storage", (event) => {
+window.addEventListener("storage", function(event) {
   if (event.key === CART_KEY || event.key === null) {
     updateCartBadge();
     window.dispatchEvent(new CustomEvent("hubator:cart-changed"));

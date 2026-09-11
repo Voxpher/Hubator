@@ -191,7 +191,7 @@ async function startCheckout(form) {
     var items = lines.map(function(l) {
       const variantKey = l.snapshot && l.snapshot.variantKey ? l.snapshot.variantKey : null;
       const product = l.product;
-      const variant = variantKey && product.variants?.has
+      const variant = variantKey && product.variants && typeof product.variants.get === "function"
         ? product.variants.get(variantKey) || null
         : null;
       return { productId: l.product.id, quantity: l.qty, variantId: variant ? variant.sku : "" };
@@ -240,8 +240,8 @@ async function startCheckout(form) {
           sessionStorage.setItem("hubator_last_order", JSON.stringify({
             orderNumber: data.orderNumber, email: snap.email,
             items: data.items || lines.map(function(l) { return { name: l.product.name, qty: l.qty, price: l.product.price }; }),
-            subtotal: data.subtotal ?? rzpData.subtotal ?? cartSubtotal(), discountAmount: data.discountAmount || 0,
-            shippingAmount: data.shippingAmount || 0, total: data.total ?? rzpData.total ?? cartSubtotal(),
+            subtotal: data.subtotal != null ? data.subtotal : (rzpData.subtotal != null ? rzpData.subtotal : cartSubtotal()), discountAmount: data.discountAmount || 0,
+            shippingAmount: data.shippingAmount || 0, total: data.total != null ? data.total : (rzpData.total != null ? rzpData.total : cartSubtotal()),
             paymentMethod: "razorpay", paymentId: response.razorpay_payment_id,
             shippingAddress: data.shippingAddress || { line1: snap.address, line2: snap.address2, city: snap.city, state: snap.state, postalCode: snap.postalCode, country: snap.country },
           }));
