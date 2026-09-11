@@ -253,3 +253,24 @@ window.addEventListener("storage", (event) => {
     window.dispatchEvent(new CustomEvent("hubator:auth-changed"));
   }
 });
+
+// Keep the classic-script API explicit for both clean and legacy entry points.
+Object.assign(window, {
+  getToken,
+  isSignedIn,
+  saveSession,
+  clearSession,
+  getStoredCustomer,
+  currentCustomer,
+  fetchCurrentCustomer,
+  signUp,
+  resendVerification,
+  signIn,
+  forgotPassword,
+  resetPassword,
+  signOut,
+  safeNextPath,
+  updateHeaderAuth,
+  showAuthError,
+  clearAuthError,
+});
