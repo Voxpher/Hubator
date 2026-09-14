@@ -44,6 +44,10 @@
       if (cleanPath) {
         location.replace(cleanPath + location.search + location.hash);
       }
+      const productMatch = location.pathname.match(/^\/product\/([^/]+)\/?$/i);
+      if (productMatch) {
+        location.replace("/product?slug=" + encodeURIComponent(decodeURIComponent(productMatch[1])) + location.search + location.hash);
+      }
     }());
   </script>
 </body>
