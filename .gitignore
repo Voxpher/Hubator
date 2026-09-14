@@ -1,1 +1,10 @@
+# AI assistant history (may contain real commands/secrets — never commit)
 .aider*
+
+# Environment / secret files — never commit these to a PUBLIC repo
+.env
+.env.*
+*.local
+*.pem
+*.key
+*.p12

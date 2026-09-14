@@ -16,7 +16,7 @@ function hubatorApiUrl(path) {
 }
 
 function productForStorefront(product) {
-  if (!product || product._id == null) return null;
+  if (!product || (product._id == null && product.id == null)) return null;
 
   var images = Array.isArray(product.images)
     ? product.images.filter(function(img) { return img && typeof img === "object"; })
@@ -54,7 +54,8 @@ function productForStorefront(product) {
   var primaryUrl = primaryImage && typeof primaryImage.url === "string" ? primaryImage.url : "";
 
   return {
-    id: String(product._id),
+    id: String(product._id != null ? product._id : product.id),
+    slug: String(product.slug || product.handle || product.urlSlug || "").trim(),
     name: String(product.title || "Untitled product"),
     category: String(product.category || "Uncategorized"),
     price: Number.isFinite(Number(product.price)) ? Number(product.price) : 0,
@@ -160,6 +161,38 @@ function loadProductsByPlacement(placement) {
 
 function getProductById(id) {
   return window.PRODUCTS.find(function(p) { return p.id === String(id); }) || null;
+}
+
+function getProductBySlug(slug) {
+  var value = String(slug || "").trim().toLowerCase();
+  if (!value) return null;
+  var matches = window.PRODUCTS.filter(function(p) {
+    return p.slug && p.slug.toLowerCase() === value;
+  });
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function productUrl(product) {
+  var value = product && product.slug ? product.slug : (product && product.id);
+  if (value == null || value === "") return "/product";
+  return "/product?" + (product && product.slug ? "slug=" : "id=") + encodeURIComponent(String(value));
+}
+
+function productReferenceFromLocation(locationObject) {
+  var current = locationObject || window.location;
+  var params = new URLSearchParams(current.search || "");
+  var slug = params.get("slug");
+  var id = params.get("id");
+  var pathMatch = (current.pathname || "").match(/^\/product\/([^/]+)\/?$/i);
+  return {
+    type: slug ? "slug" : (id ? "id" : (pathMatch ? "path" : "")),
+    value: slug || id || (pathMatch ? decodeURIComponent(pathMatch[1]) : ""),
+  };
+}
+
+function getProductFromReference(reference) {
+  if (!reference || !reference.value) return null;
+  return reference.type === "id" ? getProductById(reference.value) : getProductBySlug(reference.value);
 }
 
 function productIsPurchasable(product) {
