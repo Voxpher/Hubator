@@ -323,7 +323,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .page-hero p{max-width:60ch;}
 
 /* ── Product detail ──────────────────────────────────────── */
-.pd-grid{display:grid;grid-template-columns:.9fr 1fr;gap:44px;padding:36px 0 72px;}
+.pd-grid{display:grid;grid-template-columns:.9fr 1fr;gap:44px;padding:36px 0 72px;align-items:start;}
+.pd-gallery{grid-column:1;min-width:0;}
+@media(min-width:981px){
+  .pd-gallery{position:sticky;top:84px;}
+}
+.pd-gallery-thumbs{display:flex;gap:10px;flex-wrap:wrap;}
+.pd-gallery-thumb{width:64px;height:64px;border-radius:6px;border:1px solid var(--line);background-size:cover;background-position:center;cursor:pointer;transition:border-color .15s;}
+.pd-gallery-thumb:hover{border-color:var(--ink-soft);}
+.pd-gallery-thumb.active{border-color:var(--gold);}
+.pd-info{min-width:0;}
 .pd-gallery-main{border-radius:10px;overflow:hidden;border:1px solid var(--line);aspect-ratio:1/1;background:var(--paper-dim);margin-bottom:12px;}
 .pd-gallery-main img{width:100%;height:100%;object-fit:cover;}
 .pd-thumbs{display:flex;gap:10px;flex-wrap:wrap;}
@@ -590,9 +599,15 @@ textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius
 .variant-label strong{color:var(--ink);font-weight:600;text-transform:none;letter-spacing:0;}
 .variant-options{display:flex;flex-wrap:wrap;gap:10px;}
 .variant-chip{
-  position:relative;appearance:none;border:1px solid var(--line);background:var(--white);
+  position:relative;appearance:none;border:1px solid var(--line);
+  background:var(--swatch, var(--white));
   border-radius:50%;width:38px;height:38px;cursor:pointer;flex-shrink:0;
   transition:transform .15s, box-shadow .15s, border-color .15s;padding:0;
+}
+/* Chips without a usable colour value keep the visible name and go pill-shaped. */
+.variant-chip.has-name{
+  border-radius:999px;width:auto;min-width:38px;height:38px;padding:0 14px;
+  font-family:var(--font-mono);font-size:.78rem;color:var(--ink);
 }
 .variant-chip:hover{transform:scale(1.08);}
 .variant-chip[aria-pressed="true"]{

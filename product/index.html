@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Product — Hubator</title><link rel="stylesheet" href="/css/style.css">
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Product — Hubator</title><link rel="stylesheet" href="/css/style.css?v=2">
 <meta name="description" content="View product details, size guide and ordering information at Hubator.">
 <meta name="theme-color" content="#FAF7F0">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -29,14 +29,21 @@
       }
     });
     const hasSizes = variants.some(function(v) { return !!v.size; });
+    // Client-side fallback so swatches render even when a variant has no saved colorHex.
+    const COLOR_HEX_FALLBACK = { "white":"#FFFFFF","off white":"#FAF9F6","cream":"#F5EFD9","beige":"#E8DCC8","tan":"#D2B48C","brown":"#7C4A2D","black":"#1A1A1A","charcoal":"#3C4043","grey":"#9AA0A6","gray":"#9AA0A6","navy":"#1F3A5F","blue":"#2563EB","sky blue":"#7DD3FC","teal":"#14B8A6","green":"#2F7D4F","olive":"#6B7A3A","yellow":"#FACC15","mustard":"#D4A017","orange":"#F97316","rust":"#B7410E","red":"#DC2626","maroon":"#7C2D3B","pink":"#F9A8D4","peach":"#FDBA99","purple":"#7C3AED","lavender":"#B57EDC" };
+    const hexOf = function(c) {
+      if (c && c.hex) return c.hex;
+      return COLOR_HEX_FALLBACK[String(c && c.name ? c.name : "").trim().toLowerCase()] || "";
+    };
     const mainImg = p.img ? p.img : (p.gallery && p.gallery.length > 0 ? p.gallery[0] : "");
     let html = '<div class="pd-gallery"><div class="pd-gallery-main"><img src="'
-      + escapeHtml(safeProductImageUrl(mainImg)) + '" alt="' + escapeHtml(p.name) + '"></div></div>';
+      + escapeHtml(safeProductImageUrl(mainImg)) + '" alt="' + escapeHtml(p.name) + '"></div>';
     if (p.gallery && p.gallery.length > 1) {
       html += '<div class="pd-gallery-thumbs">' + p.gallery.slice(1).map((url, i) =>
-        '<div class="pd-gallery-thumb' + (i === 0 ? " active" : "") + '" style="background-image: url(\''
-        + escapeHtml(String(url)) + '\')"></div>').join("") + "</div>";
+        '<div class="pd-gallery-thumb' + (i === 0 ? " active" : "") + '" data-url="' + escapeHtml(String(url))
+        + '" style="background-image: url(\'' + escapeHtml(String(url)) + '\')" role="button" tabindex="0" aria-label="View image ' + (i + 2) + '"></div>').join("") + "</div>";
     }
+    html += "</div>";
     html += '<div class="pd-info"><span class="product-cat">' + escapeHtml(p.category) + "</span>"
       + '<h1 style="font-size:2rem;">' + escapeHtml(p.name) + "</h1>"
       + '<div class="pd-price-row"><span class="pd-price" id="pd-price">' + fmt(p.price) + "</span>"
@@ -48,6 +55,17 @@
       + '<ul class="pd-meta"><li>Prices shown in Indian Rupees</li><li>Shipping is calculated securely at checkout</li></ul>'
       + "</div>";
     root.innerHTML = html;
+    root.querySelectorAll(".pd-gallery-thumb").forEach(function(t) {
+      const activate = function() {
+        const main = root.querySelector(".pd-gallery-main img");
+        const url = t.getAttribute("data-url");
+        if (main && url) main.src = url;
+        root.querySelectorAll(".pd-gallery-thumb").forEach(function(x) { x.classList.remove("active"); });
+        t.classList.add("active");
+      };
+      t.addEventListener("click", activate);
+      t.addEventListener("keydown", function(e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
+    });
     let selectedColor = colors.length === 1 ? colors[0].name : "";
     let selectedSize = "";
 
@@ -88,13 +106,16 @@
 
       let out = "";
       if (colors.length > 1) {
-        out += '<div class="variant-section"><span class="variant-label">Color</span><div class="variant-options" role="group" aria-label="Choose a colour">';
+        out += '<div class="variant-section"><span class="variant-label">Color'
+          + (selectedColor ? '<strong>' + escapeHtml(selectedColor) + '</strong>' : "")
+          + '</span><div class="variant-options" role="group" aria-label="Choose a colour">';
         colors.forEach(function(c) {
           const anyStock = variants.some(function(vv) { return vv.color === c.name && stockFor(vv) > 0; });
-          out += '<button type="button" class="variant-chip' + (selectedColor === c.name ? " is-selected" : "") + (anyStock ? "" : " is-unavailable") + '"'
-            + (c.hex ? ' style="--swatch:' + escapeHtml(c.hex) + '"' : "")
-            + ' data-color="' + escapeHtml(c.name) + '" aria-pressed="' + (selectedColor === c.name ? "true" : "false") + '"'
-            + (anyStock ? "" : ' title="Out of stock"') + ">" + escapeHtml(c.name) + "</button>";
+          const swatch = hexOf(c);
+          out += '<button type="button" class="variant-chip' + (selectedColor === c.name ? " is-selected" : "") + (anyStock ? "" : " is-unavailable") + (swatch ? "" : " has-name") + '"'
+            + (swatch ? ' style="--swatch:' + escapeHtml(swatch) + '"' : "")
+            + ' data-color="' + escapeHtml(c.name) + '" title="' + escapeHtml(c.name) + (anyStock ? "" : " — out of stock") + '" aria-label="' + escapeHtml(c.name) + '" aria-pressed="' + (selectedColor === c.name ? "true" : "false") + '">'
+            + (swatch ? "" : escapeHtml(c.name)) + "</button>";
         });
         out += "</div>";
         if (!selectedColor) out += '<p class="variant-hint">Choose a colour to see available sizes</p>';
@@ -103,7 +124,9 @@
       if (hasSizes) {
         const sizes = [];
         variantsForColor(selectedColor).forEach(function(vv) { if (vv.size && sizes.indexOf(vv.size) === -1) sizes.push(vv.size); });
-        out += '<div class="variant-section"><span class="variant-label">Size</span><div class="variant-options" role="group" aria-label="Choose a size">';
+        out += '<div class="variant-section"><span class="variant-label">Size'
+          + (selectedSize ? '<strong>' + escapeHtml(selectedSize) + '</strong>' : "")
+          + '</span><div class="variant-options" role="group" aria-label="Choose a size">';
         sizes.forEach(function(s) {
           const sv = variantsForColor(selectedColor).find(function(vv) { return vv.size === s; });
           const ok = sv && stockFor(sv) > 0;
