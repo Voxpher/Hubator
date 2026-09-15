@@ -1,10 +1,16 @@
 /**
  * js/cart.js
  *
- * Cart storage: [{ id, qty, snapshot: { name, price, img, category, variantKey } }]
+ * Cart storage: [{ id, qty, snapshot: { name, price, img, category, variantId, color, size } }]
+ * Lines are keyed by productId + variantId, so the same product in two
+ * colours or sizes lives in the cart as two separate lines.
  */
 
 var CART_KEY = "hubator_cart";
+
+function cartLineKey(id, variantId) {
+  return String(id || "") + "::" + String(variantId || "");
+}
 
 // ── Storage helpers ───────────────────────────────────────────────────────────
 
@@ -13,18 +19,29 @@ function getCart() {
     var cart = JSON.parse(localStorage.getItem(CART_KEY));
     if (!Array.isArray(cart)) return [];
     return cart.map(function(line) {
+      var snapshot = line && line.snapshot && typeof line.snapshot === "object"
+        ? {
+            name: String(line.snapshot.name || "Product"),
+            price: Math.max(0, Number(line.snapshot.price) || 0),
+            img: typeof line.snapshot.img === "string" ? line.snapshot.img : "",
+            category: String(line.snapshot.category || ""),
+            variantId: line.snapshot.variantId != null ? String(line.snapshot.variantId) : "",
+            color: line.snapshot.color != null ? String(line.snapshot.color) : "",
+            size: line.snapshot.size != null ? String(line.snapshot.size) : "",
+          }
+        : null;
+      // Legacy carts stored a display-only "color-size" variantKey without a server id.
+      if (snapshot && !snapshot.variantId && line.snapshot && typeof line.snapshot.variantKey === "string" && line.snapshot.variantKey) {
+        var legacyParts = line.snapshot.variantKey.split("-");
+        if (legacyParts.length > 1) {
+          snapshot.color = legacyParts[0];
+          snapshot.size = legacyParts.slice(1).join("-");
+        }
+      }
       return {
         id: String(line && line.id != null ? line.id : ""),
         qty: Math.max(1, Math.min(99, Math.floor(Number(line && line.qty) || 0))),
-        snapshot: line && line.snapshot && typeof line.snapshot === "object"
-          ? {
-              name: String(line.snapshot.name || "Product"),
-              price: Math.max(0, Number(line.snapshot.price) || 0),
-              img: typeof line.snapshot.img === "string" ? line.snapshot.img : "",
-              category: String(line.snapshot.category || ""),
-              variantKey: line.snapshot.variantKey || null,
-            }
-          : null,
+        snapshot: snapshot,
       };
     }).filter(function(line) { return line.id && line.qty > 0; });
   } catch (e) {
@@ -53,40 +70,73 @@ function saveCart(cart) {
 
 // ── Mutation ──────────────────────────────────────────────────────────────────
 
-function addToCart(id, qty, variantKey) {
+function variantOfProduct(product, variantId) {
+  if (!product || !variantId || !product.variants || typeof product.variants.forEach !== "function") return null;
+  var wanted = String(variantId);
+  var found = null;
+  product.variants.forEach(function(v) {
+    if (!found && v && String(v._id || "") === wanted) found = v;
+  });
+  return found;
+}
+
+function variantPriceOf(product, variant) {
+  return variant && variant.priceOverride != null ? Number(variant.priceOverride) : product.price;
+}
+
+function addToCart(id, qty, variantId) {
   qty = qty || 1;
-  variantKey = variantKey || null;
+  variantId = variantId ? String(variantId) : "";
   var productId = String(id);
   var live = typeof getProductById === "function" ? getProductById(productId) : null;
   if (live && typeof productIsPurchasable === "function" && !productIsPurchasable(live)) {
     showToast("This product is currently out of stock.");
     return false;
   }
+  var variant = variantOfProduct(live, variantId);
+  if (variantId && !variant) {
+    showToast("Please choose an available option first.");
+    return false;
+  }
 
   var amount = Math.max(1, Math.floor(Number(qty) || 1));
   var cart = getCart();
+  var lineKey = cartLineKey(productId, variantId);
   var item = null;
   for (var i = 0; i < cart.length; i++) {
-    if (cart[i].id === productId) { item = cart[i]; break; }
+    if (cartLineKey(cart[i].id, cart[i].snapshot && cart[i].snapshot.variantId) === lineKey) { item = cart[i]; break; }
   }
 
   var snapshot = null;
   if (live) {
-    var variantPrice = live.price;
-    if (variantKey && live.variants && typeof live.variants.get === "function") {
-      var variant = live.variants.get(variantKey);
-      if (variant && variant.priceOverride != null) variantPrice = Number(variant.priceOverride);
-    }
-    snapshot = { name: live.name, price: variantPrice, img: live.img || "", category: live.category, variantKey: variantKey };
+    snapshot = {
+      name: live.name,
+      price: variantPriceOf(live, variant),
+      img: live.img || "",
+      category: live.category,
+      variantId: variant ? String(variant._id || "") : "",
+      color: variant && variant.color ? variant.color : "",
+      size: variant && variant.size ? variant.size : "",
+    };
   }
 
   if (item) {
     item.qty += amount;
-    if (live && live.lowestVariantStock != null) {
+    if (variant && variant.stock != null) {
+      if (variant.stock < 1) {
+        showToast("Sorry, this option is out of stock.");
+        return false;
+      }
+      item.qty = Math.min(item.qty, variant.stock);
+    } else if (live && live.lowestVariantStock != null) {
       item.qty = Math.min(item.qty, Math.max(1, live.lowestVariantStock));
     }
     if (snapshot) item.snapshot = snapshot;
   } else {
+    if (variant && variant.stock != null && variant.stock < 1) {
+      showToast("Sorry, this option is out of stock.");
+      return false;
+    }
     cart.push({ id: productId, qty: amount, snapshot: snapshot });
   }
 
@@ -95,23 +145,32 @@ function addToCart(id, qty, variantKey) {
   return true;
 }
 
-function removeFromCart(id) {
-  saveCart(getCart().filter(function(line) { return line.id !== String(id); }));
+function removeFromCart(id, variantId) {
+  var lineKey = cartLineKey(id, variantId);
+  saveCart(getCart().filter(function(line) {
+    return cartLineKey(line.id, line.snapshot && line.snapshot.variantId) !== lineKey;
+  }));
 }
 
-function setQty(id, qty, variantKey) {
+function setQty(id, qty, variantId) {
+  var lineKey = cartLineKey(id, variantId);
   var cart = getCart();
   var item = null;
   for (var i = 0; i < cart.length; i++) {
-    if (cart[i].id === String(id)) { item = cart[i]; break; }
+    if (cartLineKey(cart[i].id, cart[i].snapshot && cart[i].snapshot.variantId) === lineKey) { item = cart[i]; break; }
   }
   if (!item) return;
   var live = typeof getProductById === "function" ? getProductById(id) : null;
-  var max = live && live.lowestVariantStock != null ? Math.max(1, live.lowestVariantStock) : 99;
-  item.qty = Math.max(1, Math.min(max, Math.floor(Number(qty) || 1)));
-  if (item.snapshot && variantKey !== undefined) {
-    item.snapshot.variantKey = variantKey;
+  var variant = variantOfProduct(live, item.snapshot && item.snapshot.variantId);
+  var max = variant && variant.stock != null
+    ? Math.max(0, variant.stock)
+    : (live && live.lowestVariantStock != null ? Math.max(1, live.lowestVariantStock) : 99);
+  var next = Math.min(max, Math.floor(Number(qty) || 1));
+  if (next < 1) {
+    saveCart(cart.filter(function(line) { return line !== item; }));
+    return;
   }
+  item.qty = next;
   saveCart(cart);
 }
 
@@ -124,7 +183,7 @@ function cartCount() {
 function cartLines() {
   return getCart().map(function(line) {
     var live = typeof getProductById === "function" ? getProductById(line.id) : null;
-    var variantKey = line.snapshot && line.snapshot.variantKey ? line.snapshot.variantKey : null;
+    var variantId = line.snapshot && line.snapshot.variantId ? String(line.snapshot.variantId) : "";
     var product;
     if (live) {
       product = live;
@@ -141,11 +200,17 @@ function cartLines() {
     } else {
       return null;
     }
-    var variant = null;
-    if (variantKey && product.variants && typeof product.variants.get === "function") {
-      variant = product.variants.get(variantKey) || null;
-    }
-    return { id: line.id, qty: line.qty, snapshot: line.snapshot, product: product, variant: variant, variantKey: variantKey };
+    var variant = variantOfProduct(product, variantId);
+    return {
+      id: line.id,
+      qty: line.qty,
+      snapshot: line.snapshot,
+      product: product,
+      variant: variant,
+      variantId: variantId,
+      color: (line.snapshot && line.snapshot.color) || (variant && variant.color) || "",
+      size: (line.snapshot && line.snapshot.size) || (variant && variant.size) || "",
+    };
   }).filter(Boolean);
 }
 
@@ -175,8 +240,16 @@ window.addEventListener("hubator:products-loaded", function() {
   cart.forEach(function(line) {
     var live = typeof getProductById === "function" ? getProductById(line.id) : null;
     if (live) {
-      var existingVariantKey = line.snapshot ? line.snapshot.variantKey : null;
-      line.snapshot = { name: live.name, price: live.price, img: live.img, category: live.category, variantKey: existingVariantKey };
+      var variant = variantOfProduct(live, line.snapshot && line.snapshot.variantId);
+      line.snapshot = {
+        name: live.name,
+        price: variantPriceOf(live, variant),
+        img: live.img,
+        category: live.category,
+        variantId: variant ? String(variant._id || "") : "",
+        color: variant && variant.color ? variant.color : "",
+        size: variant && variant.size ? variant.size : "",
+      };
       updated = true;
     }
   });

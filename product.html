@@ -19,17 +19,16 @@
     const p = getProductFromReference(reference);
     const root = document.getElementById("pd-root");
     if (!p) { root.textContent = "That product is no longer available."; return; }
-    const available = productIsPurchasable(p);
     document.title = p.name + " — Hubator";
     document.getElementById("crumb-name").textContent = p.name;
-    const variantEntries = Array.from(p.variants ? p.variants.entries() : []).filter(([k]) => k !== "base");
-    const variantChips = variantEntries.map(([k, v]) => {
-      const bits = [];
-      if (v && v.color) bits.push("Color: " + v.color);
-      if (v && v.size) bits.push(" Size: " + v.size);
-      return '<span style="margin-right:8px;background:#e2e8f0;padding:2px 6px;border-radius:4px;font-size:0.78rem;">'
-        + escapeHtml(bits.join("")) + "</span>";
-    }).join(" ");
+    const variants = p.variants && typeof p.variants.forEach === "function" ? Array.from(p.variants.values()).filter(Boolean) : [];
+    const colors = [];
+    variants.forEach(function(v) {
+      if (v.color && !colors.some(function(c) { return c.name === v.color; })) {
+        colors.push({ name: v.color, hex: v.colorHex || "" });
+      }
+    });
+    const hasSizes = variants.some(function(v) { return !!v.size; });
     const mainImg = p.img ? p.img : (p.gallery && p.gallery.length > 0 ? p.gallery[0] : "");
     let html = '<div class="pd-gallery"><div class="pd-gallery-main"><img src="'
       + escapeHtml(safeProductImageUrl(mainImg)) + '" alt="' + escapeHtml(p.name) + '"></div></div>';
@@ -40,18 +39,108 @@
     }
     html += '<div class="pd-info"><span class="product-cat">' + escapeHtml(p.category) + "</span>"
       + '<h1 style="font-size:2rem;">' + escapeHtml(p.name) + "</h1>"
-      + '<div class="pd-price-row"><span class="pd-price">' + fmt(p.price) + "</span>"
+      + '<div class="pd-price-row"><span class="pd-price" id="pd-price">' + fmt(p.price) + "</span>"
       + (p.oldPrice ? '<span class="price-old">' + fmt(p.oldPrice) + "</span>" : "")
       + "</div><p>" + escapeHtml(p.desc) + "</p>"
-      + (available ? "" : '<p class="product-stock-status" role="status">Out of stock</p>')
-      + '<div class="pd-actions"><button class="btn btn-primary" data-id="' + escapeHtml(p.id) + '"'
-      + (available ? "" : " disabled") + ' onclick="addToCart(this.dataset.id)">Add to cart</button>'
-      + '<a href="' + (available ? "/checkout" : "#") + '" class="btn btn-outline" data-id="' + escapeHtml(p.id) + '"'
-      + (available ? ' onclick="return addToCart(this.dataset.id)"' : ' aria-disabled="true"') + ">Buy now</a></div>"
+      + '<div id="pd-variants"></div>'
+      + '<div class="pd-actions"><button class="btn btn-primary" id="pd-add" data-id="' + escapeHtml(p.id) + '">Add to cart</button>'
+      + '<a href="#" class="btn btn-outline" id="pd-buy" data-id="' + escapeHtml(p.id) + '">Buy now</a></div>'
       + '<ul class="pd-meta"><li>Prices shown in Indian Rupees</li><li>Shipping is calculated securely at checkout</li></ul>'
-      + (variantEntries.length > 0 ? '<div class="pd-variants"><strong>Available variants:</strong> ' + variantChips + "</div>" : "")
       + "</div>";
     root.innerHTML = html;
+    let selectedColor = colors.length === 1 ? colors[0].name : "";
+    let selectedSize = "";
+
+    function stockFor(v) { return v && v.stock != null ? v.stock : p.stock; }
+    function variantsForColor(name) {
+      return variants.filter(function(v) { return name ? v.color === name : true; });
+    }
+    function findVariant() {
+      const list = variantsForColor(selectedColor);
+      if (!hasSizes) {
+        const inStock = list.filter(function(v) { return stockFor(v) > 0; });
+        return (inStock.length ? inStock : list)[0] || null;
+      }
+      return list.find(function(v) { return v.size === selectedSize; }) || null;
+    }
+    function priceFor(v) { return v && v.priceOverride != null ? Number(v.priceOverride) : p.price; }
+    function variantIdOf(v) { return v ? String(v._id || "") : ""; }
+
+    function render() {
+      const v = findVariant();
+      const priceEl = document.getElementById("pd-price");
+      if (priceEl) priceEl.textContent = fmt(v ? priceFor(v) : p.price);
+      const addBtn = document.getElementById("pd-add");
+      const buyBtn = document.getElementById("pd-buy");
+      const inStock = v ? stockFor(v) > 0 : (variants.length === 0 ? (p.stock == null || p.stock > 0) : false);
+      const usable = inStock && (!hasSizes || !!selectedSize) && (colors.length <= 1 || !!selectedColor);
+      addBtn.disabled = !usable;
+      addBtn.onclick = function() { addToCart(p.id, 1, variantIdOf(v)); };
+      if (usable) {
+        buyBtn.setAttribute("href", "/checkout");
+        buyBtn.setAttribute("aria-disabled", "false");
+        buyBtn.onclick = function() { addToCart(p.id, 1, variantIdOf(v)); };
+      } else {
+        buyBtn.setAttribute("href", "#");
+        buyBtn.setAttribute("aria-disabled", "true");
+        buyBtn.onclick = function(event) { event.preventDefault(); };
+      }
+
+      let out = "";
+      if (colors.length > 1) {
+        out += '<div class="variant-section"><span class="variant-label">Color</span><div class="variant-options" role="group" aria-label="Choose a colour">';
+        colors.forEach(function(c) {
+          const anyStock = variants.some(function(vv) { return vv.color === c.name && stockFor(vv) > 0; });
+          out += '<button type="button" class="variant-chip' + (selectedColor === c.name ? " is-selected" : "") + (anyStock ? "" : " is-unavailable") + '"'
+            + (c.hex ? ' style="--swatch:' + escapeHtml(c.hex) + '"' : "")
+            + ' data-color="' + escapeHtml(c.name) + '" aria-pressed="' + (selectedColor === c.name ? "true" : "false") + '"'
+            + (anyStock ? "" : ' title="Out of stock"') + ">" + escapeHtml(c.name) + "</button>";
+        });
+        out += "</div>";
+        if (!selectedColor) out += '<p class="variant-hint">Choose a colour to see available sizes</p>';
+        out += "</div>";
+      }
+      if (hasSizes) {
+        const sizes = [];
+        variantsForColor(selectedColor).forEach(function(vv) { if (vv.size && sizes.indexOf(vv.size) === -1) sizes.push(vv.size); });
+        out += '<div class="variant-section"><span class="variant-label">Size</span><div class="variant-options" role="group" aria-label="Choose a size">';
+        sizes.forEach(function(s) {
+          const sv = variantsForColor(selectedColor).find(function(vv) { return vv.size === s; });
+          const ok = sv && stockFor(sv) > 0;
+          out += '<button type="button" class="size-chip' + (selectedSize === s ? " is-selected" : "") + (ok ? "" : " is-unavailable") + '"'
+            + ' data-size="' + escapeHtml(s) + '" aria-pressed="' + (selectedSize === s ? "true" : "false") + '"'
+            + (ok ? "" : ' title="Out of stock"') + ">" + escapeHtml(s) + "</button>";
+        });
+        out += "</div>";
+        if (selectedColor || colors.length === 0) {
+          if (!selectedSize) out += '<p class="variant-hint">Choose a size</p>';
+          else if (selectedSize && v && stockFor(v) <= 0) out += '<p class="variant-unavailable">This combination is out of stock</p>';
+        }
+        out += "</div>";
+      }
+      const host = document.getElementById("pd-variants");
+      host.innerHTML = out;
+      host.querySelectorAll("[data-color]").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          selectedColor = btn.getAttribute("data-color");
+          selectedSize = "";
+          render();
+        });
+      });
+      host.querySelectorAll("[data-size]").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          selectedSize = btn.getAttribute("data-size");
+          render();
+        });
+      });
+    }
+
+    // Products with nothing meaningful to choose: preselect and hide the picker.
+    if (colors.length <= 1 && !hasSizes) {
+      if (colors.length === 1) selectedColor = colors[0].name;
+      document.getElementById("pd-variants").style.display = "none";
+    }
+    render();
   }).catch(err => {
     console.error("[Hubator] product:", err);
     document.getElementById("pd-root").textContent = "We couldn't load this product. Please refresh and try again.";

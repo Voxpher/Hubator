@@ -578,3 +578,44 @@ textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .skeleton-card{min-height:280px;border-radius:8px;}
 @media(prefers-reduced-motion:reduce){.skeleton{animation:none;background:var(--paper-dim);}}
+
+/* ===== Variant selection (product page) ===== */
+.variant-section{margin:0 0 14px;}
+.variant-section + .variant-section{margin-top:0;}
+.variant-label{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink-soft);margin-bottom:8px;
+}
+.variant-label strong{color:var(--ink);font-weight:600;text-transform:none;letter-spacing:0;}
+.variant-options{display:flex;flex-wrap:wrap;gap:10px;}
+.variant-chip{
+  position:relative;appearance:none;border:1px solid var(--line);background:var(--white);
+  border-radius:50%;width:38px;height:38px;cursor:pointer;flex-shrink:0;
+  transition:transform .15s, box-shadow .15s, border-color .15s;padding:0;
+}
+.variant-chip:hover{transform:scale(1.08);}
+.variant-chip[aria-pressed="true"]{
+  border-color:var(--ink);box-shadow:0 0 0 2px var(--paper), 0 0 0 3.5px var(--ink);
+}
+.variant-chip.is-unavailable{opacity:.32;cursor:not-allowed;}
+.variant-chip.is-unavailable::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:linear-gradient(to top left, transparent calc(50% - 1px), var(--ink-soft) 50%, transparent calc(50% + 1px));
+}
+.variant-chip.is-unavailable:hover{transform:none;}
+.size-chip{
+  appearance:none;border:1px solid var(--line);background:var(--white);color:var(--ink);
+  font-family:var(--font-mono);font-size:.8rem;border-radius:20px;
+  padding:9px 16px;cursor:pointer;transition:border-color .15s, background .15s, color .15s;
+}
+.size-chip:hover{border-color:var(--ink);}
+.size-chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.size-chip.is-unavailable{
+  color:var(--ink-soft);background:var(--paper-dim);border-style:dashed;
+  cursor:not-allowed;text-decoration:line-through;
+}
+.size-chip.is-unavailable:hover{border-color:var(--line);}
+.variant-hint{font-size:.8rem;color:var(--ink-soft);margin:6px 0 0;}
+.variant-unavailable{font-size:.85rem;color:#B4232A;margin:8px 0 0;}
+.line-variant{display:block;font-size:.78rem;color:var(--ink-soft);margin-top:2px;}

@@ -86,7 +86,10 @@
       var row = document.createElement("div");
       row.style.cssText = "display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:0.9rem;";
       var left = document.createElement("span");
-      left.textContent = item.name + (item.qty > 1 ? " x" + item.qty : "");
+      var variantLabel = [item.color, item.size].filter(Boolean).join(" / ");
+      left.textContent = item.name
+        + (variantLabel ? " (" + variantLabel + ")" : "")
+        + (item.qty > 1 ? " x" + item.qty : "");
       var right = document.createElement("span");
       right.style.fontFamily = "var(--font-mono)";
       right.textContent = "Rs." + (item.price * item.qty).toFixed(0);

@@ -6,7 +6,7 @@
 
 window.PRODUCTS = [];
 var _allProductsRequest = null;
-var PRODUCT_CACHE_KEY = "hubator_product_cache_v1";
+var PRODUCT_CACHE_KEY = "hubator_product_cache_v2"; // v2: variants carry server variant ids
 var PRODUCT_CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
 
 function hubatorApiUrl(path) {
@@ -31,6 +31,7 @@ function productForStorefront(product) {
     var key = (v.color || "") + "-" + (v.size || "");
     key = key.replace(/^-|-$/g, "") || "base";
     variantMap.set(key, {
+      _id: String(v._id != null ? v._id : (v.id != null ? v.id : "")),
       color: v.color,
       colorHex: v.colorHex,
       size: v.size,

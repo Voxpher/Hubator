@@ -189,12 +189,7 @@ async function startCheckout(form) {
     var url = hubatorApiUrl("/api/public/orders/razorpay-create");
     if (!url) throw new Error("Store API URL not configured.");
     var items = lines.map(function(l) {
-      const variantKey = l.snapshot && l.snapshot.variantKey ? l.snapshot.variantKey : null;
-      const product = l.product;
-      const variant = variantKey && product.variants && typeof product.variants.get === "function"
-        ? product.variants.get(variantKey) || null
-        : null;
-      return { productId: l.product.id, quantity: l.qty, variantId: variant ? variant.sku : "" };
+      return { productId: l.product.id, quantity: l.qty, variantId: l.variantId || undefined };
     });
     var res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });
     var text = await res.text();
@@ -229,7 +224,7 @@ async function startCheckout(form) {
               razorpay_signature: response.razorpay_signature,
               customer: { name: fullName, email: snap.email, phone: snap.phone },
               shippingAddress: { name: fullName, line1: snap.address, line2: snap.address2 || undefined, city: snap.city, state: snap.state || snap.city, postalCode: snap.postalCode, country: snap.country, phone: snap.phone },
-              items: lines.map(function(l) { return { productId: l.product.id, quantity: l.qty }; }),
+              items: lines.map(function(l) { return { productId: l.product.id, quantity: l.qty, variantId: l.variantId || undefined }; }),
               shippingMethod: "Standard",
             }),
           });
@@ -239,7 +234,9 @@ async function startCheckout(form) {
 
           sessionStorage.setItem("hubator_last_order", JSON.stringify({
             orderNumber: data.orderNumber, email: snap.email,
-            items: data.items || lines.map(function(l) { return { name: l.product.name, qty: l.qty, price: l.product.price }; }),
+            items: data.items || lines.map(function(l) {
+              return { name: l.product.name, qty: l.qty, price: variantPriceOf(l.product, l.variant), color: l.color || undefined, size: l.size || undefined };
+            }),
             subtotal: data.subtotal != null ? data.subtotal : (rzpData.subtotal != null ? rzpData.subtotal : cartSubtotal()), discountAmount: data.discountAmount || 0,
             shippingAmount: data.shippingAmount || 0, total: data.total != null ? data.total : (rzpData.total != null ? rzpData.total : cartSubtotal()),
             paymentMethod: "razorpay", paymentId: response.razorpay_payment_id,

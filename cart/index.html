@@ -61,7 +61,8 @@
       name.appendChild(nameLink);
       const meta = document.createElement("div");
       meta.className = "cl-meta"; meta.textContent = l.product.category;
-      if (l.product.stock != null && l.product.stock < l.qty) {
+      const lineStock = l.variant && l.variant.stock != null ? l.variant.stock : l.product.stock;
+      if (lineStock != null && lineStock < l.qty) {
         const unavailable = document.createElement("div");
         unavailable.className = "cl-meta";
         unavailable.style.color = "#b91c1c";
@@ -76,11 +77,19 @@
       removeBtn.textContent = "Remove";
       removeBtn.onclick = function() {
         if (!window.confirm("Remove " + l.product.name + " from your cart?")) return;
-        removeFromCart(l.product.id);
+        removeFromCart(l.product.id, l.variantId);
         renderCart();
       };
 
-      info.appendChild(name); info.appendChild(meta); info.appendChild(removeBtn);
+      info.appendChild(name); info.appendChild(meta);
+      const variantLabel = [l.color, l.size].filter(Boolean).join(" / ");
+      if (variantLabel) {
+        const variantLine = document.createElement("div");
+        variantLine.className = "cl-meta line-variant";
+        variantLine.textContent = variantLabel;
+        info.appendChild(variantLine);
+      }
+      info.appendChild(removeBtn);
 
       // Qty control
       const qtyCtrl = document.createElement("div");
@@ -89,12 +98,12 @@
       decBtn.setAttribute("type", "button");
       decBtn.setAttribute("aria-label", "Decrease quantity");
       decBtn.textContent = "−";
-      decBtn.onclick = function() { setQty(l.product.id, l.qty - 1); renderCart(); };
+      decBtn.onclick = function() { setQty(l.product.id, l.qty - 1, l.variantId); renderCart(); };
 
       const qtyInput = document.createElement("input");
       qtyInput.type = "number"; // semantic fix: was type="text"
       qtyInput.value = String(l.qty);
-      qtyInput.min = "1"; qtyInput.max = "20";
+      qtyInput.min = "1"; qtyInput.max = "99";
       qtyInput.setAttribute("aria-label", "Quantity for " + l.product.name);
       qtyInput.setAttribute("readonly", "");
       qtyInput.style.cssText = "width:44px;text-align:center;border:none;background:none;font-family:var(--font-mono);";
@@ -103,14 +112,16 @@
       incBtn.setAttribute("type", "button");
       incBtn.setAttribute("aria-label", "Increase quantity");
       incBtn.textContent = "+";
-      if (l.product.stock != null && l.qty >= l.product.stock) incBtn.disabled = true;
-      incBtn.onclick = function() { setQty(l.product.id, l.qty + 1); renderCart(); };
+      const variantStock = l.variant && l.variant.stock != null ? l.variant.stock : l.product.lowestVariantStock;
+      const stockLimit = variantStock != null ? Math.max(1, variantStock) : 99;
+      if (l.qty >= stockLimit) incBtn.disabled = true;
+      incBtn.onclick = function() { setQty(l.product.id, l.qty + 1, l.variantId); renderCart(); };
 
       qtyCtrl.appendChild(decBtn); qtyCtrl.appendChild(qtyInput); qtyCtrl.appendChild(incBtn);
 
       const price = document.createElement("span");
       price.className = "ticket";
-      price.textContent = fmt(l.product.price * l.qty);
+      price.textContent = fmt(variantPriceOf(l.product, l.variant) * l.qty);
 
       line.appendChild(img); line.appendChild(info);
       line.appendChild(qtyCtrl); line.appendChild(price);
