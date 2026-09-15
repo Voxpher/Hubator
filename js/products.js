@@ -6,7 +6,7 @@
 
 window.PRODUCTS = [];
 var _allProductsRequest = null;
-var PRODUCT_CACHE_KEY = "hubator_product_cache_v2"; // v2: variants carry server variant ids
+var PRODUCT_CACHE_KEY = "hubator_product_cache_v3"; // v3: products carry colorImages
 var PRODUCT_CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
 
 function hubatorApiUrl(path) {
@@ -24,6 +24,14 @@ function productForStorefront(product) {
   var sortedImages = images.slice().sort(function(a, b) { return (a.position || 0) - (b.position || 0); });
   var primaryImage = sortedImages[0];
   var allImageUrls = sortedImages.map(function(img) { return img.url; }).filter(function(u) { return typeof u === "string"; });
+
+  // Colour → photo map straight from the dashboard (used to swap the
+  // product gallery when the customer picks a colour).
+  var colorImages = Array.isArray(product.colorImages)
+    ? product.colorImages.filter(function(entry) {
+        return entry && typeof entry.url === "string" && typeof entry.color === "string";
+      })
+    : [];
 
   var variants = product.variants || [];
   var variantMap = new Map();
@@ -66,6 +74,7 @@ function productForStorefront(product) {
     badge: Number(product.compareAtPrice) > 0 ? "Sale" : null,
     desc: String(product.description || product.shortDescription || ""),
     variants: variantMap,
+    colorImages: colorImages,
     allowCOD: product.allowCOD !== false,
     allowPrepaid: product.allowPrepaid !== false,
     placements: product.placements || [],

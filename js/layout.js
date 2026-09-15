@@ -129,7 +129,7 @@
    * even if the API is unreachable. Links use the shop filter:
    * /shop?cat=<category name>.
    */
-  const CATEGORY_NAV_CACHE_KEY = "hubator_category_nav_v1";
+  const CATEGORY_NAV_CACHE_KEY = "hubator_category_nav_v2";
   const CATEGORY_NAV_FALLBACK = [
     { group: "Man", items: [["Bengali Man", "bengali-man"], ["Festival Man", "festival-man"], ["Graphic Man", "graphic-man"], ["Oversize Man", "oversize-man"], ["Solid Man", "solid-man"], ["Sweatshirt", "sweatshirt"], ["Hoodie Man", "hoodie-man"]] },
     { group: "Woman", items: [["Bengali Woman", "bengali-woman"], ["Festival Woman", "festival-woman"], ["Graphic Woman", "graphic-woman"]] },
@@ -150,6 +150,15 @@
 
   function shopCategoryHref(name) {
     return "/shop?cat=" + encodeURIComponent(name);
+  }
+
+  // Category entries may be { name } objects (live API / cache) or
+  // [name, slug] pairs (static fallback) — normalize before rendering.
+  function categoryItemName(item) {
+    if (typeof item === "string") return item;
+    if (item && typeof item.name === "string") return item.name;
+    if (Array.isArray(item) && typeof item[0] === "string") return item[0];
+    return "";
   }
 
   function groupCategories(categories) {
@@ -197,27 +206,47 @@
       });
   }
 
-  function categoryNavItems() {
+  function categoryPanelColumns() {
     return categoryNav.map(({ group, items }) => {
-      const toggleButton = make("button", {
-        type: "button",
-        class: "nav-cat-toggle",
-        "aria-expanded": "false",
-        "aria-haspopup": "true",
-        text: group,
+      const groupIcon = String(group).toLowerCase() === "accessories" ? "bag" : "user";
+      const column = make("div", { class: "nav-cats-column" });
+      append(
+        column,
+        append(
+          make("a", {
+            class: "nav-cats-group",
+            href: shopCategoryHref(group),
+            title: "All " + group + " categories",
+          }),
+          icon(groupIcon),
+          make("span", { text: group })
+        )
+      );
+      const list = make("ul", { class: "nav-cats-list" });
+      items.forEach((item) => {
+        const name = categoryItemName(item);
+        if (!name) return;
+        append(list, append(make("li"), make("a", { href: shopCategoryHref(name), text: name })));
       });
-      const menu = make("ul", { class: "nav-cat-menu" });
-      items.forEach(({ name }) => {
-        append(menu, append(make("li"), make("a", { href: shopCategoryHref(name), text: name })));
-      });
-      return append(append(make("li", { class: "nav-cat" }), toggleButton), menu);
+      append(column, list);
+      return column;
     });
   }
 
   function categoryNavContainer() {
-    const list = make("ul", { class: "nav-cats-list" });
-    categoryNavItems().forEach((item) => list.appendChild(item));
-    return append(make("li", { class: "nav-cats" }), list);
+    const toggleButton = append(
+      make("button", {
+        type: "button",
+        class: "nav-cat-toggle",
+        "aria-expanded": "false",
+        "aria-haspopup": "true",
+      }),
+      icon("shirt"),
+      make("span", { text: "Categories" })
+    );
+    const panel = make("div", { class: "nav-cats-panel" });
+    categoryPanelColumns().forEach((column) => panel.appendChild(column));
+    return append(append(make("li", { class: "nav-cats" }), toggleButton), panel);
   }
 
   function mobileCategoryContent() {
@@ -225,7 +254,9 @@
     categoryNav.forEach(({ group, items }) => {
       const list = make("ul", { class: "mobile-cat-group" });
       append(list, make("li", { class: "mobile-cat-heading", text: group }));
-      items.forEach(({ name }) => {
+      items.forEach((item) => {
+        const name = categoryItemName(item);
+        if (!name) return;
         append(list, append(make("li"), make("a", { href: shopCategoryHref(name), text: name })));
       });
       nodes.push(list);
@@ -235,11 +266,7 @@
 
   function renderCategoryNav() {
     const container = document.querySelector(".main-nav .nav-cats");
-    if (container) {
-      const list = make("ul", { class: "nav-cats-list" });
-      categoryNavItems().forEach((item) => list.appendChild(item));
-      container.replaceChildren(list);
-    }
+    if (container) container.replaceWith(categoryNavContainer());
     const mobile = document.getElementById("mobile-nav-cats");
     if (mobile) {
       mobile.replaceChildren(
@@ -810,7 +837,7 @@
     document.addEventListener("click", (event) => {
       const toggleButton = event.target.closest(".nav-cat-toggle");
       if (!toggleButton) return;
-      const item = toggleButton.closest(".nav-cat");
+      const item = toggleButton.closest(".nav-cats");
       if (!item) return;
       const open = item.classList.toggle("open");
       toggleButton.setAttribute("aria-expanded", String(open));
