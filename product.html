@@ -20,10 +20,38 @@
     const root = document.getElementById("pd-root");
     if (!p) { root.textContent = "That product is no longer available."; return; }
     const available = productIsPurchasable(p);
-    document.title = `${p.name} — Hubator`;
+    document.title = p.name + " — Hubator";
     document.getElementById("crumb-name").textContent = p.name;
-    const variantKeys = Array.from(p.variants?.keys() || []).filter(k => k !== "base");
-    root.innerHTML = `<div class="pd-gallery"><div class="pd-gallery-main"><img src="${escapeHtml(safeProductImageUrl(p.img ? p.img : (p.gallery && p.gallery.length > 0 ? p.gallery[0] : ""))}" alt="${escapeHtml(p.name)}"></div></div>${p.gallery && p.gallery.length > 1 ? `<div class="pd-gallery-thumbs">${p.gallery.slice(1).map((url, i) => `<div class="pd-gallery-thumb${i === 0 ? " active" : ""}" style="background-image: url('${escapeHtml(String(url))}')"></div>`).join("")}</div>` : ""}<div class="pd-info"><span class="product-cat">${escapeHtml(p.category)}</span><h1 style="font-size:2rem;">${escapeHtml(p.name)}</h1><div class="pd-price-row"><span class="pd-price">${fmt(p.price)}</span>${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}</div><p>${escapeHtml(p.desc)}</p>${available ? "" : '<p class="product-stock-status" role="status">Out of stock</p>'}<div class="pd-actions"><button class="btn btn-primary" data-id="${escapeHtml(p.id)}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">Add to cart</button><a href="${available ? "/checkout" : "#"}" class="btn btn-outline" data-id="${escapeHtml(p.id)}" ${available ? 'onclick="return addToCart(this.dataset.id)"' : 'aria-disabled="true"'}>Buy now</a></div><ul class="pd-meta"><li>Prices shown in Indian Rupees</li><li>Shipping is calculated securely at checkout</li></ul>${variantKeys.length > 0 ? `<div class="pd-variants"><strong>Available variants:</strong> ${variantKeys.map((k) => { const v = p.variants?.get(k); return `<span style="margin-right:8px;background:#e2e8f0;padding:2px 6px;border-radius:4px;font-size:0.78rem;">${v.color ? `Color: ${v.color}` : ""}${v.size ? ` Size: ${v.size}` : ""}`.`).join(" ")}</span>`).join(" ")}</div>` : ""}</div>`;
+    const variantEntries = Array.from(p.variants ? p.variants.entries() : []).filter(([k]) => k !== "base");
+    const variantChips = variantEntries.map(([k, v]) => {
+      const bits = [];
+      if (v && v.color) bits.push("Color: " + v.color);
+      if (v && v.size) bits.push(" Size: " + v.size);
+      return '<span style="margin-right:8px;background:#e2e8f0;padding:2px 6px;border-radius:4px;font-size:0.78rem;">'
+        + escapeHtml(bits.join("")) + "</span>";
+    }).join(" ");
+    const mainImg = p.img ? p.img : (p.gallery && p.gallery.length > 0 ? p.gallery[0] : "");
+    let html = '<div class="pd-gallery"><div class="pd-gallery-main"><img src="'
+      + escapeHtml(safeProductImageUrl(mainImg)) + '" alt="' + escapeHtml(p.name) + '"></div></div>';
+    if (p.gallery && p.gallery.length > 1) {
+      html += '<div class="pd-gallery-thumbs">' + p.gallery.slice(1).map((url, i) =>
+        '<div class="pd-gallery-thumb' + (i === 0 ? " active" : "") + '" style="background-image: url(\''
+        + escapeHtml(String(url)) + '\')"></div>').join("") + "</div>";
+    }
+    html += '<div class="pd-info"><span class="product-cat">' + escapeHtml(p.category) + "</span>"
+      + '<h1 style="font-size:2rem;">' + escapeHtml(p.name) + "</h1>"
+      + '<div class="pd-price-row"><span class="pd-price">' + fmt(p.price) + "</span>"
+      + (p.oldPrice ? '<span class="price-old">' + fmt(p.oldPrice) + "</span>" : "")
+      + "</div><p>" + escapeHtml(p.desc) + "</p>"
+      + (available ? "" : '<p class="product-stock-status" role="status">Out of stock</p>')
+      + '<div class="pd-actions"><button class="btn btn-primary" data-id="' + escapeHtml(p.id) + '"'
+      + (available ? "" : " disabled") + ' onclick="addToCart(this.dataset.id)">Add to cart</button>'
+      + '<a href="' + (available ? "/checkout" : "#") + '" class="btn btn-outline" data-id="' + escapeHtml(p.id) + '"'
+      + (available ? ' onclick="return addToCart(this.dataset.id)"' : ' aria-disabled="true"') + ">Buy now</a></div>"
+      + '<ul class="pd-meta"><li>Prices shown in Indian Rupees</li><li>Shipping is calculated securely at checkout</li></ul>'
+      + (variantEntries.length > 0 ? '<div class="pd-variants"><strong>Available variants:</strong> ' + variantChips + "</div>" : "")
+      + "</div>";
+    root.innerHTML = html;
   }).catch(err => {
     console.error("[Hubator] product:", err);
     document.getElementById("pd-root").textContent = "We couldn't load this product. Please refresh and try again.";
