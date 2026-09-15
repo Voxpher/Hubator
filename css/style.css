@@ -147,6 +147,33 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 .nav-toggle{display:none;background:none;border:none;font-size:1.4rem;color:var(--ink);padding:4px;}
 
+/* Category dropdowns in the main nav (MAN / WOMAN / ACCESSORIES) */
+.main-nav .nav-cats{display:flex;}
+.main-nav .nav-cats-list{display:flex;gap:24px;list-style:none;margin:0;padding:0;}
+.nav-cat{position:relative;}
+.nav-cat-toggle{
+  display:inline-flex;align-items:center;gap:5px;
+  background:none;border:none;cursor:pointer;
+  font-family:inherit;font-size:.9rem;font-weight:500;color:var(--ink);
+  padding:4px 0;white-space:nowrap;
+}
+.nav-cat-toggle::after{content:"▾";font-size:.7rem;transform:translateY(1px);}
+.nav-cat-toggle:hover,.nav-cat.open .nav-cat-toggle{color:var(--gold-deep);}
+.nav-cat-menu{
+  display:none;position:absolute;top:calc(100% + 10px);left:-14px;
+  min-width:210px;background:var(--white);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:0 14px 30px rgba(22,35,31,.14);
+  list-style:none;margin:0;padding:8px 0;z-index:80;
+}
+.nav-cat:hover .nav-cat-menu,
+.nav-cat.open .nav-cat-menu,
+.nav-cat:focus-within .nav-cat-menu{display:block;}
+.nav-cat-menu a{
+  display:block;padding:9px 16px;font-size:.88rem;color:var(--ink);
+  text-decoration:none;white-space:nowrap;
+}
+.nav-cat-menu a:hover{background:var(--paper);color:var(--gold-deep);}
+
 /* Mobile nav drawer */
 .mobile-nav{
   display:none;

@@ -258,6 +258,48 @@ body.nav-drawer-open {
   margin-top: 28px;
 }
 
+/* Category groups inside the mobile drawer */
+.mobile-nav-categories {
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.mobile-nav-section-title {
+  margin: 0 0 10px;
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: .65;
+}
+
+.mobile-cat-group {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+}
+
+.mobile-cat-heading {
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  padding: 8px 0 4px;
+}
+
+.mobile-cat-group li a {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: .95rem;
+}
+
+.mobile-cat-group li a:hover {
+  color: var(--gold-deep);
+}
+
 .mobile-account-name {
   margin: 0 0 4px;
   font-size: 0.88rem;
