@@ -4,17 +4,97 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shop — Hubator</title>
-<link rel="stylesheet" href="/css/style.css?v=3">
+<link rel="stylesheet" href="/css/style.css?v=4">
 
-<meta name="description" content="Shop curated apparel and fashion from Hubator — unique clothing and accessories">
+<meta name="description" content="Shop curated apparel and accessories from Hubator — unique clothing and accessories">
 <meta name="theme-color" content="#FAF7F0">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/favicon.ico">
 <meta property="og:title" content="Shop — Hubator">
-<meta property="og:description" content="Shop curated apparel and fashion from Hubator — unique clothing and accessories">
+<meta property="og:description" content="Shop curated apparel and accessories from Hubator — unique clothing and accessories">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Hubator">
 <meta name="twitter:card" content="summary">
+<style>
+  /* ── Shop-specific overrides ─────────────────────────────── */
+  .shop-layout { display: flex; gap: 28px; align-items: flex-start; }
+  .shop-sidebar {
+    width: 220px; flex-shrink: 0;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--white); padding: 18px;
+    position: sticky; top: 80px;
+  }
+  .shop-sidebar h3 {
+    font-family: var(--font-mono); font-size: .72rem; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--ink-soft); margin: 0 0 10px;
+  }
+  .shop-sidebar h3 + h3 { margin-top: 18px; }
+  .sidebar-cats { display: flex; flex-direction: column; gap: 2px; }
+  .sidebar-cats button {
+    background: none; border: none; text-align: left; padding: 7px 10px;
+    border-radius: 4px; font-size: .88rem; cursor: pointer; color: var(--ink);
+    font-family: var(--font-body);
+  }
+  .sidebar-cats button:hover { background: var(--paper-dim); }
+  .sidebar-cats button.active { background: var(--ink); color: var(--paper); }
+  .color-swatches-sidebar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .color-swatch-btn {
+    width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent;
+    cursor: pointer; transition: transform .15s, box-shadow .15s;
+    title: attr(data-name);
+  }
+  .color-swatch-btn:hover { transform: scale(1.15); }
+  .color-swatch-btn.active { border-color: var(--ink); box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--ink); }
+  .size-chips-sidebar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .size-chip-btn {
+    font-family: var(--font-mono); font-size: .74rem;
+    border: 1px solid var(--line); border-radius: 20px; padding: 5px 11px;
+    background: var(--white); cursor: pointer; color: var(--ink);
+  }
+  .size-chip-btn:hover { border-color: var(--ink); }
+  .size-chip-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .price-filter { margin-top: 4px; }
+  .price-filter input[type=range] { width: 100%; }
+  .price-range-labels { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: .72rem; color: var(--ink-soft); margin-top: 4px; }
+  .clear-filters-btn {
+    width: 100%; margin-top: 14px; padding: 7px 12px; border-radius: 4px;
+    border: 1px dashed var(--line); background: none; font-size: .8rem;
+    color: var(--ink-soft); cursor: pointer; font-family: var(--font-mono);
+  }
+  .clear-filters-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+  /* Product card swatches — row */
+  .card-swatches { display: flex; flex-direction: row; flex-wrap: wrap; gap: 5px; margin: 4px 0 2px; }
+  .card-swatch {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 1px solid rgba(22,35,31,.18); display: inline-block;
+    flex-shrink: 0;
+  }
+
+  /* "Add to cart" button — full text, gold accent */
+  .add-to-cart-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 8px 14px; background: var(--ink); color: var(--paper);
+    border: none; border-radius: var(--radius); font-size: .8rem; font-weight: 600;
+    font-family: var(--font-body); cursor: pointer; white-space: nowrap;
+    transition: background .2s, transform .15s;
+    flex-shrink: 0;
+  }
+  .add-to-cart-btn:hover { background: var(--gold-deep); transform: translateY(-1px); }
+  .add-to-cart-btn:disabled { background: var(--paper-dim); color: var(--ink-soft); cursor: not-allowed; transform: none; }
+
+  /* Product foot — price on top, button below */
+  .product-foot { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .product-foot-row { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 8px; }
+
+  .shop-main { flex: 1; min-width: 0; }
+  .shop-results-count { font-family: var(--font-mono); font-size: .76rem; color: var(--ink-soft); margin-bottom: 16px; }
+
+  @media(max-width:760px){
+    .shop-layout { flex-direction: column; }
+    .shop-sidebar { width: 100%; position: static; }
+  }
+</style>
 </head>
 <body>
 
@@ -26,136 +106,308 @@
     <div class="wrap">
       <span class="eyebrow">All products</span>
       <h1 style="font-size:2.4rem;">Shop the collection</h1>
-      <p>Curated apparel and accessories from independent designers.</p>
+      <p>Curated apparel and accessories crafted for you.</p>
     </div>
   </section>
 
-  <section class="section" style="padding-top:36px;">
+  <section class="section" style="padding-top:28px;">
     <div class="wrap">
-      <div class="filter-bar" id="filter-bar">
-        <button class="filter-chip active" data-cat="All" aria-pressed="true">All</button>
-        <button class="filter-chip" data-cat="Home" aria-pressed="false">Home</button>
-        <button class="filter-chip" data-cat="Kitchen" aria-pressed="false">Kitchen</button>
-        <button class="filter-chip" data-cat="Apparel" aria-pressed="false">Apparel</button>
-        <button class="filter-chip" data-cat="Accessories" aria-pressed="false">Accessories</button>
-        <button class="filter-chip" data-cat="Bags" aria-pressed="false">Bags</button>
-        <button class="filter-chip" data-cat="Footwear" aria-pressed="false">Footwear</button>
+      <div class="shop-layout">
+
+        <!-- Sidebar filters -->
+        <aside class="shop-sidebar" id="shop-sidebar">
+          <h3>Categories</h3>
+          <div class="sidebar-cats" id="sidebar-cats">
+            <button class="active" data-cat="All">All</button>
+          </div>
+
+          <h3>Color</h3>
+          <div class="color-swatches-sidebar" id="color-swatches-sidebar"></div>
+
+          <h3>Size</h3>
+          <div class="size-chips-sidebar" id="size-chips-sidebar"></div>
+
+          <h3>Price</h3>
+          <div class="price-filter">
+            <input type="range" id="price-range-slider" min="0" max="10000" step="10" value="10000">
+            <div class="price-range-labels">
+              <span>₹0</span>
+              <span id="price-range-max-label">₹10000</span>
+            </div>
+          </div>
+
+          <button class="clear-filters-btn" id="clear-filters-btn">Clear all filters</button>
+        </aside>
+
+        <!-- Product grid -->
+        <div class="shop-main">
+          <div class="shop-results-count" id="results-count"></div>
+          <div class="product-grid" id="shop-grid"></div>
+        </div>
+
       </div>
-      <div class="product-grid" id="shop-grid"></div>
     </div>
   </section>
 </main>
 
 <div id="site-footer"></div>
 
-<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
+<script src="/js/maintenance.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/config.js"></script>
 <script src="/js/products.js"></script>
-<script src="/js/cart.js"></script><script src="/js/auth.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
 <script>
-  function cardHTML(p){
-    const available = productIsPurchasable(p);
-    const hasVariants = p.variants && p.variants.size > 0;
-    return `
-      <div class="product-card" data-cat="${escapeHtml(p.category)}">
-        <a href="${productUrl(p)}" class="product-media">
-          ${p.badge ? `<span class="product-badge ticket ${p.badge==='Sale'?'on-sale':''}">${escapeHtml(p.badge)}</span>` : ""}
-          <img src="${escapeHtml(safeProductImageUrl(p.img))}" alt="${escapeHtml(p.name)}">
-        </a>
-        <div class="product-body">
-          <span class="product-cat">${escapeHtml(p.category)}</span>
-          <h4><a href="${productUrl(p)}">${escapeHtml(p.name)}</a></h4>
-          <div class="product-foot">
-            <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
-            ${hasVariants ? `<div class="product-variants">${Array.from(p.variants.keys()).slice(0,2).map((k) => { const v = p.variants.get(k); return `<span>${v.color ? `Color: ${v.color}` : ""}${v.size ? ` Size: ${v.size}` : ""}</span>`.trim();}).join(" ")}</div>` : ""}
-            <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
-          </div>
-        </div>
-      </div>`;
+(function() {
+  var grid = document.getElementById("shop-grid");
+  var sidebarCats = document.getElementById("sidebar-cats");
+  var colorSwatches = document.getElementById("color-swatches-sidebar");
+  var sizeChips = document.getElementById("size-chips-sidebar");
+  var priceSlider = document.getElementById("price-range-slider");
+  var priceLabel = document.getElementById("price-range-max-label");
+  var clearBtn = document.getElementById("clear-filters-btn");
+  var resultsCount = document.getElementById("results-count");
+
+  var activeCat = "All";
+  var activeColors = new Set();
+  var activeSizes = new Set();
+  var maxPrice = 10000;
+  var globalMaxPrice = 10000;
+
+  // ── Product card HTML ────────────────────────────────────────
+  function cardHTML(p) {
+    var available = productIsPurchasable(p);
+
+    // Color swatches from colorImages or variants — deduplicated, row layout
+    var swatchColors = [];
+    if (Array.isArray(p.colorImages) && p.colorImages.length > 0) {
+      p.colorImages.forEach(function(ci) {
+        if (ci.color && !swatchColors.find(function(s) { return s.name === ci.color; })) {
+          swatchColors.push({ name: ci.color, hex: ci.colorHex || "" });
+        }
+      });
+    }
+    if (swatchColors.length === 0 && p.variants) {
+      p.variants.forEach(function(v) {
+        if (v.color && !swatchColors.find(function(s) { return s.name === v.color; })) {
+          swatchColors.push({ name: v.color, hex: v.colorHex || "" });
+        }
+      });
+    }
+
+    var swatchesHTML = swatchColors.length > 0
+      ? '<div class="card-swatches">' + swatchColors.slice(0, 6).map(function(s) {
+          var bg = s.hex || "#ccc";
+          return '<span class="card-swatch" style="background:' + escapeHtml(bg) + ';" title="' + escapeHtml(s.name) + '"></span>';
+        }).join("") + (swatchColors.length > 6 ? '<span style="font-family:var(--font-mono);font-size:.65rem;color:var(--ink-soft);align-self:center;">+' + (swatchColors.length - 6) + '</span>' : '') + '</div>'
+      : "";
+
+    return '<div class="product-card" data-cat="' + escapeHtml(p.category) + '">' +
+      '<a href="' + productUrl(p) + '" class="product-media">' +
+        (p.badge ? '<span class="product-badge ticket ' + (p.badge === "Sale" ? "on-sale" : "") + '">' + escapeHtml(p.badge) + '</span>' : "") +
+        '<img src="' + escapeHtml(safeProductImageUrl(p.img)) + '" alt="' + escapeHtml(p.name) + '" loading="lazy">' +
+      '</a>' +
+      '<div class="product-body">' +
+        '<span class="product-cat">' + escapeHtml(p.category) + '</span>' +
+        '<h4><a href="' + productUrl(p) + '">' + escapeHtml(p.name) + '</a></h4>' +
+        swatchesHTML +
+        '<div class="product-foot">' +
+          '<div class="product-foot-row">' +
+            '<span class="ticket ' + (p.oldPrice ? "on-sale" : "") + '">' +
+              (p.oldPrice ? '<span class="price-old">' + fmt(p.oldPrice) + '</span>' : "") +
+              fmt(p.price) +
+            '</span>' +
+          '</div>' +
+          '<div class="product-foot-row">' +
+            '<a href="' + productUrl(p) + '" class="add-to-cart-btn" aria-label="View ' + escapeHtml(p.name) + '">View &amp; Buy</a>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   }
-  const grid = document.getElementById("shop-grid");
-  const filterBar = document.getElementById("filter-bar");
-  // Group names are clickable from the header "Categories" menu
-  // (/shop?cat=Man). A filter key may therefore be a group
-  // ("Man") or a single category name ("Bengali Man").
-  // Groups expand to every category belonging to that group.
-  const GROUP_OF_CATEGORY = { "Man": "Man", "Woman": "Woman", "Accessories": "Accessories" };
-  let categoryGroups = {};
-  function refreshCategoryGroups() {
-    // Cheap local map: category name -> group name, synced with the
-    // header "Categories" menu (live API, local cache, or static fallback).
-    categoryGroups = Object.assign({}, GROUP_OF_CATEGORY);
-    try {
-      const cached = JSON.parse(localStorage.getItem("hubator_category_nav_v2") || "null");
-      if (Array.isArray(cached)) {
-        cached.forEach(function(entry) {
-          (entry.items || []).forEach(function(item) {
-            const name = typeof item === "string" ? item : item.name || (Array.isArray(item) ? item[0] : "");
-            if (name) categoryGroups[name] = entry.group;
-          });
-        });
-      }
-    } catch (error) { /* keep fallback map */ }
+
+  // ── Filtering ────────────────────────────────────────────────
+  function matchesFilters(p) {
+    // Category
+    if (activeCat !== "All" && p.category !== activeCat) return false;
+    // Color
+    if (activeColors.size > 0) {
+      var productColors = new Set();
+      (p.colorImages || []).forEach(function(ci) { if (ci.color) productColors.add(ci.color); });
+      if (p.variants) { p.variants.forEach(function(v) { if (v.color) productColors.add(v.color); }); }
+      var matched = false;
+      activeColors.forEach(function(c) { if (productColors.has(c)) matched = true; });
+      if (!matched) return false;
+    }
+    // Size
+    if (activeSizes.size > 0) {
+      var productSizes = new Set();
+      if (p.variants) { p.variants.forEach(function(v) { if (v.size) productSizes.add(v.size); }); }
+      var matched = false;
+      activeSizes.forEach(function(s) { if (productSizes.has(s)) matched = true; });
+      if (!matched) return false;
+    }
+    // Price
+    if (p.price > maxPrice) return false;
+    return true;
   }
-  function matchesFilter(product, cat) {
-    if (cat === "All") return true;
-    if (product.category === cat) return true;
-    const catLower = String(cat).toLowerCase();
-    const groupLower = String(categoryGroups[String(product.category || "")] || "").toLowerCase();
-    if (groupLower && groupLower === catLower) return true;
-    // Fallback when the group map hasn't loaded yet: "Man"/"Woman"
-    // only match whole words so "Festival Woman" isn't pulled into "Man".
-    const lower = String(product.category || "").toLowerCase();
-    if (catLower === "man") return lower.split(/[^a-z]+/).includes("man");
-    if (catLower === "woman") return lower.split(/[^a-z]+/).includes("woman");
-    if (catLower === "accessories") return lower === "accessories";
-    return false;
+
+  function render() {
+    var list = (window.PRODUCTS || []).filter(matchesFilters);
+    grid.innerHTML = list.map(cardHTML).join("") || '<p style="grid-column:1/-1;color:var(--ink-soft);">No products match your filters.</p>';
+    if (resultsCount) resultsCount.textContent = list.length + " product" + (list.length === 1 ? "" : "s");
   }
-  function render(cat){
-    const list = PRODUCTS.filter(p => matchesFilter(p, cat));
-    grid.innerHTML = list.map(cardHTML).join("") || `<p>There are no products in this category yet.</p>`;
-  }
-  function selectCategory(cat) {
-    document.querySelectorAll(".filter-chip").forEach(c => {
-      const active = c.dataset.cat === cat;
-      c.classList.toggle("active", active);
-      c.setAttribute("aria-pressed", String(active));
+
+  // ── Category sidebar ─────────────────────────────────────────
+  function buildCategories() {
+    var cats = Array.from(new Set((window.PRODUCTS || []).map(function(p) { return p.category; }).filter(Boolean))).sort();
+    sidebarCats.innerHTML = "";
+    var allBtn = document.createElement("button");
+    allBtn.textContent = "All";
+    allBtn.dataset.cat = "All";
+    if (activeCat === "All") allBtn.classList.add("active");
+    sidebarCats.appendChild(allBtn);
+    cats.forEach(function(cat) {
+      var btn = document.createElement("button");
+      btn.textContent = cat;
+      btn.dataset.cat = cat;
+      if (activeCat === cat) btn.classList.add("active");
+      sidebarCats.appendChild(btn);
     });
-    render(cat);
   }
-  filterBar.addEventListener("click", (event) => {
-    const chip = event.target.closest(".filter-chip");
-    if (chip) selectCategory(chip.dataset.cat);
+
+  sidebarCats.addEventListener("click", function(e) {
+    var btn = e.target.closest("button[data-cat]");
+    if (!btn) return;
+    activeCat = btn.dataset.cat;
+    document.querySelectorAll("#sidebar-cats button").forEach(function(b) {
+      b.classList.toggle("active", b.dataset.cat === activeCat);
+    });
+    render();
   });
-  const params = new URLSearchParams(location.search);
-  const requestedCat = (params.get("cat") || "").trim();
-  let initialCat = requestedCat || "All";
-  function syncCategories() {
-    refreshCategoryGroups();
-    const existing = new Set(Array.from(document.querySelectorAll(".filter-chip")).map(c => c.dataset.cat));
-    const categories = Array.from(new Set(PRODUCTS.map(p => p.category).filter(Boolean))).sort();
-    categories.forEach(category => {
-      if (existing.has(category)) return;
-      const chip = document.createElement("button");
-      chip.type = "button";
-      chip.className = "filter-chip";
-      chip.dataset.cat = category;
-      chip.setAttribute("aria-pressed", "false");
-      chip.textContent = category;
-      filterBar.appendChild(chip);
+
+  // ── Color swatches sidebar ───────────────────────────────────
+  function buildColorSwatches(filterData) {
+    colorSwatches.innerHTML = "";
+    if (!filterData || !filterData.colors || filterData.colors.length === 0) {
+      colorSwatches.innerHTML = '<span style="font-size:.78rem;color:var(--ink-soft);">—</span>';
+      return;
+    }
+    // Build hex map from products
+    var hexMap = {};
+    (window.PRODUCTS || []).forEach(function(p) {
+      (p.colorImages || []).forEach(function(ci) { if (ci.color && ci.colorHex) hexMap[ci.color] = ci.colorHex; });
+      if (p.variants) { p.variants.forEach(function(v) { if (v.color && v.colorHex) hexMap[v.color] = v.colorHex; }); }
     });
-    if (!categories.includes(initialCat) && initialCat !== "All") initialCat = "All";
-    selectCategory(initialCat);
+    filterData.colors.forEach(function(colorName) {
+      var btn = document.createElement("button");
+      btn.className = "color-swatch-btn";
+      btn.dataset.color = colorName;
+      btn.title = colorName;
+      btn.setAttribute("aria-label", colorName);
+      var hex = hexMap[colorName] || "#cccccc";
+      btn.style.background = hex;
+      if (activeColors.has(colorName)) btn.classList.add("active");
+      colorSwatches.appendChild(btn);
+    });
   }
-  loadProducts().then(syncCategories).catch(err => {
+
+  colorSwatches.addEventListener("click", function(e) {
+    var btn = e.target.closest(".color-swatch-btn");
+    if (!btn) return;
+    var c = btn.dataset.color;
+    if (activeColors.has(c)) { activeColors.delete(c); btn.classList.remove("active"); }
+    else { activeColors.add(c); btn.classList.add("active"); }
+    render();
+  });
+
+  // ── Size chips sidebar ───────────────────────────────────────
+  function buildSizeChips(filterData) {
+    sizeChips.innerHTML = "";
+    if (!filterData || !filterData.sizes || filterData.sizes.length === 0) {
+      sizeChips.innerHTML = '<span style="font-size:.78rem;color:var(--ink-soft);">—</span>';
+      return;
+    }
+    filterData.sizes.forEach(function(size) {
+      var btn = document.createElement("button");
+      btn.className = "size-chip-btn";
+      btn.dataset.size = size;
+      btn.textContent = size;
+      if (activeSizes.has(size)) btn.classList.add("active");
+      sizeChips.appendChild(btn);
+    });
+  }
+
+  sizeChips.addEventListener("click", function(e) {
+    var btn = e.target.closest(".size-chip-btn");
+    if (!btn) return;
+    var s = btn.dataset.size;
+    if (activeSizes.has(s)) { activeSizes.delete(s); btn.classList.remove("active"); }
+    else { activeSizes.add(s); btn.classList.add("active"); }
+    render();
+  });
+
+  // ── Price slider ─────────────────────────────────────────────
+  priceSlider.addEventListener("input", function() {
+    maxPrice = Number(priceSlider.value);
+    priceLabel.textContent = fmt(maxPrice);
+    render();
+  });
+
+  // ── Clear filters ────────────────────────────────────────────
+  clearBtn.addEventListener("click", function() {
+    activeCat = "All";
+    activeColors.clear();
+    activeSizes.clear();
+    maxPrice = globalMaxPrice;
+    priceSlider.value = globalMaxPrice;
+    priceLabel.textContent = fmt(globalMaxPrice);
+    document.querySelectorAll("#sidebar-cats button").forEach(function(b) { b.classList.toggle("active", b.dataset.cat === "All"); });
+    document.querySelectorAll(".color-swatch-btn").forEach(function(b) { b.classList.remove("active"); });
+    document.querySelectorAll(".size-chip-btn").forEach(function(b) { b.classList.remove("active"); });
+    render();
+  });
+
+  // ── URL param: ?cat= ─────────────────────────────────────────
+  var params = new URLSearchParams(location.search);
+  var requestedCat = (params.get("cat") || "").trim();
+
+  // ── Boot ─────────────────────────────────────────────────────
+  var filterData = null;
+  fetchFilterOptions().then(function(data) {
+    filterData = data;
+    if (data && data.priceMax > 0) {
+      globalMaxPrice = data.priceMax;
+      maxPrice = data.priceMax;
+      priceSlider.max = data.priceMax;
+      priceSlider.value = data.priceMax;
+      priceLabel.textContent = fmt(data.priceMax);
+    }
+    buildColorSwatches(filterData);
+    buildSizeChips(filterData);
+  }).catch(function() {});
+
+  loadProducts().then(function(products) {
+    if (requestedCat) activeCat = requestedCat;
+    buildCategories();
+    buildColorSwatches(filterData);
+    buildSizeChips(filterData);
+    render();
+  }).catch(function(err) {
     console.error("[Hubator] shop:", err);
     grid.innerHTML = "<p>We couldn't load the collection. Please refresh and try again.</p>";
   });
-  window.addEventListener("hubator:products-loaded", () => {
-    syncCategories();
-    const active = document.querySelector(".filter-chip.active");
-    render(active ? active.dataset.cat : "All");
+
+  window.addEventListener("hubator:products-loaded", function() {
+    buildCategories();
+    render();
   });
-  window.addEventListener("hubator:cart-changed", updateCartBadge);
+
+  window.addEventListener("hubator:cart-changed", function() {
+    if (typeof updateCartBadge === "function") updateCartBadge();
+  });
+})();
 </script>
 </body>
 </html>
