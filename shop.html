@@ -16,6 +16,7 @@
 <meta property="og:site_name" content="Hubator">
 <meta name="twitter:card" content="summary">
 </head>
+
 <body>
 
 <div id="site-header"></div>
@@ -33,13 +34,30 @@
   <section class="section" style="padding-top:36px;">
     <div class="wrap">
       <div class="filter-bar" id="filter-bar">
-        <button class="filter-chip active" data-cat="All" aria-pressed="true">All</button>
-        <button class="filter-chip" data-cat="Home" aria-pressed="false">Home</button>
-        <button class="filter-chip" data-cat="Kitchen" aria-pressed="false">Kitchen</button>
-        <button class="filter-chip" data-cat="Apparel" aria-pressed="false">Apparel</button>
-        <button class="filter-chip" data-cat="Accessories" aria-pressed="false">Accessories</button>
-        <button class="filter-chip" data-cat="Bags" aria-pressed="false">Bags</button>
-        <button class="filter-chip" data-cat="Footwear" aria-pressed="false">Footwear</button>
+        <div class="filter-chip-row" style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
+          <button class="filter-chip active" data-cat="All" aria-pressed="true">All</button>
+          <button class="filter-chip" data-cat="Home" aria-pressed="false">Home</button>
+          <button class="filter-chip" data-cat="Kitchen" aria-pressed="false">Kitchen</button>
+          <button class="filter-chip" data-cat="Apparel" aria-pressed="false">Apparel</button>
+          <button class="filter-chip" data-cat="Accessories" aria-pressed="false">Accessories</button>
+          <button class="filter-chip" data-cat="Bags" aria-pressed="false">Bags</button>
+          <button class="filter-chip" data-cat="Footwear" aria-pressed="false">Footwear</button>
+        </div>
+        <div id="color-swatches-filter" style={{ marginBottom: "16px" }}>
+          <!-- Populated by JS -->
+        </div>
+        <div id="size-chips-filter" style={{ marginBottom: "16px" }}>
+          <!-- Populated by JS -->
+        </div>
+        <div style={{ marginBottom: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", fontFamily: "var(--font-mono), monospace" }}>
+            <span id="price-min-desktop" style={{ color: "var(--ink)" }}>₹0</span>
+            <input type="range" id="price-range-desktop" style={{ flex: 1, height: 4 }} min="0" max="10000" step="10" value="10000">
+            <span id="price-max-desktop" style={{ color: "var(--ink)" }}>₹10000</span>
+          </div>
+        </div>
+        <button class="button-link secondary" style={{ marginTop: "8px", width: "100%", padding: "8px 16px", background: "none", border: "none", color: "var(--ink)", fontSize: "0.875rem", cursor: "pointer" }} id="clear-filters-btn">Clear all filters</button>
+        <span class="cart-count" style={{ marginLeft: "0.5rem", background: "var(--rust)", width: "18px", height: "18px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".65rem", color: "var(--white)" }} id="filter-count-badge">0</span>
       </div>
       <div class="product-grid" id="shop-grid"></div>
     </div>
@@ -50,11 +68,198 @@
 
 <script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
 <script src="/js/products.js"></script>
-<script src="/js/cart.js"></script><script src="/js/auth.js"></script>
+<script src="/js/cart.js"></script><script src="/js/auth.js">
+</script>
 <script>
+  // Live filter state
+  var activeFilters = { category: "All", colors: [], sizes: [], minPrice: 0, maxPrice: Infinity };
+  var allColors = [];    // from API
+  var allSizes = [];     // from API
+
+  // Fetch live filter options after products load
+  function initFilters() {
+    var base = (window.HUBATOR_API_BASE || "").replace(/\/$/, "");
+    var url = base + "/api/admin/filter-options";
+    if (!base || !url) return;
+    fetch(url).then(function(res) {
+      if (!res.ok) return;
+      return res.json().then(function(data) {
+        allColors = data.colors || [];
+        allSizes = data.sizes || [];
+        // Populate color filter chips
+        populateColorFilters(allColors);
+        // Populate size filter chips
+        populateSizeFilters(allSizes);
+        // Set price range slider bounds
+        setPriceRangeBounds(data.priceMin || 0, data.priceMax || 10000);
+      });
+    });
+  }
+
+  function populateColorFilters(colors) {
+    var container = document.getElementById("color-swatches-filter");
+    if (!container) return;
+    container.innerHTML = "";
+    colors.forEach(function(colorName) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "filter-chip";
+      chip.style = {
+        padding: "6px 10px", fontSize: "0.75rem", borderRadius: "20px",
+        border: "1px solid var(--line)", background: "var(--white)",
+        cursor: "pointer", color: "var(--ink)", margin: "2px 4px",
+        minWidth: "32px", textAlign: "center"
+      };
+      chip.dataset.color = colorName;
+      // We'll set background after we know the hex - use placeholder
+      chip.style.background = "#e5e7eb";
+      chip.textContent = colorName.substring(0, 6) + (colorName.length > 6 ? "..." : "");
+      chip.onclick = function() { toggleColorFilter(colorName); };
+      container.appendChild(chip);
+    });
+  }
+
+  function populateSizeFilters(sizes) {
+    var container = document.getElementById("size-chips-filter");
+    if (!container) return;
+    container.innerHTML = "";
+    sizes.forEach(function(size) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "filter-chip";
+      chip.style = {
+        padding: "6px 10px", fontSize: "0.75rem", borderRadius: "20px",
+        border: "1px solid var(--line)", background: "var(--white)",
+        cursor: "pointer", color: "var(--ink)", margin: "2px 4px"
+      };
+      chip.dataset.size = size;
+      chip.textContent = size;
+      chip.onclick = function() { toggleSizeFilter(size); };
+      container.appendChild(chip);
+    });
+  }
+
+  function setPriceRangeBounds(min, max) {
+    var priceInput = document.getElementById("price-range-desktop");
+    if (priceInput) {
+      priceInput.min = min;
+      priceInput.max = max;
+      priceInput.value = max;
+    }
+    updatePriceDisplay(min, max);
+  }
+
+  function updatePriceDisplay(min, max) {
+    var minEl = document.getElementById("price-min-desktop");
+    var maxEl = document.getElementById("price-max-desktop");
+    if (minEl) minEl.textContent = "₹" + min;
+    if (maxEl) maxEl.textContent = "₹" + max;
+  }
+
+  function toggleColorFilter(colorName) {
+    var chip = event.target.closest(".filter-chip");
+    if (!chip) return;
+    var wasActive = chip.classList.contains("active");
+    document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+    if (!wasActive) {
+      chip.classList.add("active");
+      activeFilters.colors.push(colorName);
+    }
+    applyFilters();
+  }
+
+  function toggleSizeFilter(size) {
+    var chip = event.target.closest(".filter-chip");
+    if (!chip) return;
+    var wasActive = chip.classList.contains("active");
+    document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+    if (!wasActive) {
+      chip.classList.add("active");
+      activeFilters.sizes.push(size);
+    }
+    applyFilters();
+  }
+
+  function applyFilters() {
+    // Update URL
+    var url = new URL(location.href);
+    url.searchParams.set("category", activeFilters.category);
+    url.searchParams.set("colors", activeFilters.colors.join(","));
+    url.searchParams.set("sizes", activeFilters.sizes.join(","));
+    url.searchParams.set("minPrice", activeFilters.minPrice);
+    url.searchParams.set("maxPrice", activeFilters.maxPrice);
+    history.pushState({}, "", url);
+
+    // Filter products
+    var list = PRODUCTS.filter(function(p) {
+      // Category filter
+      if (activeFilters.category !== "All" && p.category !== activeFilters.category) return false;
+      // Color filter (OR within colors)
+      if (activeFilters.colors.length > 0) {
+        var hasColor = false;
+        p.variants.forEach(function(v) {
+          if (activeFilters.colors.some(c => v.color && v.color.toLowerCase() === c.toLowerCase())) { hasColor = true; }
+        });
+        if (!hasColor) return false;
+      }
+      // Size filter (OR within sizes)
+      if (activeFilters.sizes.length > 0) {
+        var hasSize = false;
+        p.variants.forEach(function(v) {
+          if (activeFilters.sizes.some(s => v.size && v.size.toLowerCase() === s.toLowerCase())) { hasSize = true; }
+        });
+        if (!hasSize) return false;
+      }
+      // Price filter
+      if (p.price < activeFilters.minPrice || p.price > activeFilters.maxPrice) return false;
+      return true;
+    });
+    document.getElementById("shop-grid").innerHTML = list.map(cardHTML).join("") || "<p>No products match these filters.</p>";
+    updateFilterCountBadge();
+  }
+
+  function updateFilterCountBadge() {
+    var count = document.querySelectorAll(".filter-chip.active").length;
+    var badge = document.getElementById("filter-count-badge");
+    if (badge) badge.textContent = count;
+  }
+
+  document.getElementById("clear-filters-btn").onclick = function() {
+    activeFilters = { category: "All", colors: [], sizes: [], minPrice: 0, maxPrice: Infinity };
+    document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+    applyFilters();
+    updateFilterCountBadge();
+  };
+
+  // ---- Load products and initialize ----
   function cardHTML(p){
     const available = productIsPurchasable(p);
     const hasVariants = p.variants && p.variants.size > 0;
+    var colors = [];
+    if (p.variants && p.variants.size > 0) {
+      p.variants.forEach(function(v) { if (v.color && colors.indexOf(v.color) === -1) colors.push(v.color); });
+    }
+    var swatchesHTML = "";
+    var maxShow = 3;
+    var extraCount = 0;
+    for (var i = 0; i < colors.length; i++) {
+      if (i < maxShow) {
+        var colorName = colors[i];
+        var colorHex = "#ffffff";
+        if (p.variants && p.variants.size > 0) {
+          p.variants.forEach(function(v) {
+            if (v.color && v.color.toLowerCase() === colorName.toLowerCase()) { colorHex = v.colorHex || "#ffffff"; }
+          });
+        }
+        swatchesHTML += `<span class="color-swatch" style="width:20px;height:20px;border-radius:50%;background:${colorHex};border:1px solid var(--line);display:inline-block;margin:2px;flex-shrink:0;" title="${colorName}"></span>`;
+      } else {
+        extraCount++;
+      }
+    }
+    if (extraCount > 0) {
+      swatchesHTML += `<span class="color-swatch" style="width:20px;height:20px;border-radius:50%;background:var(--line);border:1px solid var(--line);display:inline-block;margin:2px;flex-shrink:0;" title="+${extraCount} more colors"></span>`;
+    }
+
     return `
       <div class="product-card" data-cat="${escapeHtml(p.category)}">
         <a href="${productUrl(p)}" class="product-media">
@@ -64,9 +269,10 @@
         <div class="product-body">
           <span class="product-cat">${escapeHtml(p.category)}</span>
           <h4><a href="${productUrl(p)}">${escapeHtml(p.name)}</a></h4>
+          ${swatchesHTML}
           <div class="product-foot">
             <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
-            ${hasVariants ? `<div class="product-variants">${Array.from(p.variants.keys()).slice(0,2).map((k) => { const v = p.variants.get(k); return `<span>${v.color ? `Color: ${v.color}` : ""}${v.size ? ` Size: ${v.size}` : ""}</span>`.trim();}).join(" ")}</div>` : ""}
+            ${hasVariants ? `<div class="product-variants">${Array.from(p.variants.keys()).slice(0,2).map((k) => { const v = p.variants.get(k); return `<span>${v.color ? `Color: ${v.color}` : ""}${v.size ? ` Size: ${v.size}</span>`.trim();}).join(" ")}</div>` : ""}
             <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
           </div>
         </div>
@@ -109,14 +315,26 @@
     if (!categories.includes(initialCat) && initialCat !== "All") initialCat = "All";
     selectCategory(initialCat);
   }
-  loadProducts().then(syncCategories).catch(err => {
+  loadProducts().then(function(products) {
+    window.PRODUCTS = products;
+    syncCategories();
+    // Initialize filters after products load
+    initFilters();
+    // Apply any initial filter from URL
+    var urlCat = params.get("cat") || "";
+    if (urlCat && categories.includes(urlCat)) {
+      selectCategory(urlCat);
+    } else {
+      selectCategory("All");
+    }
+    updateFilterCountBadge();
+  }).catch(err => {
     console.error("[Hubator] shop:", err);
     grid.innerHTML = "<p>We couldn't load the collection. Please refresh and try again.</p>";
   });
   window.addEventListener("hubator:products-loaded", () => {
     syncCategories();
-    const active = document.querySelector(".filter-chip.active");
-    render(active ? active.dataset.cat : "All");
+    initFilters();
   });
   window.addEventListener("hubator:cart-changed", updateCartBadge);
 </script>

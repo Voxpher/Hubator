@@ -15,6 +15,22 @@ function hubatorApiUrl(path) {
   return base + path;
 }
 
+function fetchFilterOptions() {
+  var url = hubatorApiUrl("/api/admin/filter-options");
+  if (!url) return null;
+  return fetch(url).then(function(res) {
+    if (!res.ok) return null;
+    return res.json().then(function(data) {
+      return {
+        colors: data.colors || [],
+        sizes: data.sizes || [],
+        priceMin: data.priceMin || 0,
+        priceMax: data.priceMax || 0,
+      };
+    });
+  });
+}
+
 function productForStorefront(product) {
   if (!product || (product._id == null && product.id == null)) return null;
 
