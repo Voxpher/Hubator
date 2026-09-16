@@ -34,7 +34,7 @@
   <section class="section" style="padding-top:36px;">
     <div class="wrap">
       <div class="filter-bar" id="filter-bar">
-        <div class="filter-chip-row" style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
+        <div class="filter-chip-row" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
           <button class="filter-chip active" data-cat="All" aria-pressed="true">All</button>
           <button class="filter-chip" data-cat="Home" aria-pressed="false">Home</button>
           <button class="filter-chip" data-cat="Kitchen" aria-pressed="false">Kitchen</button>
@@ -43,21 +43,21 @@
           <button class="filter-chip" data-cat="Bags" aria-pressed="false">Bags</button>
           <button class="filter-chip" data-cat="Footwear" aria-pressed="false">Footwear</button>
         </div>
-        <div id="color-swatches-filter" style={{ marginBottom: "16px" }}>
+        <div id="color-swatches-filter" style="margin-bottom:16px;">
           <!-- Populated by JS -->
         </div>
-        <div id="size-chips-filter" style={{ marginBottom: "16px" }}>
+        <div id="size-chips-filter" style="margin-bottom:16px;">
           <!-- Populated by JS -->
         </div>
-        <div style={{ marginBottom: "16px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", fontFamily: "var(--font-mono), monospace" }}>
-            <span id="price-min-desktop" style={{ color: "var(--ink)" }}>₹0</span>
-            <input type="range" id="price-range-desktop" style={{ flex: 1, height: 4 }} min="0" max="10000" step="10" value="10000">
-            <span id="price-max-desktop" style={{ color: "var(--ink)" }}>₹10000</span>
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-family:var(--font-mono),monospace;">
+            <span id="price-min-desktop" style="color:var(--ink);">₹0</span>
+            <input type="range" id="price-range-desktop" style="flex:1;height:4px;" min="0" max="10000" step="10" value="10000">
+            <span id="price-max-desktop" style="color:var(--ink);">₹10000</span>
           </div>
         </div>
-        <button class="button-link secondary" style={{ marginTop: "8px", width: "100%", padding: "8px 16px", background: "none", border: "none", color: "var(--ink)", fontSize: "0.875rem", cursor: "pointer" }} id="clear-filters-btn">Clear all filters</button>
-        <span class="cart-count" style={{ marginLeft: "0.5rem", background: "var(--rust)", width: "18px", height: "18px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".65rem", color: "var(--white)" }} id="filter-count-badge">0</span>
+        <button class="button-link secondary" style="margin-top:8px;width:100%;padding:8px 16px;background:none;border:none;color:var(--ink);font-size:0.875rem;cursor:pointer;" id="clear-filters-btn">Clear all filters</button>
+        <span class="cart-count" style="margin-left:0.5rem;background:var(--rust);width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--white);" id="filter-count-badge">0</span>
       </div>
       <div class="product-grid" id="shop-grid"></div>
     </div>
@@ -104,15 +104,8 @@
       var chip = document.createElement("button");
       chip.type = "button";
       chip.className = "filter-chip";
-      chip.style = {
-        padding: "6px 10px", fontSize: "0.75rem", borderRadius: "20px",
-        border: "1px solid var(--line)", background: "var(--white)",
-        cursor: "pointer", color: "var(--ink)", margin: "2px 4px",
-        minWidth: "32px", textAlign: "center"
-      };
+      chip.style.cssText = "padding:6px 10px;font-size:0.75rem;border-radius:20px;border:1px solid var(--line);background:#e5e7eb;cursor:pointer;color:var(--ink);margin:2px 4px;min-width:32px;text-align:center;";
       chip.dataset.color = colorName;
-      // We'll set background after we know the hex - use placeholder
-      chip.style.background = "#e5e7eb";
       chip.textContent = colorName.substring(0, 6) + (colorName.length > 6 ? "..." : "");
       chip.onclick = function() { toggleColorFilter(colorName); };
       container.appendChild(chip);
@@ -127,11 +120,7 @@
       var chip = document.createElement("button");
       chip.type = "button";
       chip.className = "filter-chip";
-      chip.style = {
-        padding: "6px 10px", fontSize: "0.75rem", borderRadius: "20px",
-        border: "1px solid var(--line)", background: "var(--white)",
-        cursor: "pointer", color: "var(--ink)", margin: "2px 4px"
-      };
+      chip.style.cssText = "padding:6px 10px;font-size:0.75rem;border-radius:20px;border:1px solid var(--line);background:var(--white);cursor:pointer;color:var(--ink);margin:2px 4px;";
       chip.dataset.size = size;
       chip.textContent = size;
       chip.onclick = function() { toggleSizeFilter(size); };
@@ -272,7 +261,7 @@
           ${swatchesHTML}
           <div class="product-foot">
             <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
-            ${hasVariants ? `<div class="product-variants">${Array.from(p.variants.keys()).slice(0,2).map((k) => { const v = p.variants.get(k); return `<span>${v.color ? `Color: ${v.color}` : ""}${v.size ? ` Size: ${v.size}</span>`.trim();}).join(" ")}</div>` : ""}
+            ${hasVariants ? ` <div class="product-variants">${Array.from(p.variants.keys()).slice(0,2).map((k) => { const v = p.variants.get(k); var c = v.color || ""; var s = v.size || ""; return "<span>" + c + (s ? " Size: " + s : "") + "</span>"; }).join(" ")}</div>` : ""}
             <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
           </div>
         </div>

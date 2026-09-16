@@ -7,7 +7,7 @@
 window.PRODUCTS = [];
 var _allProductsRequest = null;
 var PRODUCT_CACHE_KEY = "hubator_product_cache_v3"; // v3: products carry colorImages
-var PRODUCT_CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
+var PRODUCT_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes — keeps the storefront fresh after dashboard edits
 
 function hubatorApiUrl(path) {
   var base = (window.HUBATOR_API_BASE || "").replace(/\/$/, "");
@@ -16,7 +16,7 @@ function hubatorApiUrl(path) {
 }
 
 function fetchFilterOptions() {
-  var url = hubatorApiUrl("/api/admin/filter-options");
+  var url = hubatorApiUrl("/api/public/filter-options");
   if (!url) return null;
   return fetch(url).then(function(res) {
     if (!res.ok) return null;
