@@ -115,7 +115,7 @@
     },
   };
 
-  const NAV_LINKS = [
+  const NAV_LINKS_FALLBACK = [
     { href: "/", label: "Home", icon: "home" },
     { href: "/shop", label: "Shop", icon: "shop" },
     { href: "/about", label: "About", icon: "info" },
@@ -123,7 +123,9 @@
     { href: "/faq", label: "FAQ", icon: "help" },
   ];
 
-  /* ── Category navigation (MAN / WOMAN / ACCESSORIES) ──────────
+  var NAV_LINKS = NAV_LINKS_FALLBACK;
+
+  const FOOTER_COLUMNS_FALLBACK = [
    * Groups come from the dashboard's public categories API and are
    * cached in localStorage; a static fallback keeps the menu usable
    * even if the API is unreachable. Links use the shop filter:
@@ -276,7 +278,7 @@
     }
   }
 
-  const FOOTER_COLUMNS = [
+  const FOOTER_COLUMNS_FALLBACK = [
     {
       heading: "Shop",
       links: [
@@ -314,6 +316,8 @@
       ],
     },
   ];
+
+  var FOOTER_COLUMNS = FOOTER_COLUMNS_FALLBACK;
 
   function make(tag, attrs) {
     const node = document.createElement(tag);
@@ -823,6 +827,65 @@
     root.querySelectorAll(CONTROL_SELECTOR).forEach(enhanceControl);
   }
 
+  /* ── Fetch nav menus from dashboard ───────────────────────────
+   * Fetches /api/public/navigation from the dashboard and replaces
+   * NAV_LINKS and FOOTER_COLUMNS. Falls back to hardcoded values
+   * if the fetch fails or returns empty menus.
+   */
+  function fetchNavMenus() {
+    var url = typeof hubatorApiUrl === "function" ? hubatorApiUrl("/api/public/navigation") : null;
+    if (!url || typeof fetch !== "function") return;
+    fetch(url)
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(data) {
+        var menus = Array.isArray(data && data.menus) ? data.menus : [];
+        if (!menus.length) return; // no saved menus yet — keep fallback
+
+        var mainMenu = menus.find(function(m) { return m.id === "main"; });
+        if (mainMenu && Array.isArray(mainMenu.links) && mainMenu.links.length) {
+          NAV_LINKS = mainMenu.links.map(function(l) {
+            return { href: l.href || "/", label: l.label || "", icon: l.icon || "home", openInNewTab: !!l.openInNewTab };
+          }).sort(function(a, b) { return (a.sortOrder || 0) - (b.sortOrder || 0); });
+
+          // Re-render desktop nav
+          var mainNav = document.querySelector(".main-nav ul");
+          if (mainNav) {
+            var newList = navigationList(true);
+            mainNav.replaceWith(newList);
+            // Re-attach category panel toggle
+          }
+          // Re-render mobile nav links
+          var mobileNav = document.querySelector(".mobile-nav nav");
+          if (mobileNav) {
+            var mobileList = navigationList();
+            mobileNav.replaceChildren(mobileList);
+          }
+        }
+
+        // Footer menus
+        var footerMenuIds = ["footer-shop", "footer-company", "footer-legal"];
+        var hasFooterMenus = footerMenuIds.some(function(id) {
+          return menus.find(function(m) { return m.id === id && m.links && m.links.length; });
+        });
+        if (hasFooterMenus) {
+          FOOTER_COLUMNS = menus
+            .filter(function(m) { return m.id && m.id.startsWith("footer-") && m.links && m.links.length; })
+            .map(function(m) {
+              return {
+                heading: m.title.replace(/^Footer — /, ""),
+                links: m.links.map(function(l) {
+                  return { href: l.href || "/", label: l.label || "", icon: l.icon || "home" };
+                }),
+              };
+            });
+          // Re-render footer
+          var footer = document.querySelector(".site-footer");
+          if (footer) footer.replaceWith(buildFooter());
+        }
+      })
+      .catch(function() { /* keep fallback nav */ });
+  }
+
   function initialize() {
     const main = document.querySelector("main");
     if (main && !main.id) main.id = "main-content";
@@ -844,6 +907,7 @@
     });
 
     fetchCategoryNav();
+    fetchNavMenus();
 
     const footerPlaceholder = document.getElementById("site-footer");
     if (footerPlaceholder) footerPlaceholder.replaceWith(buildFooter());
