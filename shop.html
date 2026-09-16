@@ -4,19 +4,115 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shop — Hubator</title>
-<link rel="stylesheet" href="/css/style.css?v=3">
-
-<meta name="description" content="Shop curated apparel and fashion from Hubator — unique clothing and accessories">
+<link rel="stylesheet" href="/css/style.css?v=4">
+<meta name="description" content="Shop curated apparel and accessories from Hubator">
 <meta name="theme-color" content="#FAF7F0">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/favicon.ico">
 <meta property="og:title" content="Shop — Hubator">
-<meta property="og:description" content="Shop curated apparel and fashion from Hubator — unique clothing and accessories">
+<meta property="og:description" content="Shop curated apparel and accessories from Hubator">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Hubator">
 <meta name="twitter:card" content="summary">
+<style>
+/* ── Shop layout ──────────────────────────────────── */
+.shop-layout{display:flex;gap:28px;align-items:flex-start;}
+.shop-sidebar{
+  width:210px;flex-shrink:0;
+  border:1px solid var(--line);border-radius:8px;
+  background:var(--white);padding:18px 16px;
+  position:sticky;top:80px;
+}
+.shop-sidebar-section{margin-bottom:20px;}
+.shop-sidebar-section:last-child{margin-bottom:0;}
+.sidebar-heading{
+  font-family:var(--font-mono);font-size:.69rem;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--ink-soft);margin:0 0 10px;
+}
+/* Category list */
+.sidebar-cats{display:flex;flex-direction:column;gap:2px;}
+.sidebar-cats button{
+  background:none;border:none;text-align:left;padding:7px 10px;
+  border-radius:4px;font-size:.88rem;cursor:pointer;color:var(--ink);
+  font-family:var(--font-body);transition:background .15s;
+}
+.sidebar-cats button:hover{background:var(--paper-dim);}
+.sidebar-cats button.active{background:var(--ink);color:var(--paper);}
+/* Color swatches */
+.sidebar-swatches{display:flex;flex-wrap:wrap;gap:7px;}
+.sidebar-swatch{
+  width:24px;height:24px;border-radius:50%;
+  border:2px solid transparent;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  flex-shrink:0;
+}
+.sidebar-swatch:hover{transform:scale(1.15);}
+.sidebar-swatch.active{
+  border-color:var(--ink);
+  box-shadow:0 0 0 2px var(--white),0 0 0 3.5px var(--ink);
+}
+/* Size chips */
+.sidebar-sizes{display:flex;flex-wrap:wrap;gap:6px;}
+.sidebar-size{
+  font-family:var(--font-mono);font-size:.74rem;
+  border:1px solid var(--line);border-radius:20px;
+  padding:5px 11px;background:var(--white);
+  cursor:pointer;color:var(--ink);transition:border-color .15s,background .15s;
+}
+.sidebar-size:hover{border-color:var(--ink);}
+.sidebar-size.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+/* Price slider */
+.price-slider{width:100%;}
+.price-range-labels{
+  display:flex;justify-content:space-between;
+  font-family:var(--font-mono);font-size:.72rem;color:var(--ink-soft);margin-top:5px;
+}
+/* Clear btn */
+.sidebar-clear{
+  width:100%;padding:7px 12px;border-radius:4px;
+  border:1px dashed var(--line);background:none;
+  font-size:.78rem;color:var(--ink-soft);cursor:pointer;
+  font-family:var(--font-mono);margin-top:4px;
+  transition:border-color .15s,color .15s;
+}
+.sidebar-clear:hover{border-color:var(--ink);color:var(--ink);}
+/* Main area */
+.shop-main{flex:1;min-width:0;}
+.results-count{
+  font-family:var(--font-mono);font-size:.76rem;
+  color:var(--ink-soft);margin-bottom:16px;
+}
+/* Product card swatches — horizontal row */
+.card-swatches{
+  display:flex;flex-direction:row;flex-wrap:wrap;
+  gap:5px;margin:6px 0 4px;
+}
+.card-swatch{
+  width:16px;height:16px;border-radius:50%;
+  border:1px solid rgba(22,35,31,.18);
+  display:inline-block;flex-shrink:0;
+}
+/* Add to cart button */
+.card-buy-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  padding:8px 14px;background:var(--ink);color:var(--paper);
+  border:none;border-radius:var(--radius);
+  font-size:.8rem;font-weight:600;font-family:var(--font-body);
+  cursor:pointer;white-space:nowrap;
+  transition:background .2s,transform .15s;
+  text-decoration:none;flex-shrink:0;
+}
+.card-buy-btn:hover{background:var(--gold-deep);transform:translateY(-1px);}
+.card-buy-btn:disabled{background:var(--paper-dim);color:var(--ink-soft);cursor:not-allowed;transform:none;}
+/* Override product-foot to stack price above button */
+.product-foot{flex-direction:column;align-items:flex-start;gap:8px;}
+.product-foot-price{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+@media(max-width:760px){
+  .shop-layout{flex-direction:column;}
+  .shop-sidebar{width:100%;position:static;}
+}
+</style>
 </head>
-
 <body>
 
 <div id="site-header"></div>
@@ -27,342 +123,292 @@
     <div class="wrap">
       <span class="eyebrow">All products</span>
       <h1 style="font-size:2.4rem;">Shop the collection</h1>
-      <p>Curated apparel and accessories from independent designers.</p>
+      <p>Curated apparel and accessories crafted for you.</p>
     </div>
   </section>
 
-  <section class="section" style="padding-top:36px;">
+  <section class="section" style="padding-top:28px;">
     <div class="wrap">
-      <div class="filter-bar" id="filter-bar">
-        <div class="filter-chip-row" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
-          <button class="filter-chip active" data-cat="All" aria-pressed="true">All</button>
-          <button class="filter-chip" data-cat="Home" aria-pressed="false">Home</button>
-          <button class="filter-chip" data-cat="Kitchen" aria-pressed="false">Kitchen</button>
-          <button class="filter-chip" data-cat="Apparel" aria-pressed="false">Apparel</button>
-          <button class="filter-chip" data-cat="Accessories" aria-pressed="false">Accessories</button>
-          <button class="filter-chip" data-cat="Bags" aria-pressed="false">Bags</button>
-          <button class="filter-chip" data-cat="Footwear" aria-pressed="false">Footwear</button>
-        </div>
-        <div id="color-swatches-filter" style="margin-bottom:16px;">
-          <!-- Populated by JS -->
-        </div>
-        <div id="size-chips-filter" style="margin-bottom:16px;">
-          <!-- Populated by JS -->
-        </div>
-        <div style="margin-bottom:16px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-family:var(--font-mono),monospace;">
-            <span id="price-min-desktop" style="color:var(--ink);">₹0</span>
-            <input type="range" id="price-range-desktop" style="flex:1;height:4px;" min="0" max="10000" step="10" value="10000">
-            <span id="price-max-desktop" style="color:var(--ink);">₹10000</span>
+      <div class="shop-layout">
+
+        <!-- ── Sidebar ───────────────────────────────── -->
+        <aside class="shop-sidebar">
+          <div class="shop-sidebar-section">
+            <p class="sidebar-heading">Category</p>
+            <div class="sidebar-cats" id="sidebar-cats">
+              <button class="active" data-cat="All">All</button>
+            </div>
           </div>
+
+          <div class="shop-sidebar-section" id="color-section" style="display:none;">
+            <p class="sidebar-heading">Color</p>
+            <div class="sidebar-swatches" id="sidebar-swatches"></div>
+          </div>
+
+          <div class="shop-sidebar-section" id="size-section" style="display:none;">
+            <p class="sidebar-heading">Size</p>
+            <div class="sidebar-sizes" id="sidebar-sizes"></div>
+          </div>
+
+          <div class="shop-sidebar-section">
+            <p class="sidebar-heading">Price</p>
+            <input type="range" class="price-slider" id="price-slider" min="0" max="10000" step="10" value="10000">
+            <div class="price-range-labels">
+              <span>₹0</span>
+              <span id="price-max-label">₹10,000</span>
+            </div>
+          </div>
+
+          <button class="sidebar-clear" id="clear-filters">Clear all filters</button>
+        </aside>
+
+        <!-- ── Product grid ──────────────────────────── -->
+        <div class="shop-main">
+          <p class="results-count" id="results-count"></p>
+          <div class="product-grid" id="shop-grid"></div>
         </div>
-        <button class="button-link secondary" style="margin-top:8px;width:100%;padding:8px 16px;background:none;border:none;color:var(--ink);font-size:0.875rem;cursor:pointer;" id="clear-filters-btn">Clear all filters</button>
-        <span class="cart-count" style="margin-left:0.5rem;background:var(--rust);width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--white);" id="filter-count-badge">0</span>
+
       </div>
-      <div class="product-grid" id="shop-grid"></div>
     </div>
   </section>
 </main>
 
 <div id="site-footer"></div>
 
-<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
+<script src="/js/maintenance.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/config.js"></script>
 <script src="/js/products.js"></script>
-<script src="/js/cart.js"></script><script src="/js/auth.js">
-</script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
 <script>
-  // Live filter state
-  var activeFilters = { category: "All", colors: [], sizes: [], minPrice: 0, maxPrice: Infinity };
-  var allColors = [];    // from API
-  var allSizes = [];     // from API
+(function(){
+  /* ── State ───────────────────────────────────────── */
+  var activeCat    = "All";
+  var activeColors = [];   // array of color names
+  var activeSizes  = [];   // array of size names
+  var maxPrice     = 10000;
+  var globalMax    = 10000;
 
-  // Fetch live filter options after products load
-  function initFilters() {
-    var base = (window.HUBATOR_API_BASE || "").replace(/\/$/, "");
-    var url = base + "/api/admin/filter-options";
-    if (!base || !url) return;
-    fetch(url).then(function(res) {
-      if (!res.ok) return;
-      return res.json().then(function(data) {
-        allColors = data.colors || [];
-        allSizes = data.sizes || [];
-        // Populate color filter chips
-        populateColorFilters(allColors);
-        // Populate size filter chips
-        populateSizeFilters(allSizes);
-        // Set price range slider bounds
-        setPriceRangeBounds(data.priceMin || 0, data.priceMax || 10000);
+  /* ── DOM refs ────────────────────────────────────── */
+  var grid       = document.getElementById("shop-grid");
+  var catList    = document.getElementById("sidebar-cats");
+  var swatches   = document.getElementById("sidebar-swatches");
+  var sizes      = document.getElementById("sidebar-sizes");
+  var slider     = document.getElementById("price-slider");
+  var priceLabel = document.getElementById("price-max-label");
+  var clearBtn   = document.getElementById("clear-filters");
+  var countEl    = document.getElementById("results-count");
+
+  /* ── Card HTML ───────────────────────────────────── */
+  function cardHTML(p) {
+    var available = productIsPurchasable(p);
+
+    // Collect unique colors with hex from colorImages OR variants
+    var seen = {};
+    var swatchList = [];
+    (p.colorImages || []).forEach(function(ci){
+      if(ci.color && !seen[ci.color]){ seen[ci.color]=1; swatchList.push({name:ci.color,hex:ci.colorHex||""}); }
+    });
+    if(swatchList.length===0 && p.variants){
+      p.variants.forEach(function(v){
+        if(v.color && !seen[v.color]){ seen[v.color]=1; swatchList.push({name:v.color,hex:v.colorHex||""}); }
       });
+    }
+
+    var swatchHTML = "";
+    if(swatchList.length>0){
+      swatchHTML = '<div class="card-swatches">' +
+        swatchList.slice(0,6).map(function(s){
+          return '<span class="card-swatch" style="background:'+(s.hex||"#ccc")+';" title="'+escapeHtml(s.name)+'"></span>';
+        }).join("") +
+        (swatchList.length>6 ? '<span style="font-size:.65rem;color:var(--ink-soft);align-self:center;">+' + (swatchList.length-6) + '</span>' : '') +
+      '</div>';
+    }
+
+    return '<div class="product-card" data-cat="'+escapeHtml(p.category)+'">' +
+      '<a href="'+productUrl(p)+'" class="product-media">' +
+        (p.badge ? '<span class="product-badge ticket '+(p.badge==="Sale"?"on-sale":"")+'">'+ escapeHtml(p.badge)+'</span>' : '')+
+        '<img src="'+escapeHtml(safeProductImageUrl(p.img))+'" alt="'+escapeHtml(p.name)+'" loading="lazy">'+
+      '</a>' +
+      '<div class="product-body">' +
+        '<span class="product-cat">'+escapeHtml(p.category)+'</span>' +
+        '<h4><a href="'+productUrl(p)+'">'+escapeHtml(p.name)+'</a></h4>' +
+        swatchHTML +
+        '<div class="product-foot">' +
+          '<div class="product-foot-price">' +
+            '<span class="ticket '+(p.oldPrice?"on-sale":"")+'">' +
+              (p.oldPrice ? '<span class="price-old">'+fmt(p.oldPrice)+'</span>' : '') +
+              fmt(p.price) +
+            '</span>' +
+          '</div>' +
+          '<a href="'+productUrl(p)+'" class="card-buy-btn">View &amp; Buy</a>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── Filtering ───────────────────────────────────── */
+  function matchesAll(p){
+    // Category
+    if(activeCat!=="All"){
+      var cat = String(p.category||"").toLowerCase();
+      var target = activeCat.toLowerCase();
+      if(cat !== target) return false;
+    }
+    // Color
+    if(activeColors.length>0){
+      var pColors = new Set();
+      (p.colorImages||[]).forEach(function(ci){ if(ci.color) pColors.add(ci.color); });
+      if(p.variants) p.variants.forEach(function(v){ if(v.color) pColors.add(v.color); });
+      var ok=false; activeColors.forEach(function(c){ if(pColors.has(c)) ok=true; });
+      if(!ok) return false;
+    }
+    // Size
+    if(activeSizes.length>0){
+      var pSizes = new Set();
+      if(p.variants) p.variants.forEach(function(v){ if(v.size) pSizes.add(v.size); });
+      var ok=false; activeSizes.forEach(function(s){ if(pSizes.has(s)) ok=true; });
+      if(!ok) return false;
+    }
+    // Price
+    if(p.price > maxPrice) return false;
+    return true;
+  }
+
+  function render(){
+    var list = (window.PRODUCTS||[]).filter(matchesAll);
+    grid.innerHTML = list.map(cardHTML).join("") ||
+      '<p style="grid-column:1/-1;color:var(--ink-soft);padding:40px 0;">No products match your filters.</p>';
+    if(countEl) countEl.textContent = list.length + " product" + (list.length===1?"":"s");
+  }
+
+  /* ── Build category list ─────────────────────────── */
+  function buildCats(){
+    var cats = Array.from(new Set((window.PRODUCTS||[]).map(function(p){ return p.category; }).filter(Boolean))).sort();
+    catList.innerHTML = "";
+    var allBtn = document.createElement("button");
+    allBtn.textContent="All"; allBtn.dataset.cat="All";
+    if(activeCat==="All") allBtn.classList.add("active");
+    catList.appendChild(allBtn);
+    cats.forEach(function(c){
+      var btn=document.createElement("button");
+      btn.textContent=c; btn.dataset.cat=c;
+      if(activeCat===c) btn.classList.add("active");
+      catList.appendChild(btn);
     });
   }
-
-  function populateColorFilters(colors) {
-    var container = document.getElementById("color-swatches-filter");
-    if (!container) return;
-    container.innerHTML = "";
-    colors.forEach(function(colorName) {
-      var chip = document.createElement("button");
-      chip.type = "button";
-      chip.className = "filter-chip";
-      chip.style.cssText = "padding:6px 10px;font-size:0.75rem;border-radius:20px;border:1px solid var(--line);background:#e5e7eb;cursor:pointer;color:var(--ink);margin:2px 4px;min-width:32px;text-align:center;";
-      chip.dataset.color = colorName;
-      chip.textContent = colorName.substring(0, 6) + (colorName.length > 6 ? "..." : "");
-      chip.onclick = function() { toggleColorFilter(colorName); };
-      container.appendChild(chip);
-    });
-  }
-
-  function populateSizeFilters(sizes) {
-    var container = document.getElementById("size-chips-filter");
-    if (!container) return;
-    container.innerHTML = "";
-    sizes.forEach(function(size) {
-      var chip = document.createElement("button");
-      chip.type = "button";
-      chip.className = "filter-chip";
-      chip.style.cssText = "padding:6px 10px;font-size:0.75rem;border-radius:20px;border:1px solid var(--line);background:var(--white);cursor:pointer;color:var(--ink);margin:2px 4px;";
-      chip.dataset.size = size;
-      chip.textContent = size;
-      chip.onclick = function() { toggleSizeFilter(size); };
-      container.appendChild(chip);
-    });
-  }
-
-  function setPriceRangeBounds(min, max) {
-    var priceInput = document.getElementById("price-range-desktop");
-    if (priceInput) {
-      priceInput.min = min;
-      priceInput.max = max;
-      priceInput.value = max;
-    }
-    updatePriceDisplay(min, max);
-  }
-
-  function updatePriceDisplay(min, max) {
-    var minEl = document.getElementById("price-min-desktop");
-    var maxEl = document.getElementById("price-max-desktop");
-    if (minEl) minEl.textContent = "₹" + min;
-    if (maxEl) maxEl.textContent = "₹" + max;
-  }
-
-  function toggleColorFilter(colorName) {
-    var chip = event.target.closest(".filter-chip");
-    if (!chip) return;
-    var wasActive = chip.classList.contains("active");
-    document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
-    if (!wasActive) {
-      chip.classList.add("active");
-      activeFilters.colors.push(colorName);
-    }
-    applyFilters();
-  }
-
-  function toggleSizeFilter(size) {
-    var chip = event.target.closest(".filter-chip");
-    if (!chip) return;
-    var wasActive = chip.classList.contains("active");
-    document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
-    if (!wasActive) {
-      chip.classList.add("active");
-      activeFilters.sizes.push(size);
-    }
-    applyFilters();
-  }
-
-  function applyFilters() {
-    // Update URL
-    var url = new URL(location.href);
-    url.searchParams.set("category", activeFilters.category);
-    url.searchParams.set("colors", activeFilters.colors.join(","));
-    url.searchParams.set("sizes", activeFilters.sizes.join(","));
-    url.searchParams.set("minPrice", activeFilters.minPrice);
-    url.searchParams.set("maxPrice", activeFilters.maxPrice);
-    history.pushState({}, "", url);
-
-    // Filter products
-    var list = PRODUCTS.filter(function(p) {
-      // Category filter
-      if (activeFilters.category !== "All" && p.category !== activeFilters.category) return false;
-      // Color filter (OR within colors)
-      if (activeFilters.colors.length > 0) {
-        var hasColor = false;
-        p.variants.forEach(function(v) {
-          if (activeFilters.colors.some(c => v.color && v.color.toLowerCase() === c.toLowerCase())) { hasColor = true; }
-        });
-        if (!hasColor) return false;
-      }
-      // Size filter (OR within sizes)
-      if (activeFilters.sizes.length > 0) {
-        var hasSize = false;
-        p.variants.forEach(function(v) {
-          if (activeFilters.sizes.some(s => v.size && v.size.toLowerCase() === s.toLowerCase())) { hasSize = true; }
-        });
-        if (!hasSize) return false;
-      }
-      // Price filter
-      if (p.price < activeFilters.minPrice || p.price > activeFilters.maxPrice) return false;
-      return true;
-    });
-    document.getElementById("shop-grid").innerHTML = list.map(cardHTML).join("") || "<p>No products match these filters.</p>";
-    updateFilterCountBadge();
-  }
-
-  function updateFilterCountBadge() {
-    var count = document.querySelectorAll(".filter-chip.active").length;
-    var badge = document.getElementById("filter-count-badge");
-    if (badge) badge.textContent = count;
-  }
-
-  document.getElementById("clear-filters-btn").onclick = function() {
-    activeFilters = { category: "All", colors: [], sizes: [], minPrice: 0, maxPrice: Infinity };
-    document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
-    applyFilters();
-    updateFilterCountBadge();
-  };
-
-  // ---- Load products and initialize ----
-  function cardHTML(p){
-    const available = productIsPurchasable(p);
-    const hasVariants = p.variants && p.variants.size > 0;
-    var colors = [];
-    if (p.variants && p.variants.size > 0) {
-      p.variants.forEach(function(v) { if (v.color && colors.indexOf(v.color) === -1) colors.push(v.color); });
-    }
-    var swatchesHTML = "";
-    var maxShow = 3;
-    var extraCount = 0;
-    for (var i = 0; i < colors.length; i++) {
-      if (i < maxShow) {
-        var colorName = colors[i];
-        var colorHex = "#ffffff";
-        if (p.variants && p.variants.size > 0) {
-          p.variants.forEach(function(v) {
-            if (v.color && v.color.toLowerCase() === colorName.toLowerCase()) { colorHex = v.colorHex || "#ffffff"; }
-          });
-        }
-        swatchesHTML += `<span class="color-swatch" style="width:20px;height:20px;border-radius:50%;background:${colorHex};border:1px solid var(--line);display:inline-block;margin:2px;flex-shrink:0;" title="${colorName}"></span>`;
-      } else {
-        extraCount++;
-      }
-    }
-    if (extraCount > 0) {
-      swatchesHTML += `<span class="color-swatch" style="width:20px;height:20px;border-radius:50%;background:var(--line);border:1px solid var(--line);display:inline-block;margin:2px;flex-shrink:0;" title="+${extraCount} more colors"></span>`;
-    }
-
-    return `
-      <div class="product-card" data-cat="${escapeHtml(p.category)}">
-        <a href="${productUrl(p)}" class="product-media">
-          ${p.badge ? `<span class="product-badge ticket ${p.badge==='Sale'?'on-sale':''}">${escapeHtml(p.badge)}</span>` : ""}
-          <img src="${escapeHtml(safeProductImageUrl(p.img))}" alt="${escapeHtml(p.name)}">
-        </a>
-        <div class="product-body">
-          <span class="product-cat">${escapeHtml(p.category)}</span>
-          <h4><a href="${productUrl(p)}">${escapeHtml(p.name)}</a></h4>
-          ${swatchesHTML}
-          <div class="product-foot">
-            <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
-            ${hasVariants ? ` <div class="product-variants">${Array.from(p.variants.keys()).slice(0,2).map((k) => { const v = p.variants.get(k); var c = v.color || ""; var s = v.size || ""; return "<span>" + c + (s ? " Size: " + s : "") + "</span>"; }).join(" ")}</div>` : ""}
-            <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
-          </div>
-        </div>
-      </div>`;
-  }
-  const grid = document.getElementById("shop-grid");
-  const filterBar = document.getElementById("filter-bar");
-  // Group names are clickable from the header "Categories" menu
-  // (/shop?cat=Man). A filter key may therefore be a group
-  // ("Man") or a single category name ("Bengali Man").
-  // Groups expand to every category belonging to that group.
-  const GROUP_OF_CATEGORY = { "Man": "Man", "Woman": "Woman", "Accessories": "Accessories" };
-  let categoryGroups = {};
-  function refreshCategoryGroups() {
-    // Cheap local map: category name -> group name, synced with the
-    // header "Categories" menu (live API, local cache, or static fallback).
-    categoryGroups = Object.assign({}, GROUP_OF_CATEGORY);
-    try {
-      const cached = JSON.parse(localStorage.getItem("hubator_category_nav_v2") || "null");
-      if (Array.isArray(cached)) {
-        cached.forEach(function(entry) {
-          (entry.items || []).forEach(function(item) {
-            const name = typeof item === "string" ? item : item.name || (Array.isArray(item) ? item[0] : "");
-            if (name) categoryGroups[name] = entry.group;
-          });
-        });
-      }
-    } catch (error) { /* keep fallback map */ }
-  }
-  function matchesFilter(product, cat) {
-    if (cat === "All") return true;
-    if (product.category === cat) return true;
-    const catLower = String(cat).toLowerCase();
-    const groupLower = String(categoryGroups[String(product.category || "")] || "").toLowerCase();
-    if (groupLower && groupLower === catLower) return true;
-    // Fallback when the group map hasn't loaded yet: "Man"/"Woman"
-    // only match whole words so "Festival Woman" isn't pulled into "Man".
-    const lower = String(product.category || "").toLowerCase();
-    if (catLower === "man") return lower.split(/[^a-z]+/).includes("man");
-    if (catLower === "woman") return lower.split(/[^a-z]+/).includes("woman");
-    if (catLower === "accessories") return lower === "accessories";
-    return false;
-  }
-  function render(cat){
-    const list = PRODUCTS.filter(p => matchesFilter(p, cat));
-    grid.innerHTML = list.map(cardHTML).join("") || `<p>There are no products in this category yet.</p>`;
-  }
-  function selectCategory(cat) {
-    document.querySelectorAll(".filter-chip").forEach(c => {
-      const active = c.dataset.cat === cat;
-      c.classList.toggle("active", active);
-      c.setAttribute("aria-pressed", String(active));
-    });
-    render(cat);
-  }
-  filterBar.addEventListener("click", (event) => {
-    const chip = event.target.closest(".filter-chip");
-    if (chip) selectCategory(chip.dataset.cat);
+  catList.addEventListener("click",function(e){
+    var btn=e.target.closest("button[data-cat]"); if(!btn) return;
+    activeCat=btn.dataset.cat;
+    catList.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active",b.dataset.cat===activeCat); });
+    render();
   });
-  const params = new URLSearchParams(location.search);
-  const requestedCat = (params.get("cat") || "").trim();
-  let initialCat = requestedCat || "All";
-  function syncCategories() {
-    refreshCategoryGroups();
-    const existing = new Set(Array.from(document.querySelectorAll(".filter-chip")).map(c => c.dataset.cat));
-    const categories = Array.from(new Set(PRODUCTS.map(p => p.category).filter(Boolean))).sort();
-    categories.forEach(category => {
-      if (existing.has(category)) return;
-      const chip = document.createElement("button");
-      chip.type = "button";
-      chip.className = "filter-chip";
-      chip.dataset.cat = category;
-      chip.setAttribute("aria-pressed", "false");
-      chip.textContent = category;
-      filterBar.appendChild(chip);
+
+  /* ── Build color swatches ────────────────────────── */
+  function buildSwatches(filterData){
+    if(!filterData||!filterData.colors||filterData.colors.length===0){ document.getElementById("color-section").style.display="none"; return; }
+    // Build hex map from products
+    var hexMap={};
+    (window.PRODUCTS||[]).forEach(function(p){
+      (p.colorImages||[]).forEach(function(ci){ if(ci.color&&ci.colorHex) hexMap[ci.color]=ci.colorHex; });
+      if(p.variants) p.variants.forEach(function(v){ if(v.color&&v.colorHex) hexMap[v.color]=v.colorHex; });
     });
-    if (!categories.includes(initialCat) && initialCat !== "All") initialCat = "All";
-    selectCategory(initialCat);
+    swatches.innerHTML="";
+    filterData.colors.forEach(function(name){
+      var btn=document.createElement("button");
+      btn.className="sidebar-swatch"; btn.dataset.color=name;
+      btn.title=name; btn.setAttribute("aria-label",name);
+      btn.style.background=hexMap[name]||"#ccc";
+      if(activeColors.indexOf(name)>-1) btn.classList.add("active");
+      swatches.appendChild(btn);
+    });
+    document.getElementById("color-section").style.display="block";
   }
-  loadProducts().then(function(products) {
-    window.PRODUCTS = products;
-    syncCategories();
-    // Initialize filters after products load
-    initFilters();
-    // Apply any initial filter from URL
-    var urlCat = params.get("cat") || "";
-    if (urlCat && categories.includes(urlCat)) {
-      selectCategory(urlCat);
-    } else {
-      selectCategory("All");
+  swatches.addEventListener("click",function(e){
+    var btn=e.target.closest(".sidebar-swatch"); if(!btn) return;
+    var c=btn.dataset.color;
+    var idx=activeColors.indexOf(c);
+    if(idx>-1){ activeColors.splice(idx,1); btn.classList.remove("active"); }
+    else { activeColors.push(c); btn.classList.add("active"); }
+    render();
+  });
+
+  /* ── Build size chips ────────────────────────────── */
+  function buildSizes(filterData){
+    if(!filterData||!filterData.sizes||filterData.sizes.length===0){ document.getElementById("size-section").style.display="none"; return; }
+    sizes.innerHTML="";
+    filterData.sizes.forEach(function(name){
+      var btn=document.createElement("button");
+      btn.className="sidebar-size"; btn.dataset.size=name; btn.textContent=name;
+      if(activeSizes.indexOf(name)>-1) btn.classList.add("active");
+      sizes.appendChild(btn);
+    });
+    document.getElementById("size-section").style.display="block";
+  }
+  sizes.addEventListener("click",function(e){
+    var btn=e.target.closest(".sidebar-size"); if(!btn) return;
+    var s=btn.dataset.size;
+    var idx=activeSizes.indexOf(s);
+    if(idx>-1){ activeSizes.splice(idx,1); btn.classList.remove("active"); }
+    else { activeSizes.push(s); btn.classList.add("active"); }
+    render();
+  });
+
+  /* ── Price slider ────────────────────────────────── */
+  slider.addEventListener("input",function(){
+    maxPrice=Number(slider.value);
+    priceLabel.textContent="₹"+maxPrice.toLocaleString("en-IN");
+    render();
+  });
+
+  /* ── Clear all ───────────────────────────────────── */
+  clearBtn.addEventListener("click",function(){
+    activeCat="All"; activeColors=[]; activeSizes=[]; maxPrice=globalMax;
+    slider.value=globalMax;
+    priceLabel.textContent="₹"+globalMax.toLocaleString("en-IN");
+    catList.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active",b.dataset.cat==="All"); });
+    swatches.querySelectorAll(".sidebar-swatch").forEach(function(b){ b.classList.remove("active"); });
+    sizes.querySelectorAll(".sidebar-size").forEach(function(b){ b.classList.remove("active"); });
+    render();
+  });
+
+  /* ── URL ?cat= param ─────────────────────────────── */
+  var urlCat = (new URLSearchParams(location.search).get("cat")||"").trim();
+
+  /* ── Boot ────────────────────────────────────────── */
+  var filterData = null;
+
+  // Load filter options from PUBLIC endpoint
+  fetchFilterOptions().then(function(data){
+    filterData=data;
+    if(data&&data.priceMax>0){
+      globalMax=data.priceMax; maxPrice=data.priceMax;
+      slider.max=data.priceMax; slider.value=data.priceMax;
+      priceLabel.textContent="₹"+data.priceMax.toLocaleString("en-IN");
     }
-    updateFilterCountBadge();
-  }).catch(err => {
-    console.error("[Hubator] shop:", err);
-    grid.innerHTML = "<p>We couldn't load the collection. Please refresh and try again.</p>";
+    buildSwatches(filterData);
+    buildSizes(filterData);
+  }).catch(function(){});
+
+  loadProducts().then(function(){
+    if(urlCat) activeCat=urlCat;
+    buildCats();
+    buildSwatches(filterData);
+    buildSizes(filterData);
+    render();
+  }).catch(function(err){
+    console.error("[Hubator] shop:",err);
+    grid.innerHTML="<p>We couldn't load the collection. Please refresh.</p>";
   });
-  window.addEventListener("hubator:products-loaded", () => {
-    syncCategories();
-    initFilters();
+
+  window.addEventListener("hubator:products-loaded",function(){
+    buildCats(); buildSwatches(filterData); buildSizes(filterData); render();
   });
-  window.addEventListener("hubator:cart-changed", updateCartBadge);
+  window.addEventListener("hubator:cart-changed",function(){
+    if(typeof updateCartBadge==="function") updateCartBadge();
+  });
+})();
 </script>
 </body>
 </html>
