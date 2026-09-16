@@ -16,24 +16,24 @@
 <meta name="twitter:card" content="summary">
 <style>
 /* ── Shop layout ──────────────────────────────────── */
-.shop-layout{display:flex;gap:28px;align-items:flex-start;}
+.shop-layout{display:flex;gap:24px;align-items:flex-start;}
 .shop-sidebar{
-  width:210px;flex-shrink:0;
+  width:190px;flex-shrink:0;
   border:1px solid var(--line);border-radius:8px;
-  background:var(--white);padding:18px 16px;
+  background:var(--white);padding:16px 14px;
   position:sticky;top:80px;
 }
-.shop-sidebar-section{margin-bottom:20px;}
+.shop-sidebar-section{margin-bottom:18px;}
 .shop-sidebar-section:last-child{margin-bottom:0;}
 .sidebar-heading{
-  font-family:var(--font-mono);font-size:.69rem;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--ink-soft);margin:0 0 10px;
+  font-family:var(--font-mono);font-size:.67rem;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--ink-soft);margin:0 0 9px;
 }
 /* Category list */
 .sidebar-cats{display:flex;flex-direction:column;gap:2px;}
 .sidebar-cats button{
-  background:none;border:none;text-align:left;padding:7px 10px;
-  border-radius:4px;font-size:.88rem;cursor:pointer;color:var(--ink);
+  background:none;border:none;text-align:left;padding:6px 9px;
+  border-radius:4px;font-size:.86rem;cursor:pointer;color:var(--ink);
   font-family:var(--font-body);transition:background .15s;
 }
 .sidebar-cats button:hover{background:var(--paper-dim);}
@@ -54,9 +54,9 @@
 /* Size chips */
 .sidebar-sizes{display:flex;flex-wrap:wrap;gap:6px;}
 .sidebar-size{
-  font-family:var(--font-mono);font-size:.74rem;
+  font-family:var(--font-mono);font-size:.72rem;
   border:1px solid var(--line);border-radius:20px;
-  padding:5px 11px;background:var(--white);
+  padding:4px 10px;background:var(--white);
   cursor:pointer;color:var(--ink);transition:border-color .15s,background .15s;
 }
 .sidebar-size:hover{border-color:var(--ink);}
@@ -65,22 +65,24 @@
 .price-slider{width:100%;}
 .price-range-labels{
   display:flex;justify-content:space-between;
-  font-family:var(--font-mono);font-size:.72rem;color:var(--ink-soft);margin-top:5px;
+  font-family:var(--font-mono);font-size:.7rem;color:var(--ink-soft);margin-top:4px;
 }
 /* Clear btn */
 .sidebar-clear{
-  width:100%;padding:7px 12px;border-radius:4px;
+  width:100%;padding:6px 12px;border-radius:4px;
   border:1px dashed var(--line);background:none;
-  font-size:.78rem;color:var(--ink-soft);cursor:pointer;
-  font-family:var(--font-mono);margin-top:4px;
+  font-size:.76rem;color:var(--ink-soft);cursor:pointer;
+  font-family:var(--font-mono);margin-top:2px;
   transition:border-color .15s,color .15s;
 }
 .sidebar-clear:hover{border-color:var(--ink);color:var(--ink);}
-/* Main area */
+/* Main area — wider grid */
 .shop-main{flex:1;min-width:0;}
+/* Override product grid columns to use available space */
+.shop-main .product-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;}
 .results-count{
-  font-family:var(--font-mono);font-size:.76rem;
-  color:var(--ink-soft);margin-bottom:16px;
+  font-family:var(--font-mono);font-size:.74rem;
+  color:var(--ink-soft);margin-bottom:14px;
 }
 /* Product card swatches — horizontal row */
 .card-swatches{
@@ -89,27 +91,30 @@
 }
 .card-swatch{
   width:16px;height:16px;border-radius:50%;
-  border:1px solid rgba(22,35,31,.18);
+  border:1.5px solid rgba(22,35,31,.2);
   display:inline-block;flex-shrink:0;
 }
 /* Add to cart button */
 .card-buy-btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:5px;
-  padding:8px 14px;background:var(--ink);color:var(--paper);
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:8px 16px;background:var(--ink);color:var(--paper);
   border:none;border-radius:var(--radius);
-  font-size:.8rem;font-weight:600;font-family:var(--font-body);
+  font-size:.82rem;font-weight:600;font-family:var(--font-body);
   cursor:pointer;white-space:nowrap;
   transition:background .2s,transform .15s;
-  text-decoration:none;flex-shrink:0;
+  text-decoration:none;
 }
 .card-buy-btn:hover{background:var(--gold-deep);transform:translateY(-1px);}
-.card-buy-btn:disabled{background:var(--paper-dim);color:var(--ink-soft);cursor:not-allowed;transform:none;}
 /* Override product-foot to stack price above button */
 .product-foot{flex-direction:column;align-items:flex-start;gap:8px;}
-.product-foot-price{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+/* Mobile */
 @media(max-width:760px){
   .shop-layout{flex-direction:column;}
   .shop-sidebar{width:100%;position:static;}
+  .shop-main .product-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+}
+@media(max-width:400px){
+  .shop-main .product-grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -204,15 +209,28 @@
   function cardHTML(p) {
     var available = productIsPurchasable(p);
 
-    // Collect unique colors with hex from colorImages OR variants
+    // Collect unique colors with hex — check variants Map first (has colorHex), then colorImages
     var seen = {};
     var swatchList = [];
+    // Build hex lookup from variants Map
+    var hexLookup = {};
+    if(p.variants && typeof p.variants.forEach === "function"){
+      p.variants.forEach(function(v){ if(v.color && v.colorHex) hexLookup[v.color]=v.colorHex; });
+    }
+    // colorImages gives color names; use hex from lookup
     (p.colorImages || []).forEach(function(ci){
-      if(ci.color && !seen[ci.color]){ seen[ci.color]=1; swatchList.push({name:ci.color,hex:ci.colorHex||""}); }
+      if(ci.color && !seen[ci.color]){
+        seen[ci.color]=1;
+        swatchList.push({name:ci.color, hex: ci.colorHex || hexLookup[ci.color] || ""});
+      }
     });
-    if(swatchList.length===0 && p.variants){
+    // Fall back to variants if no colorImages
+    if(swatchList.length===0 && p.variants && typeof p.variants.forEach === "function"){
       p.variants.forEach(function(v){
-        if(v.color && !seen[v.color]){ seen[v.color]=1; swatchList.push({name:v.color,hex:v.colorHex||""}); }
+        if(v.color && !seen[v.color]){
+          seen[v.color]=1;
+          swatchList.push({name:v.color, hex: v.colorHex || hexLookup[v.color] || ""});
+        }
       });
     }
 
@@ -260,14 +278,18 @@
     if(activeColors.length>0){
       var pColors = new Set();
       (p.colorImages||[]).forEach(function(ci){ if(ci.color) pColors.add(ci.color); });
-      if(p.variants) p.variants.forEach(function(v){ if(v.color) pColors.add(v.color); });
+      if(p.variants && typeof p.variants.forEach === "function"){
+        p.variants.forEach(function(v){ if(v.color) pColors.add(v.color); });
+      }
       var ok=false; activeColors.forEach(function(c){ if(pColors.has(c)) ok=true; });
       if(!ok) return false;
     }
     // Size
     if(activeSizes.length>0){
       var pSizes = new Set();
-      if(p.variants) p.variants.forEach(function(v){ if(v.size) pSizes.add(v.size); });
+      if(p.variants && typeof p.variants.forEach === "function"){
+        p.variants.forEach(function(v){ if(v.size) pSizes.add(v.size); });
+      }
       var ok=false; activeSizes.forEach(function(s){ if(pSizes.has(s)) ok=true; });
       if(!ok) return false;
     }
@@ -308,11 +330,13 @@
   /* ── Build color swatches ────────────────────────── */
   function buildSwatches(filterData){
     if(!filterData||!filterData.colors||filterData.colors.length===0){ document.getElementById("color-section").style.display="none"; return; }
-    // Build hex map from products
+    // Build hex map from products — check both colorImages and variants
     var hexMap={};
     (window.PRODUCTS||[]).forEach(function(p){
       (p.colorImages||[]).forEach(function(ci){ if(ci.color&&ci.colorHex) hexMap[ci.color]=ci.colorHex; });
-      if(p.variants) p.variants.forEach(function(v){ if(v.color&&v.colorHex) hexMap[v.color]=v.colorHex; });
+      if(p.variants && typeof p.variants.forEach === "function"){
+        p.variants.forEach(function(v){ if(v.color&&v.colorHex) hexMap[v.color]=v.colorHex; });
+      }
     });
     swatches.innerHTML="";
     filterData.colors.forEach(function(name){
