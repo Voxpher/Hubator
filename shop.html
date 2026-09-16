@@ -15,178 +15,579 @@
 <meta property="og:site_name" content="Hubator">
 <meta name="twitter:card" content="summary">
 <style>
-/* ── Shop layout ──────────────────────────────────── */
-.shop-layout{display:flex;gap:28px;align-items:flex-start;}
-.shop-sidebar{
-  width:240px;flex-shrink:0;
-  border:1px solid var(--line);border-radius:8px;
-  background:var(--white);padding:20px 18px;
-  position:sticky;top:80px;
+/* ═══════════════════════════════════════════════════
+   SHOP PAGE — Premium Shopify-style design system
+   ═══════════════════════════════════════════════════ */
+
+/* ── Page shell ──────────────────────────────────────── */
+.shop-page { background: var(--paper); }
+
+/* Compact breadcrumb */
+.shop-breadcrumb {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  color: var(--ink-soft);
+  padding: 14px 0 10px;
 }
-.shop-sidebar-section{margin-bottom:22px;}
-.shop-sidebar-section:last-child{margin-bottom:0;}
-.sidebar-heading{
-  font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--ink-soft);margin:0 0 12px;
+.shop-breadcrumb a:hover { color: var(--gold-deep); }
+
+/* Compact hero */
+.shop-hero {
+  padding: 20px 0 24px;
+  border-bottom: 1px solid var(--line);
 }
-/* Category list */
-.sidebar-cats{display:flex;flex-direction:column;gap:2px;}
-.sidebar-cats button{
-  background:none;border:none;text-align:left;padding:9px 12px;
-  border-radius:6px;font-size:.92rem;cursor:pointer;color:var(--ink);
-  font-family:var(--font-body);transition:background .15s;
+.shop-hero-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
-.sidebar-cats button:hover{background:var(--paper-dim);}
-.sidebar-cats button.active{background:var(--ink);color:var(--paper);}
+.shop-hero h1 {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  margin: 0;
+  line-height: 1.1;
+}
+.shop-hero-sub {
+  font-size: .9rem;
+  color: var(--ink-soft);
+  margin: 4px 0 0;
+}
+.shop-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+.shop-sort select {
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* ── Main layout ─────────────────────────────────────── */
+.shop-body {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  padding: 28px 0 72px;
+}
+
+/* ── Sidebar ─────────────────────────────────────────── */
+.shop-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+}
+.sidebar-section {
+  border-bottom: 1px solid var(--line);
+  padding: 18px 0;
+}
+.sidebar-section:first-child { padding-top: 0; }
+.sidebar-section:last-child { border-bottom: none; }
+.sidebar-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  margin-bottom: 12px;
+  user-select: none;
+}
+.sidebar-section-title {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ink);
+  font-weight: 600;
+}
+.sidebar-toggle-icon {
+  font-size: .8rem;
+  color: var(--ink-soft);
+  transition: transform .2s;
+}
+.sidebar-section.collapsed .sidebar-toggle-icon { transform: rotate(-90deg); }
+.sidebar-section.collapsed .sidebar-section-body { display: none; }
+
+/* Category */
+.sidebar-cats { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-cat-btn {
+  background: none; border: none; text-align: left;
+  padding: 8px 10px; border-radius: 6px;
+  font-size: .9rem; cursor: pointer; color: var(--ink);
+  font-family: var(--font-body); transition: background .15s;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sidebar-cat-btn:hover { background: var(--paper-dim); }
+.sidebar-cat-btn.active {
+  background: var(--ink); color: var(--paper);
+  font-weight: 600;
+}
+.sidebar-cat-count {
+  font-family: var(--font-mono); font-size: .68rem;
+  color: var(--ink-soft); margin-left: 4px;
+}
+.sidebar-cat-btn.active .sidebar-cat-count { color: rgba(255,255,255,.6); }
+
 /* Color swatches */
-.sidebar-swatches{display:flex;flex-wrap:wrap;gap:8px;}
-.sidebar-swatch{
-  width:30px;height:30px;border-radius:50%;
-  border:2px solid transparent;cursor:pointer;
-  transition:transform .15s,box-shadow .15s;flex-shrink:0;
+.sidebar-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.sidebar-swatch {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid transparent; cursor: pointer;
+  transition: transform .15s, box-shadow .15s; flex-shrink: 0;
+  position: relative;
 }
-.sidebar-swatch:hover{transform:scale(1.12);}
-.sidebar-swatch.active{
-  border-color:var(--ink);
-  box-shadow:0 0 0 2px var(--white),0 0 0 3.5px var(--ink);
+.sidebar-swatch::after {
+  content: attr(title);
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink); color: var(--paper);
+  font-family: var(--font-mono); font-size: .65rem;
+  padding: 3px 7px; border-radius: 4px;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity .15s;
 }
+.sidebar-swatch:hover::after { opacity: 1; }
+.sidebar-swatch:hover { transform: scale(1.12); }
+.sidebar-swatch.active {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--ink);
+}
+
 /* Size chips */
-.sidebar-sizes{display:flex;flex-wrap:wrap;gap:8px;}
-.sidebar-size{
-  font-family:var(--font-mono);font-size:.8rem;
-  border:1px solid var(--line);border-radius:6px;
-  padding:7px 14px;background:var(--white);
-  cursor:pointer;color:var(--ink);transition:border-color .15s,background .15s;
-  min-width:42px;text-align:center;
+.sidebar-sizes { display: flex; flex-wrap: wrap; gap: 8px; }
+.sidebar-size {
+  font-family: var(--font-mono); font-size: .78rem;
+  border: 1.5px solid var(--line); border-radius: 6px;
+  padding: 7px 13px; background: var(--white);
+  cursor: pointer; color: var(--ink);
+  transition: border-color .15s, background .15s, color .15s;
+  min-width: 44px; text-align: center;
 }
-.sidebar-size:hover{border-color:var(--ink);}
-.sidebar-size.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
-/* Price slider */
-.price-slider{width:100%;height:4px;accent-color:var(--ink);}
-.price-range-labels{
-  display:flex;justify-content:space-between;
-  font-family:var(--font-mono);font-size:.74rem;color:var(--ink-soft);margin-top:6px;
+.sidebar-size:hover { border-color: var(--ink); }
+.sidebar-size.active {
+  background: var(--ink); color: var(--paper);
+  border-color: var(--ink); font-weight: 600;
 }
-/* Clear btn */
-.sidebar-clear{
-  width:100%;padding:9px 14px;border-radius:6px;
-  border:1px dashed var(--line);background:none;
-  font-size:.82rem;color:var(--ink-soft);cursor:pointer;
-  font-family:var(--font-mono);margin-top:4px;
-  transition:border-color .15s,color .15s;
-}
-.sidebar-clear:hover{border-color:var(--ink);color:var(--ink);}
 
-/* ── Product grid — Shopify-style card sizes ──────── */
-.shop-main{flex:1;min-width:0;}
-.shop-main .product-grid{
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:24px;
+/* Price */
+.price-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 3px;
+  background: linear-gradient(to right, var(--ink) 0%, var(--ink) 100%);
+  border-radius: 2px; outline: none; cursor: pointer;
 }
-.results-count{
-  font-family:var(--font-mono);font-size:.76rem;
-  color:var(--ink-soft);margin-bottom:16px;
+.price-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--white); border: 2px solid var(--ink);
+  cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.15);
 }
-/* Card swatches — row */
-.card-swatches{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px;margin:8px 0 6px;}
-.card-swatch{
-  width:20px;height:20px;border-radius:50%;
-  border:1.5px solid rgba(22,35,31,.2);
-  display:inline-block;flex-shrink:0;
+.price-range-labels {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-mono); font-size: .74rem;
+  color: var(--ink-soft); margin-top: 8px;
 }
-/* Buy button */
-.card-buy-btn{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:100%;padding:11px 18px;background:var(--ink);color:var(--paper);
-  border:none;border-radius:var(--radius);
-  font-size:.9rem;font-weight:600;font-family:var(--font-body);
-  cursor:pointer;white-space:nowrap;
-  transition:background .2s,transform .15s;
-  text-decoration:none;
-}
-.card-buy-btn:hover{background:var(--gold-deep);transform:translateY(-1px);}
-/* Product foot stacks price then full-width button */
-.product-foot{flex-direction:column;align-items:stretch;gap:10px;}
 
-/* ── Responsive ───────────────────────────────────── */
-/* Tablet: sidebar collapses, 2-col grid */
-@media(max-width:900px){
-  .shop-layout{flex-direction:column;}
-  .shop-sidebar{width:100%;position:static;display:flex;flex-wrap:wrap;gap:20px;padding:16px;}
-  .shop-sidebar-section{margin-bottom:0;min-width:140px;}
-  .shop-main .product-grid{grid-template-columns:repeat(2,1fr);gap:16px;}
+/* Clear */
+.sidebar-clear-btn {
+  width: 100%; padding: 9px 14px; border-radius: 6px;
+  border: 1px solid var(--line); background: none;
+  font-size: .82rem; color: var(--ink-soft); cursor: pointer;
+  font-family: var(--font-mono); margin-top: 16px;
+  transition: border-color .15s, color .15s, background .15s;
 }
-/* Mobile: 2 good-sized cards */
-@media(max-width:600px){
-  .shop-sidebar{display:block;padding:14px;}
-  .shop-sidebar-section{margin-bottom:16px;}
-  .shop-main .product-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+.sidebar-clear-btn:hover {
+  border-color: var(--ink); color: var(--ink);
+  background: var(--paper-dim);
 }
-/* Very small: single column */
-@media(max-width:360px){
-  .shop-main .product-grid{grid-template-columns:1fr;}
+
+/* ── Mobile filter bar ───────────────────────────────── */
+.mobile-filter-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+.mobile-filter-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 16px; border: 1.5px solid var(--line);
+  border-radius: 20px; background: var(--white);
+  font-size: .88rem; font-weight: 600;
+  font-family: var(--font-body); cursor: pointer; color: var(--ink);
+  transition: border-color .15s, background .15s;
+}
+.mobile-filter-btn:hover { border-color: var(--ink); }
+.mobile-filter-btn.has-filters {
+  border-color: var(--ink); background: var(--ink); color: var(--paper);
+}
+.mobile-filter-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--rust); color: var(--white);
+  font-family: var(--font-mono); font-size: .65rem;
+  font-weight: 700;
+}
+.mobile-sort-select {
+  font-family: var(--font-mono); font-size: .78rem;
+  border: 1.5px solid var(--line); border-radius: 20px;
+  padding: 8px 12px; background: var(--white); color: var(--ink);
+  cursor: pointer;
+}
+
+/* ── Mobile filter drawer ────────────────────────────── */
+.filter-drawer-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(22,35,31,.5);
+}
+.filter-drawer-overlay.open { display: block; }
+.filter-drawer {
+  position: absolute; left: 0; top: 0; bottom: 0; width: min(340px, 90vw);
+  background: var(--paper); overflow-y: auto;
+  display: flex; flex-direction: column;
+  transform: translateX(-100%); transition: transform .3s ease;
+}
+.filter-drawer-overlay.open .filter-drawer { transform: translateX(0); }
+.filter-drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px; border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; background: var(--paper); z-index: 1;
+}
+.filter-drawer-head h2 {
+  font-size: 1rem; margin: 0; font-family: var(--font-display);
+}
+.drawer-close-btn {
+  background: none; border: none; font-size: 1.4rem;
+  cursor: pointer; color: var(--ink); padding: 4px;
+  line-height: 1;
+}
+.filter-drawer-body { padding: 16px 20px; flex: 1; }
+.filter-drawer-foot {
+  padding: 16px 20px; border-top: 1px solid var(--line);
+  display: flex; gap: 10px; position: sticky; bottom: 0;
+  background: var(--paper);
+}
+.drawer-apply-btn {
+  flex: 1; padding: 12px; background: var(--ink); color: var(--paper);
+  border: none; border-radius: 6px; font-weight: 600;
+  font-size: .9rem; cursor: pointer; font-family: var(--font-body);
+}
+.drawer-clear-btn {
+  padding: 12px 18px; border: 1.5px solid var(--line);
+  border-radius: 6px; background: none; cursor: pointer;
+  font-size: .88rem; font-family: var(--font-body); color: var(--ink-soft);
+}
+
+/* ── Product grid ────────────────────────────────────── */
+.shop-main { flex: 1; min-width: 0; }
+.shop-grid-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.shop-count {
+  font-family: var(--font-mono); font-size: .76rem; color: var(--ink-soft);
+}
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* ── Product card ────────────────────────────────────── */
+.shop-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .22s ease, transform .22s ease;
+  position: relative;
+}
+.shop-card:hover {
+  box-shadow: 0 12px 32px rgba(22,35,31,.12);
+  transform: translateY(-3px);
+}
+
+/* Image */
+.shop-card-media {
+  position: relative;
+  aspect-ratio: 4/5;
+  background: var(--paper-dim);
+  overflow: hidden;
+  display: block;
+}
+.shop-card-media img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .4s ease;
+  display: block;
+}
+.shop-card:hover .shop-card-media img { transform: scale(1.04); }
+
+/* Badge */
+.shop-card-badge {
+  position: absolute; top: 10px; left: 10px; z-index: 1;
+  font-family: var(--font-mono); font-size: .68rem; font-weight: 600;
+  padding: 4px 9px; border-radius: 4px;
+  background: var(--rust); color: var(--white);
+  letter-spacing: .04em; text-transform: uppercase;
+}
+
+/* Quick-add button — top-right of image */
+.quick-add-btn {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--white); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; font-weight: 300; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(22,35,31,.12);
+  transition: background .18s, border-color .18s, transform .15s;
+  opacity: 0; transform: translateY(4px);
+  color: var(--ink);
+}
+.shop-card:hover .quick-add-btn {
+  opacity: 1; transform: translateY(0);
+}
+.quick-add-btn:hover {
+  background: var(--ink); border-color: var(--ink); color: var(--paper);
+}
+.quick-add-btn:disabled {
+  background: var(--paper-dim); color: var(--ink-soft);
+  cursor: not-allowed; border-color: var(--line);
+}
+
+/* Card body */
+.shop-card-body {
+  padding: 12px 14px 16px;
+  display: flex; flex-direction: column; gap: 6px; flex: 1;
+}
+.shop-card-cat {
+  font-family: var(--font-mono); font-size: .66rem;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--sage);
+}
+.shop-card-name {
+  font-size: .92rem; font-weight: 600; line-height: 1.3;
+  color: var(--ink); margin: 0;
+}
+.shop-card-name a { text-decoration: none; color: inherit; }
+.shop-card-name a:hover { color: var(--gold-deep); }
+
+/* Swatches row */
+.shop-card-swatches {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px;
+}
+.shop-card-swatch {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1.5px solid rgba(22,35,31,.18);
+  cursor: default; flex-shrink: 0;
+  transition: transform .15s;
+}
+.shop-card-swatch:hover { transform: scale(1.15); }
+
+/* Price row */
+.shop-card-foot { margin-top: auto; padding-top: 8px; }
+.shop-card-price-row {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; margin-bottom: 10px;
+}
+.shop-card-price {
+  font-family: var(--font-mono); font-size: .92rem; font-weight: 600;
+  color: var(--ink);
+}
+.shop-card-price.on-sale { color: var(--rust); }
+.shop-card-compare {
+  font-family: var(--font-mono); font-size: .8rem;
+  color: var(--ink-soft); text-decoration: line-through;
+}
+.shop-card-save {
+  font-family: var(--font-mono); font-size: .68rem;
+  background: #FFF3F1; color: var(--rust);
+  padding: 2px 6px; border-radius: 4px;
+}
+
+/* View & Buy button */
+.shop-card-cta {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; padding: 10px 16px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 6px;
+  font-size: .86rem; font-weight: 600; font-family: var(--font-body);
+  cursor: pointer; text-decoration: none;
+  transition: background .2s, transform .15s;
+}
+.shop-card-cta:hover { background: var(--gold-deep); transform: translateY(-1px); }
+.shop-card-cta.out-of-stock {
+  background: var(--paper-dim); color: var(--ink-soft);
+  cursor: not-allowed; transform: none;
+}
+
+/* ── Toast notification ──────────────────────────────── */
+.shop-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: var(--paper);
+  padding: 11px 22px; border-radius: 8px;
+  font-size: .86rem; font-weight: 500;
+  opacity: 0; transition: opacity .25s ease, transform .25s ease;
+  z-index: 500; pointer-events: none; white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(22,35,31,.22);
+}
+.shop-toast.show {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+
+/* ── Empty state ─────────────────────────────────────── */
+.shop-empty {
+  grid-column: 1 / -1; text-align: center;
+  padding: 64px 20px;
+}
+.shop-empty-icon { font-size: 2.4rem; margin-bottom: 12px; }
+.shop-empty p { color: var(--ink-soft); font-size: .95rem; }
+
+/* ── Loading skeletons ───────────────────────────────── */
+.skeleton-card {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: 10px; overflow: hidden;
+}
+.skeleton-img {
+  aspect-ratio: 4/5; background: var(--paper-dim);
+  animation: shimmer 1.4s infinite;
+  background-size: 200% 100%;
+  background-image: linear-gradient(90deg, var(--paper-dim) 25%, var(--line) 50%, var(--paper-dim) 75%);
+}
+.skeleton-body { padding: 12px 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.skeleton-line {
+  border-radius: 4px; background: var(--paper-dim);
+  animation: shimmer 1.4s infinite;
+  background-size: 200% 100%;
+  background-image: linear-gradient(90deg, var(--paper-dim) 25%, var(--line) 50%, var(--paper-dim) 75%);
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* ── Responsive ──────────────────────────────────────── */
+@media(max-width:1279px) {
+  .shop-grid { grid-template-columns: repeat(3,1fr); }
+}
+@media(max-width:1023px) {
+  .shop-sidebar { display: none; }
+  .mobile-filter-bar { display: flex; }
+  .shop-body { padding-top: 0; }
+  .shop-grid { grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .shop-sort { display: none; }
+}
+@media(max-width:767px) {
+  .shop-grid { grid-template-columns: repeat(2,1fr); gap: 12px; }
+  .shop-card-body { padding: 10px 12px 14px; }
+  .shop-card-name { font-size: .88rem; }
+  .quick-add-btn { opacity: 1; transform: translateY(0); }
+}
+@media(max-width:480px) {
+  .shop-grid { gap: 10px; }
+}
+@media(max-width:359px) {
+  .shop-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
-<body>
+<body class="shop-page">
 
 <div id="site-header"></div>
 
 <main>
-  <div class="wrap breadcrumb"><a href="/">Home</a> / Shop</div>
-  <section class="page-hero">
-    <div class="wrap">
-      <span class="eyebrow">All products</span>
-      <h1 style="font-size:2.4rem;">Shop the collection</h1>
-      <p>Curated apparel and accessories crafted for you.</p>
-    </div>
-  </section>
+  <div style="max-width:1440px;margin:0 auto;padding:0 24px;">
 
-  <section class="section" style="padding-top:28px;">
-    <div style="max-width:1400px;margin:0 auto;padding:0 20px;">
-      <div class="shop-layout">
+    <!-- Breadcrumb -->
+    <div class="shop-breadcrumb"><a href="/">Home</a> / Shop</div>
 
-        <!-- ── Sidebar ───────────────────────────────── -->
-        <aside class="shop-sidebar">
-          <div class="shop-sidebar-section">
-            <p class="sidebar-heading">Category</p>
-            <div class="sidebar-cats" id="sidebar-cats">
-              <button class="active" data-cat="All">All</button>
-            </div>
-          </div>
-
-          <div class="shop-sidebar-section" id="color-section" style="display:none;">
-            <p class="sidebar-heading">Color</p>
-            <div class="sidebar-swatches" id="sidebar-swatches"></div>
-          </div>
-
-          <div class="shop-sidebar-section" id="size-section" style="display:none;">
-            <p class="sidebar-heading">Size</p>
-            <div class="sidebar-sizes" id="sidebar-sizes"></div>
-          </div>
-
-          <div class="shop-sidebar-section">
-            <p class="sidebar-heading">Price</p>
-            <input type="range" class="price-slider" id="price-slider" min="0" max="10000" step="10" value="10000">
-            <div class="price-range-labels">
-              <span>₹0</span>
-              <span id="price-max-label">₹10,000</span>
-            </div>
-          </div>
-
-          <button class="sidebar-clear" id="clear-filters">Clear all filters</button>
-        </aside>
-
-        <!-- ── Product grid ──────────────────────────── -->
-        <div class="shop-main">
-          <p class="results-count" id="results-count"></p>
-          <div class="product-grid" id="shop-grid"></div>
+    <!-- Hero -->
+    <section class="shop-hero">
+      <div class="shop-hero-inner">
+        <div>
+          <h1>Shop the collection</h1>
+          <p class="shop-hero-sub">Curated apparel and accessories crafted for you.</p>
         </div>
-
+        <div class="shop-sort">
+          <span>Sort by</span>
+          <select id="sort-select" aria-label="Sort products">
+            <option value="default">Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="name-asc">Name: A–Z</option>
+          </select>
+        </div>
       </div>
+    </section>
+
+    <!-- Mobile filter bar -->
+    <div class="mobile-filter-bar">
+      <button class="mobile-filter-btn" id="mobile-filter-open" aria-label="Open filters">
+        <svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect y="0" width="15" height="1.5" rx=".75" fill="currentColor"/><rect x="3" y="5.25" width="9" height="1.5" rx=".75" fill="currentColor"/><rect x="5.5" y="10.5" width="4" height="1.5" rx=".75" fill="currentColor"/></svg>
+        Filters
+        <span class="mobile-filter-count" id="mobile-filter-count" style="display:none">0</span>
+      </button>
+      <select class="mobile-sort-select" id="mobile-sort-select" aria-label="Sort products">
+        <option value="default">Featured</option>
+        <option value="price-asc">Price: Low → High</option>
+        <option value="price-desc">Price: High → Low</option>
+        <option value="name-asc">Name: A–Z</option>
+      </select>
     </div>
-  </section>
+
+    <!-- Shop body -->
+    <div class="shop-body">
+
+      <!-- Desktop sidebar -->
+      <aside class="shop-sidebar" id="desktop-sidebar" aria-label="Product filters">
+        <div id="sidebar-content"><!-- filled by JS --></div>
+        <button class="sidebar-clear-btn" id="sidebar-clear">Clear all filters</button>
+      </aside>
+
+      <!-- Product grid -->
+      <div class="shop-main">
+        <div class="shop-grid-head">
+          <p class="shop-count" id="shop-count"></p>
+        </div>
+        <div class="shop-grid" id="shop-grid">
+          <!-- Loading skeletons -->
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line" style="height:12px;width:40%"></div><div class="skeleton-line" style="height:16px;width:80%"></div><div class="skeleton-line" style="height:14px;width:55%"></div></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line" style="height:12px;width:40%"></div><div class="skeleton-line" style="height:16px;width:80%"></div><div class="skeleton-line" style="height:14px;width:55%"></div></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line" style="height:12px;width:40%"></div><div class="skeleton-line" style="height:16px;width:80%"></div><div class="skeleton-line" style="height:14px;width:55%"></div></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line" style="height:12px;width:40%"></div><div class="skeleton-line" style="height:16px;width:80%"></div><div class="skeleton-line" style="height:14px;width:55%"></div></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </main>
+
+<!-- Mobile filter drawer -->
+<div class="filter-drawer-overlay" id="filter-drawer-overlay" role="dialog" aria-modal="true" aria-label="Filters">
+  <div class="filter-drawer">
+    <div class="filter-drawer-head">
+      <h2>Filters</h2>
+      <button class="drawer-close-btn" id="drawer-close" aria-label="Close filters">✕</button>
+    </div>
+    <div class="filter-drawer-body" id="drawer-content"><!-- filled by JS --></div>
+    <div class="filter-drawer-foot">
+      <button class="drawer-clear-btn" id="drawer-clear">Clear all</button>
+      <button class="drawer-apply-btn" id="drawer-apply">View results</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="shop-toast" id="shop-toast" aria-live="polite"></div>
 
 <div id="site-footer"></div>
 
@@ -198,250 +599,342 @@
 <script src="/js/auth.js"></script>
 <script>
 (function(){
-  /* ── State ───────────────────────────────────────── */
-  var activeCat    = "All";
-  var activeColors = [];   // array of color names
-  var activeSizes  = [];   // array of size names
-  var maxPrice     = 10000;
-  var globalMax    = 10000;
+'use strict';
 
-  /* ── DOM refs ────────────────────────────────────── */
-  var grid       = document.getElementById("shop-grid");
-  var catList    = document.getElementById("sidebar-cats");
-  var swatches   = document.getElementById("sidebar-swatches");
-  var sizes      = document.getElementById("sidebar-sizes");
-  var slider     = document.getElementById("price-slider");
-  var priceLabel = document.getElementById("price-max-label");
-  var clearBtn   = document.getElementById("clear-filters");
-  var countEl    = document.getElementById("results-count");
+/* ── State ─────────────────────────────────────── */
+var state = {
+  cat: 'All',
+  colors: [],
+  sizes: [],
+  maxPrice: 10000,
+  globalMax: 10000,
+  sort: 'default',
+  filterData: null
+};
 
-  /* ── Card HTML ───────────────────────────────────── */
-  function cardHTML(p) {
-    var available = productIsPurchasable(p);
+/* ── DOM ────────────────────────────────────────── */
+var grid        = document.getElementById('shop-grid');
+var countEl     = document.getElementById('shop-count');
+var sortSel     = document.getElementById('sort-select');
+var mobileSortSel = document.getElementById('mobile-sort-select');
+var sidebarClear = document.getElementById('sidebar-clear');
+var mobileBtn   = document.getElementById('mobile-filter-open');
+var mobileCount = document.getElementById('mobile-filter-count');
+var overlay     = document.getElementById('filter-drawer-overlay');
+var drawerClose = document.getElementById('drawer-close');
+var drawerClear = document.getElementById('drawer-clear');
+var drawerApply = document.getElementById('drawer-apply');
+var toast       = document.getElementById('shop-toast');
 
-    // Collect unique colors with hex — check variants Map first (has colorHex), then colorImages
-    var seen = {};
-    var swatchList = [];
-    // Build hex lookup from variants Map
-    var hexLookup = {};
-    if(p.variants && typeof p.variants.forEach === "function"){
-      p.variants.forEach(function(v){ if(v.color && v.colorHex) hexLookup[v.color]=v.colorHex; });
-    }
-    // colorImages gives color names; use hex from lookup
-    (p.colorImages || []).forEach(function(ci){
-      if(ci.color && !seen[ci.color]){
-        seen[ci.color]=1;
-        swatchList.push({name:ci.color, hex: ci.colorHex || hexLookup[ci.color] || ""});
-      }
+/* ── Toast ──────────────────────────────────────── */
+var toastTimer;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 2200);
+}
+
+/* ── Sort ───────────────────────────────────────── */
+function sortProducts(list) {
+  var s = state.sort;
+  var copy = list.slice();
+  if(s === 'price-asc') copy.sort(function(a,b){ return a.price - b.price; });
+  else if(s === 'price-desc') copy.sort(function(a,b){ return b.price - a.price; });
+  else if(s === 'name-asc') copy.sort(function(a,b){ return a.name.localeCompare(b.name); });
+  else copy.sort(function(a,b){ return (a.sortOrder||0) - (b.sortOrder||0); });
+  return copy;
+}
+
+/* ── Filter match ───────────────────────────────── */
+function matches(p) {
+  if(state.cat !== 'All' && p.category !== state.cat) return false;
+  if(state.colors.length > 0) {
+    var pColors = new Set();
+    (p.colorImages||[]).forEach(function(ci){ if(ci.color) pColors.add(ci.color); });
+    if(p.variants && typeof p.variants.forEach === 'function')
+      p.variants.forEach(function(v){ if(v.color) pColors.add(v.color); });
+    var ok = false;
+    state.colors.forEach(function(c){ if(pColors.has(c)) ok = true; });
+    if(!ok) return false;
+  }
+  if(state.sizes.length > 0) {
+    var pSizes = new Set();
+    if(p.variants && typeof p.variants.forEach === 'function')
+      p.variants.forEach(function(v){ if(v.size) pSizes.add(v.size); });
+    var ok = false;
+    state.sizes.forEach(function(s){ if(pSizes.has(s)) ok = true; });
+    if(!ok) return false;
+  }
+  if(p.price > state.maxPrice) return false;
+  return true;
+}
+
+/* ── Active filter count ────────────────────────── */
+function activeFilterCount() {
+  var n = 0;
+  if(state.cat !== 'All') n++;
+  n += state.colors.length;
+  n += state.sizes.length;
+  if(state.maxPrice < state.globalMax) n++;
+  return n;
+}
+
+/* ── Card HTML ──────────────────────────────────── */
+function cardHTML(p) {
+  var available = productIsPurchasable(p);
+  var savings = p.oldPrice && p.oldPrice > p.price ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
+
+  // Swatches
+  var seen = {}, hexLookup = {}, swatchList = [];
+  if(p.variants && typeof p.variants.forEach === 'function')
+    p.variants.forEach(function(v){ if(v.color && v.colorHex) hexLookup[v.color] = v.colorHex; });
+  (p.colorImages||[]).forEach(function(ci){
+    if(ci.color && !seen[ci.color]){ seen[ci.color]=1; swatchList.push({name:ci.color,hex:ci.colorHex||hexLookup[ci.color]||''}); }
+  });
+  if(swatchList.length===0 && p.variants && typeof p.variants.forEach === 'function'){
+    p.variants.forEach(function(v){
+      if(v.color && !seen[v.color]){ seen[v.color]=1; swatchList.push({name:v.color,hex:v.colorHex||hexLookup[v.color]||''}); }
     });
-    // Fall back to variants if no colorImages
-    if(swatchList.length===0 && p.variants && typeof p.variants.forEach === "function"){
-      p.variants.forEach(function(v){
-        if(v.color && !seen[v.color]){
-          seen[v.color]=1;
-          swatchList.push({name:v.color, hex: v.colorHex || hexLookup[v.color] || ""});
-        }
-      });
-    }
-
-    var swatchHTML = "";
-    if(swatchList.length>0){
-      swatchHTML = '<div class="card-swatches">' +
-        swatchList.slice(0,6).map(function(s){
-          return '<span class="card-swatch" style="background:'+(s.hex||"#ccc")+';" title="'+escapeHtml(s.name)+'"></span>';
-        }).join("") +
-        (swatchList.length>6 ? '<span style="font-size:.65rem;color:var(--ink-soft);align-self:center;">+' + (swatchList.length-6) + '</span>' : '') +
-      '</div>';
-    }
-
-    return '<div class="product-card" data-cat="'+escapeHtml(p.category)+'">' +
-      '<a href="'+productUrl(p)+'" class="product-media">' +
-        (p.badge ? '<span class="product-badge ticket '+(p.badge==="Sale"?"on-sale":"")+'">'+ escapeHtml(p.badge)+'</span>' : '')+
-        '<img src="'+escapeHtml(safeProductImageUrl(p.img))+'" alt="'+escapeHtml(p.name)+'" loading="lazy">'+
-      '</a>' +
-      '<div class="product-body">' +
-        '<span class="product-cat">'+escapeHtml(p.category)+'</span>' +
-        '<h4><a href="'+productUrl(p)+'">'+escapeHtml(p.name)+'</a></h4>' +
-        swatchHTML +
-        '<div class="product-foot">' +
-          '<div class="product-foot-price">' +
-            '<span class="ticket '+(p.oldPrice?"on-sale":"")+'">' +
-              (p.oldPrice ? '<span class="price-old">'+fmt(p.oldPrice)+'</span>' : '') +
-              fmt(p.price) +
-            '</span>' +
-          '</div>' +
-          '<a href="'+productUrl(p)+'" class="card-buy-btn">View &amp; Buy</a>' +
-        '</div>' +
-      '</div>' +
+  }
+  var swatchHTML = '';
+  if(swatchList.length > 0){
+    swatchHTML = '<div class="shop-card-swatches">' +
+      swatchList.slice(0,6).map(function(s){
+        var bg = s.hex || '#ccc';
+        return '<span class="shop-card-swatch" style="background:'+bg+';" title="'+escapeHtml(s.name)+'"></span>';
+      }).join('') +
+      (swatchList.length>6 ? '<span style="font-family:var(--font-mono);font-size:.65rem;color:var(--ink-soft);align-self:center;padding-left:2px;">+' + (swatchList.length-6) + '</span>' : '') +
     '</div>';
   }
 
-  /* ── Filtering ───────────────────────────────────── */
-  function matchesAll(p){
-    // Category
-    if(activeCat!=="All"){
-      var cat = String(p.category||"").toLowerCase();
-      var target = activeCat.toLowerCase();
-      if(cat !== target) return false;
-    }
-    // Color
-    if(activeColors.length>0){
-      var pColors = new Set();
-      (p.colorImages||[]).forEach(function(ci){ if(ci.color) pColors.add(ci.color); });
-      if(p.variants && typeof p.variants.forEach === "function"){
-        p.variants.forEach(function(v){ if(v.color) pColors.add(v.color); });
-      }
-      var ok=false; activeColors.forEach(function(c){ if(pColors.has(c)) ok=true; });
-      if(!ok) return false;
-    }
-    // Size
-    if(activeSizes.length>0){
-      var pSizes = new Set();
-      if(p.variants && typeof p.variants.forEach === "function"){
-        p.variants.forEach(function(v){ if(v.size) pSizes.add(v.size); });
-      }
-      var ok=false; activeSizes.forEach(function(s){ if(pSizes.has(s)) ok=true; });
-      if(!ok) return false;
-    }
-    // Price
-    if(p.price > maxPrice) return false;
-    return true;
-  }
+  var priceRow =
+    (p.oldPrice
+      ? '<span class="shop-card-compare">' + fmt(p.oldPrice) + '</span><span class="shop-card-price on-sale">' + fmt(p.price) + '</span>' +
+        (savings > 0 ? '<span class="shop-card-save">-' + savings + '%</span>' : '')
+      : '<span class="shop-card-price">' + fmt(p.price) + '</span>'
+    );
 
-  function render(){
-    var list = (window.PRODUCTS||[]).filter(matchesAll);
-    grid.innerHTML = list.map(cardHTML).join("") ||
-      '<p style="grid-column:1/-1;color:var(--ink-soft);padding:40px 0;">No products match your filters.</p>';
-    if(countEl) countEl.textContent = list.length + " product" + (list.length===1?"":"s");
-  }
+  return '<div class="shop-card">' +
+    '<a href="'+productUrl(p)+'" class="shop-card-media" tabindex="-1" aria-hidden="true">' +
+      (p.badge ? '<span class="shop-card-badge">'+escapeHtml(p.badge)+'</span>' : '') +
+      '<img src="'+escapeHtml(safeProductImageUrl(p.img))+'" alt="'+escapeHtml(p.name)+'" loading="lazy">' +
+    '</a>' +
+    '<button class="quick-add-btn" data-id="'+escapeHtml(p.id)+'" '+
+      (available ? '' : 'disabled') +
+      ' aria-label="Quick add '+escapeHtml(p.name)+' to cart" title="Quick add">+</button>' +
+    '<div class="shop-card-body">' +
+      '<span class="shop-card-cat">'+escapeHtml(p.category)+'</span>' +
+      '<h3 class="shop-card-name"><a href="'+productUrl(p)+'">'+escapeHtml(p.name)+'</a></h3>' +
+      swatchHTML +
+      '<div class="shop-card-foot">' +
+        '<div class="shop-card-price-row">'+priceRow+'</div>' +
+        '<a href="'+productUrl(p)+'" class="shop-card-cta'+(available?'':' out-of-stock')+'">' +
+          (available ? 'View &amp; Buy' : 'Out of stock') +
+        '</a>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
 
-  /* ── Build category list ─────────────────────────── */
-  function buildCats(){
-    var cats = Array.from(new Set((window.PRODUCTS||[]).map(function(p){ return p.category; }).filter(Boolean))).sort();
-    catList.innerHTML = "";
-    var allBtn = document.createElement("button");
-    allBtn.textContent="All"; allBtn.dataset.cat="All";
-    if(activeCat==="All") allBtn.classList.add("active");
-    catList.appendChild(allBtn);
-    cats.forEach(function(c){
-      var btn=document.createElement("button");
-      btn.textContent=c; btn.dataset.cat=c;
-      if(activeCat===c) btn.classList.add("active");
-      catList.appendChild(btn);
-    });
+/* ── Render grid ────────────────────────────────── */
+function render() {
+  var list = sortProducts((window.PRODUCTS||[]).filter(matches));
+  if(list.length === 0) {
+    grid.innerHTML = '<div class="shop-empty"><div class="shop-empty-icon">🛍</div><p>No products match your filters.</p></div>';
+  } else {
+    grid.innerHTML = list.map(cardHTML).join('');
   }
-  catList.addEventListener("click",function(e){
-    var btn=e.target.closest("button[data-cat]"); if(!btn) return;
-    activeCat=btn.dataset.cat;
-    catList.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active",b.dataset.cat===activeCat); });
-    render();
-  });
+  if(countEl) countEl.textContent = list.length + ' product' + (list.length===1?'':'s');
+  updateFilterBadge();
+}
 
-  /* ── Build color swatches ────────────────────────── */
-  function buildSwatches(filterData){
-    if(!filterData||!filterData.colors||filterData.colors.length===0){ document.getElementById("color-section").style.display="none"; return; }
-    // Build hex map from products — check both colorImages and variants
-    var hexMap={};
-    (window.PRODUCTS||[]).forEach(function(p){
+/* ── Quick-add delegation ───────────────────────── */
+grid.addEventListener('click', function(e) {
+  var btn = e.target.closest('.quick-add-btn');
+  if(!btn || btn.disabled) return;
+  var id = btn.dataset.id;
+  if(typeof addToCart === 'function') {
+    addToCart(id);
+    showToast('Added to cart ✓');
+  }
+});
+
+/* ── Sort ───────────────────────────────────────── */
+sortSel.addEventListener('change', function(){ state.sort = sortSel.value; mobileSortSel.value = sortSel.value; render(); });
+mobileSortSel.addEventListener('change', function(){ state.sort = mobileSortSel.value; sortSel.value = mobileSortSel.value; render(); });
+
+/* ── Build sidebar/drawer filters ──────────────── */
+function buildFilters(container, forDrawer) {
+  if(!container) return;
+  var products = window.PRODUCTS || [];
+  var fd = state.filterData;
+  var html = '';
+
+  // Category
+  var cats = Array.from(new Set(products.map(function(p){ return p.category; }).filter(Boolean))).sort();
+  var catCounts = {};
+  products.forEach(function(p){ catCounts[p.category] = (catCounts[p.category]||0)+1; });
+  html += '<div class="sidebar-section" id="sec-cat'+(forDrawer?'-d':'')+'">' +
+    '<div class="sidebar-section-head"><span class="sidebar-section-title">Category</span><span class="sidebar-toggle-icon">▾</span></div>' +
+    '<div class="sidebar-section-body"><div class="sidebar-cats">' +
+    '<button class="sidebar-cat-btn'+(state.cat==='All'?' active':'')+'" data-cat="All">All <span class="sidebar-cat-count">('+products.length+')</span></button>' +
+    cats.map(function(c){
+      return '<button class="sidebar-cat-btn'+(state.cat===c?' active':'')+'" data-cat="'+escapeHtml(c)+'">'+escapeHtml(c)+' <span class="sidebar-cat-count">('+((catCounts[c])||0)+')</span></button>';
+    }).join('') +
+    '</div></div></div>';
+
+  // Colors
+  if(fd && fd.colors && fd.colors.length > 0) {
+    var hexMap = {};
+    products.forEach(function(p){
       (p.colorImages||[]).forEach(function(ci){ if(ci.color&&ci.colorHex) hexMap[ci.color]=ci.colorHex; });
-      if(p.variants && typeof p.variants.forEach === "function"){
+      if(p.variants && typeof p.variants.forEach === 'function')
         p.variants.forEach(function(v){ if(v.color&&v.colorHex) hexMap[v.color]=v.colorHex; });
-      }
     });
-    swatches.innerHTML="";
-    filterData.colors.forEach(function(name){
-      var btn=document.createElement("button");
-      btn.className="sidebar-swatch"; btn.dataset.color=name;
-      btn.title=name; btn.setAttribute("aria-label",name);
-      btn.style.background=hexMap[name]||"#ccc";
-      if(activeColors.indexOf(name)>-1) btn.classList.add("active");
-      swatches.appendChild(btn);
-    });
-    document.getElementById("color-section").style.display="block";
+    html += '<div class="sidebar-section" id="sec-color'+(forDrawer?'-d':'')+'">' +
+      '<div class="sidebar-section-head"><span class="sidebar-section-title">Color</span><span class="sidebar-toggle-icon">▾</span></div>' +
+      '<div class="sidebar-section-body"><div class="sidebar-swatches">' +
+      fd.colors.map(function(c){
+        var hex = hexMap[c] || '#ccc';
+        var active = state.colors.indexOf(c) > -1 ? ' active' : '';
+        return '<button class="sidebar-swatch'+active+'" data-color="'+escapeHtml(c)+'" style="background:'+hex+';" title="'+escapeHtml(c)+'" aria-label="'+escapeHtml(c)+'" aria-pressed="'+(active?'true':'false')+'"></button>';
+      }).join('') +
+      '</div></div></div>';
   }
-  swatches.addEventListener("click",function(e){
-    var btn=e.target.closest(".sidebar-swatch"); if(!btn) return;
-    var c=btn.dataset.color;
-    var idx=activeColors.indexOf(c);
-    if(idx>-1){ activeColors.splice(idx,1); btn.classList.remove("active"); }
-    else { activeColors.push(c); btn.classList.add("active"); }
-    render();
-  });
 
-  /* ── Build size chips ────────────────────────────── */
-  function buildSizes(filterData){
-    if(!filterData||!filterData.sizes||filterData.sizes.length===0){ document.getElementById("size-section").style.display="none"; return; }
-    sizes.innerHTML="";
-    filterData.sizes.forEach(function(name){
-      var btn=document.createElement("button");
-      btn.className="sidebar-size"; btn.dataset.size=name; btn.textContent=name;
-      if(activeSizes.indexOf(name)>-1) btn.classList.add("active");
-      sizes.appendChild(btn);
-    });
-    document.getElementById("size-section").style.display="block";
+  // Sizes
+  if(fd && fd.sizes && fd.sizes.length > 0) {
+    html += '<div class="sidebar-section" id="sec-size'+(forDrawer?'-d':'')+'">' +
+      '<div class="sidebar-section-head"><span class="sidebar-section-title">Size</span><span class="sidebar-toggle-icon">▾</span></div>' +
+      '<div class="sidebar-section-body"><div class="sidebar-sizes">' +
+      fd.sizes.map(function(s){
+        var active = state.sizes.indexOf(s) > -1 ? ' active' : '';
+        return '<button class="sidebar-size'+active+'" data-size="'+escapeHtml(s)+'" aria-pressed="'+(active?'true':'false')+'">'+escapeHtml(s)+'</button>';
+      }).join('') +
+      '</div></div></div>';
   }
-  sizes.addEventListener("click",function(e){
-    var btn=e.target.closest(".sidebar-size"); if(!btn) return;
-    var s=btn.dataset.size;
-    var idx=activeSizes.indexOf(s);
-    if(idx>-1){ activeSizes.splice(idx,1); btn.classList.remove("active"); }
-    else { activeSizes.push(s); btn.classList.add("active"); }
-    render();
+
+  // Price
+  html += '<div class="sidebar-section" id="sec-price'+(forDrawer?'-d':'')+'">' +
+    '<div class="sidebar-section-head"><span class="sidebar-section-title">Price</span><span class="sidebar-toggle-icon">▾</span></div>' +
+    '<div class="sidebar-section-body">' +
+    '<input type="range" class="price-slider" id="price-slider'+(forDrawer?'-d':'')+'" min="0" max="'+state.globalMax+'" step="10" value="'+state.maxPrice+'" aria-label="Max price">' +
+    '<div class="price-range-labels"><span>₹0</span><span id="price-label'+(forDrawer?'-d':'')+'">'+fmt(state.maxPrice)+'</span></div>' +
+    '</div></div>';
+
+  container.innerHTML = html;
+
+  // Attach events
+  container.querySelectorAll('.sidebar-cat-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      state.cat = btn.dataset.cat;
+      container.querySelectorAll('.sidebar-cat-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.cat===state.cat); });
+      if(!forDrawer) render();
+    });
+  });
+  container.querySelectorAll('.sidebar-swatch').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var c = btn.dataset.color;
+      var idx = state.colors.indexOf(c);
+      if(idx>-1){ state.colors.splice(idx,1); btn.classList.remove('active'); btn.setAttribute('aria-pressed','false'); }
+      else { state.colors.push(c); btn.classList.add('active'); btn.setAttribute('aria-pressed','true'); }
+      if(!forDrawer) render();
+    });
+  });
+  container.querySelectorAll('.sidebar-size').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var s = btn.dataset.size;
+      var idx = state.sizes.indexOf(s);
+      if(idx>-1){ state.sizes.splice(idx,1); btn.classList.remove('active'); btn.setAttribute('aria-pressed','false'); }
+      else { state.sizes.push(s); btn.classList.add('active'); btn.setAttribute('aria-pressed','true'); }
+      if(!forDrawer) render();
+    });
+  });
+  var slider = container.querySelector('.price-slider');
+  var label = container.querySelector('[id^="price-label"]');
+  if(slider) slider.addEventListener('input', function(){
+    state.maxPrice = Number(slider.value);
+    if(label) label.textContent = fmt(state.maxPrice);
+    if(!forDrawer) render();
   });
 
-  /* ── Price slider ────────────────────────────────── */
-  slider.addEventListener("input",function(){
-    maxPrice=Number(slider.value);
-    priceLabel.textContent="₹"+maxPrice.toLocaleString("en-IN");
-    render();
+  // Collapsible sections
+  container.querySelectorAll('.sidebar-section-head').forEach(function(head){
+    head.addEventListener('click', function(){
+      head.parentElement.classList.toggle('collapsed');
+    });
   });
+}
 
-  /* ── Clear all ───────────────────────────────────── */
-  clearBtn.addEventListener("click",function(){
-    activeCat="All"; activeColors=[]; activeSizes=[]; maxPrice=globalMax;
-    slider.value=globalMax;
-    priceLabel.textContent="₹"+globalMax.toLocaleString("en-IN");
-    catList.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active",b.dataset.cat==="All"); });
-    swatches.querySelectorAll(".sidebar-swatch").forEach(function(b){ b.classList.remove("active"); });
-    sizes.querySelectorAll(".sidebar-size").forEach(function(b){ b.classList.remove("active"); });
-    render();
-  });
+/* ── Filter badge ───────────────────────────────── */
+function updateFilterBadge() {
+  var n = activeFilterCount();
+  if(mobileCount) {
+    mobileCount.textContent = n;
+    mobileCount.style.display = n > 0 ? 'inline-flex' : 'none';
+  }
+  if(mobileBtn) mobileBtn.classList.toggle('has-filters', n > 0);
+}
 
-  /* ── URL ?cat= param ─────────────────────────────── */
-  var urlCat = (new URLSearchParams(location.search).get("cat")||"").trim();
+/* ── Clear filters ──────────────────────────────── */
+function clearFilters() {
+  state.cat = 'All';
+  state.colors = [];
+  state.sizes = [];
+  state.maxPrice = state.globalMax;
+  buildFilters(document.getElementById('sidebar-content'), false);
+  buildFilters(document.getElementById('drawer-content'), true);
+  render();
+}
 
-  /* ── Boot ────────────────────────────────────────── */
-  var filterData = null;
+if(sidebarClear) sidebarClear.addEventListener('click', clearFilters);
+if(drawerClear) drawerClear.addEventListener('click', function(){ clearFilters(); });
+if(drawerApply) drawerApply.addEventListener('click', function(){ overlay.classList.remove('open'); render(); });
 
-  // Load filter options from PUBLIC endpoint
-  fetchFilterOptions().then(function(data){
-    filterData=data;
-    if(data&&data.priceMax>0){
-      globalMax=data.priceMax; maxPrice=data.priceMax;
-      slider.max=data.priceMax; slider.value=data.priceMax;
-      priceLabel.textContent="₹"+data.priceMax.toLocaleString("en-IN");
-    }
-    buildSwatches(filterData);
-    buildSizes(filterData);
-  }).catch(function(){});
+/* ── Mobile drawer ──────────────────────────────── */
+if(mobileBtn) mobileBtn.addEventListener('click', function(){
+  buildFilters(document.getElementById('drawer-content'), true);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+});
+function closeDrawer() {
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+if(drawerClose) drawerClose.addEventListener('click', closeDrawer);
+if(overlay) overlay.addEventListener('click', function(e){ if(e.target===overlay) closeDrawer(); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeDrawer(); });
 
-  loadProducts().then(function(){
-    if(urlCat) activeCat=urlCat;
-    buildCats();
-    buildSwatches(filterData);
-    buildSizes(filterData);
-    render();
-  }).catch(function(err){
-    console.error("[Hubator] shop:",err);
-    grid.innerHTML="<p>We couldn't load the collection. Please refresh.</p>";
-  });
+/* ── URL ?cat param ─────────────────────────────── */
+var urlCat = (new URLSearchParams(location.search).get('cat')||'').trim();
+if(urlCat) state.cat = urlCat;
 
-  window.addEventListener("hubator:products-loaded",function(){
-    buildCats(); buildSwatches(filterData); buildSizes(filterData); render();
-  });
-  window.addEventListener("hubator:cart-changed",function(){
-    if(typeof updateCartBadge==="function") updateCartBadge();
-  });
+/* ── Boot ───────────────────────────────────────── */
+fetchFilterOptions().then(function(data){
+  state.filterData = data;
+  if(data && data.priceMax > 0){
+    state.globalMax = data.priceMax;
+    state.maxPrice = data.priceMax;
+  }
+  buildFilters(document.getElementById('sidebar-content'), false);
+}).catch(function(){});
+
+loadProducts().then(function(){
+  buildFilters(document.getElementById('sidebar-content'), false);
+  render();
+}).catch(function(err){
+  console.error('[Hubator] shop:', err);
+  grid.innerHTML = '<div class="shop-empty"><div class="shop-empty-icon">😕</div><p>We couldn\'t load the collection.<br>Please refresh and try again.</p></div>';
+});
+
+window.addEventListener('hubator:products-loaded', function(){
+  buildFilters(document.getElementById('sidebar-content'), false);
+  render();
+});
+window.addEventListener('hubator:cart-changed', function(){
+  if(typeof updateCartBadge === 'function') updateCartBadge();
+});
 })();
 </script>
 </body>
