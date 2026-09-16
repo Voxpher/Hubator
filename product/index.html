@@ -1,209 +1,949 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Product — Hubator</title><link rel="stylesheet" href="/css/style.css?v=3">
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product — Hubator</title>
+<link rel="stylesheet" href="/css/style.css?v=4">
 <meta name="description" content="View product details, size guide and ordering information at Hubator.">
 <meta name="theme-color" content="#FAF7F0">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/favicon.ico">
-<meta property="og:title" content="Product — Hubator">
-<meta property="og:description" content="View product details, size guide and ordering information at Hubator.">
-<meta property="og:type" content="website">
+<!-- OG/Twitter filled dynamically -->
+<meta id="og-title" property="og:title" content="Product — Hubator">
+<meta id="og-desc" property="og:description" content="View product details at Hubator.">
+<meta id="og-image" property="og:image" content="">
+<meta property="og:type" content="product">
 <meta property="og:site_name" content="Hubator">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
+<!-- JSON-LD product schema — filled dynamically -->
+<script id="product-schema" type="application/ld+json">{}</script>
+
+<style>
+/* ════════════════════════════════════════════════════
+   PRODUCT DETAIL PAGE — Premium PDP
+   ════════════════════════════════════════════════════ */
+
+.pdp-wrap {
+  max-width: 1280px; margin: 0 auto; padding: 0 24px;
+}
+
+/* ── Breadcrumb ─────────────────────────────────── */
+.pdp-breadcrumb {
+  font-family: var(--font-mono); font-size: .72rem;
+  color: var(--ink-soft); padding: 14px 0;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.pdp-breadcrumb a:hover { color: var(--gold-deep); }
+.pdp-breadcrumb-sep { color: var(--line); }
+
+/* ── Main grid ──────────────────────────────────── */
+.pdp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  padding: 8px 0 80px;
+  align-items: start;
+}
+
+/* ════════════ GALLERY ════════════ */
+.pdp-gallery {
+  position: sticky; top: 80px;
+}
+
+/* Main image */
+.pdp-main-img-wrap {
+  position: relative;
+  border-radius: 12px; overflow: hidden;
+  background: var(--paper-dim);
+  aspect-ratio: 1/1;
+  cursor: zoom-in;
+}
+.pdp-main-img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .4s ease, opacity .2s ease;
+  display: block;
+}
+.pdp-main-img.fading { opacity: 0; }
+.pdp-main-img-wrap:hover .pdp-main-img { transform: scale(1.04); }
+.pdp-main-img-wrap.zoomed { cursor: zoom-out; }
+.pdp-main-img-wrap.zoomed .pdp-main-img { transform: scale(1.8); }
+
+/* Gallery badge */
+.pdp-gallery-badge {
+  position: absolute; top: 14px; left: 14px; z-index: 2;
+  font-family: var(--font-mono); font-size: .7rem; font-weight: 700;
+  padding: 5px 10px; border-radius: 5px;
+  background: var(--rust); color: var(--white);
+  letter-spacing: .04em; text-transform: uppercase;
+}
+
+/* Thumbnail strip — desktop */
+.pdp-thumbs {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+}
+.pdp-thumb {
+  width: 72px; height: 72px;
+  border-radius: 8px; overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer; flex-shrink: 0;
+  transition: border-color .15s, opacity .15s;
+  background: var(--paper-dim);
+}
+.pdp-thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.pdp-thumb:hover { border-color: var(--ink-soft); }
+.pdp-thumb.active { border-color: var(--gold); }
+
+/* Mobile carousel */
+.pdp-carousel {
+  display: none;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: 0; border-radius: 12px; scroll-behavior: smooth;
+}
+.pdp-carousel::-webkit-scrollbar { display: none; }
+.pdp-carousel-item {
+  flex: 0 0 100%; scroll-snap-align: start;
+  aspect-ratio: 1/1; overflow: hidden;
+}
+.pdp-carousel-item img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.pdp-dots {
+  display: none; justify-content: center; gap: 6px; margin-top: 10px;
+}
+.pdp-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--line); border: none; padding: 0; cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+.pdp-dot.active { background: var(--ink); transform: scale(1.3); }
+
+/* ════════════ INFO PANEL ════════════ */
+.pdp-info {}
+
+/* Category label */
+.pdp-cat {
+  font-family: var(--font-mono); font-size: .72rem;
+  text-transform: uppercase; letter-spacing: .1em; color: var(--sage);
+  display: block; margin-bottom: 8px;
+}
+
+/* Title */
+.pdp-title {
+  font-size: clamp(1.5rem, 3vw, 2.1rem); line-height: 1.15;
+  font-weight: 700; margin: 0 0 20px; color: var(--ink);
+}
+
+/* Price block */
+.pdp-price-block {
+  display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap; margin-bottom: 24px;
+}
+.pdp-price {
+  font-family: var(--font-mono); font-size: 1.5rem;
+  font-weight: 700; color: var(--ink);
+}
+.pdp-price.on-sale { color: var(--rust); }
+.pdp-compare {
+  font-family: var(--font-mono); font-size: 1rem;
+  color: var(--ink-soft); text-decoration: line-through;
+}
+.pdp-save-tag {
+  font-family: var(--font-mono); font-size: .75rem; font-weight: 700;
+  background: #FFF3F1; color: var(--rust);
+  padding: 4px 9px; border-radius: 5px; letter-spacing: .02em;
+}
+
+/* Divider */
+.pdp-divider {
+  border: none; border-top: 1px solid var(--line); margin: 20px 0;
+}
+
+/* ── Variant sections ────────────────────────────── */
+.pdp-variant-section { margin-bottom: 20px; }
+.pdp-variant-label {
+  display: flex; align-items: baseline; gap: 6px;
+  font-family: var(--font-mono); font-size: .74rem;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-soft); margin-bottom: 10px;
+}
+.pdp-variant-label strong {
+  font-family: var(--font-body); font-size: .9rem;
+  font-weight: 600; text-transform: none; letter-spacing: 0;
+  color: var(--ink);
+}
+
+/* Color swatches */
+.pdp-color-options { display: flex; flex-wrap: wrap; gap: 10px; }
+.pdp-color-chip {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid transparent; cursor: pointer; flex-shrink: 0;
+  position: relative; transition: transform .15s, box-shadow .15s;
+}
+.pdp-color-chip:hover { transform: scale(1.1); }
+.pdp-color-chip[aria-pressed="true"] {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink);
+}
+.pdp-color-chip[aria-pressed="true"]::after {
+  content: "✓";
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700;
+  color: var(--white);
+  text-shadow: 0 0 3px rgba(0,0,0,.4);
+}
+.pdp-color-chip.is-unavailable {
+  opacity: .32; cursor: not-allowed;
+}
+.pdp-color-chip.is-unavailable::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: linear-gradient(to top left, transparent calc(50% - 1px), var(--ink-soft) 50%, transparent calc(50% + 1px));
+}
+/* Named color (no hex) */
+.pdp-color-chip.has-name {
+  border-radius: 999px; width: auto; min-width: 36px; height: 36px;
+  padding: 0 14px; font-family: var(--font-mono); font-size: .78rem;
+  color: var(--ink); background: var(--white);
+  border: 1.5px solid var(--line);
+}
+.pdp-color-chip.has-name[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.pdp-color-chip.has-name[aria-pressed="true"]::after { display: none; }
+
+/* Size chips */
+.pdp-size-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.pdp-size-chip {
+  min-width: 52px; padding: 10px 16px;
+  border: 1.5px solid var(--line); border-radius: 8px;
+  background: var(--white); color: var(--ink);
+  font-family: var(--font-mono); font-size: .84rem; font-weight: 600;
+  cursor: pointer; text-align: center;
+  transition: border-color .15s, background .15s, color .15s;
+  position: relative;
+}
+.pdp-size-chip:hover { border-color: var(--ink); }
+.pdp-size-chip[aria-pressed="true"] {
+  background: var(--ink); color: var(--paper); border-color: var(--ink);
+}
+.pdp-size-chip.is-unavailable {
+  color: var(--ink-soft); background: var(--paper-dim);
+  border-style: dashed; cursor: not-allowed;
+  text-decoration: line-through; opacity: .55;
+}
+.pdp-size-chip.is-unavailable:hover { border-color: var(--line); }
+
+/* Helper microcopy */
+.pdp-hint {
+  font-size: .82rem; color: var(--ink-soft); margin: 8px 0 0;
+  display: flex; align-items: center; gap: 5px;
+}
+.pdp-hint-warn { color: var(--rust); }
+
+/* ── Quantity stepper ────────────────────────────── */
+.pdp-qty-row {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.pdp-qty-label {
+  font-family: var(--font-mono); font-size: .74rem;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-soft);
+}
+.pdp-qty-ctrl {
+  display: flex; align-items: center;
+  border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden;
+}
+.pdp-qty-btn {
+  width: 40px; height: 40px; border: none; background: none;
+  font-size: 1.2rem; cursor: pointer; color: var(--ink);
+  transition: background .15s; display: flex; align-items: center; justify-content: center;
+}
+.pdp-qty-btn:hover { background: var(--paper-dim); }
+.pdp-qty-val {
+  width: 44px; text-align: center;
+  font-family: var(--font-mono); font-size: .9rem; font-weight: 600;
+  border: none; background: none; color: var(--ink); pointer-events: none;
+}
+
+/* ── CTA buttons ─────────────────────────────────── */
+.pdp-actions {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.pdp-add-btn {
+  width: 100%; padding: 15px 24px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 8px;
+  font-size: 1rem; font-weight: 700; font-family: var(--font-body);
+  cursor: pointer; transition: background .2s, transform .15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.pdp-add-btn:hover:not(:disabled) { background: var(--gold-deep); transform: translateY(-1px); }
+.pdp-add-btn:disabled { background: var(--paper-dim); color: var(--ink-soft); cursor: not-allowed; transform: none; }
+.pdp-buy-btn {
+  width: 100%; padding: 14px 24px;
+  background: transparent; color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 8px;
+  font-size: 1rem; font-weight: 700; font-family: var(--font-body);
+  cursor: pointer; text-align: center; text-decoration: none;
+  transition: background .2s, color .2s, transform .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.pdp-buy-btn:hover:not(.disabled) { background: var(--ink); color: var(--paper); transform: translateY(-1px); }
+.pdp-buy-btn.disabled { opacity: .45; cursor: not-allowed; transform: none; pointer-events: none; }
+
+/* ── Trust badges ────────────────────────────────── */
+.pdp-trust {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 20px; padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.pdp-trust-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: .84rem; color: var(--ink-soft);
+}
+.pdp-trust-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--paper-dim);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+
+/* ── Product details accordion ───────────────────── */
+.pdp-accordion { margin-top: 8px; }
+.pdp-accordion-item {
+  border-top: 1px solid var(--line);
+}
+.pdp-accordion-item:last-child { border-bottom: 1px solid var(--line); }
+.pdp-accordion-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; cursor: pointer; background: none; border: none;
+  width: 100%; text-align: left;
+  font-family: var(--font-mono); font-size: .8rem;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
+  font-weight: 600;
+}
+.pdp-accordion-icon {
+  font-size: .9rem; color: var(--ink-soft);
+  transition: transform .2s;
+}
+.pdp-accordion-item.open .pdp-accordion-icon { transform: rotate(45deg); }
+.pdp-accordion-body {
+  display: none; padding: 0 0 16px;
+  font-size: .9rem; color: var(--ink-soft); line-height: 1.7;
+}
+.pdp-accordion-item.open .pdp-accordion-body { display: block; }
+
+/* ── Mini cart toast ─────────────────────────────── */
+.pdp-toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(24px);
+  background: var(--ink); color: var(--paper);
+  padding: 12px 24px; border-radius: 8px;
+  font-size: .88rem; font-weight: 500;
+  opacity: 0; transition: opacity .25s ease, transform .25s ease;
+  z-index: 500; pointer-events: none; white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(22,35,31,.22);
+  display: flex; align-items: center; gap: 8px;
+}
+.pdp-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Sticky mobile CTA bar ───────────────────────── */
+.pdp-sticky-bar {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: var(--paper); border-top: 1px solid var(--line);
+  padding: 12px 20px; gap: 10px;
+}
+.pdp-sticky-bar-title {
+  font-size: .84rem; font-weight: 600; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 55%;
+}
+.pdp-sticky-bar-price {
+  font-family: var(--font-mono); font-size: .88rem;
+  font-weight: 700; color: var(--ink); white-space: nowrap;
+}
+.pdp-sticky-add {
+  flex: 1; padding: 11px 14px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 6px;
+  font-size: .88rem; font-weight: 700; cursor: pointer;
+  font-family: var(--font-body); white-space: nowrap;
+}
+.pdp-sticky-add:disabled { background: var(--paper-dim); color: var(--ink-soft); cursor: not-allowed; }
+
+/* ── Loading skeleton ────────────────────────────── */
+.pdp-skeleton { padding: 24px 0 80px; }
+.pdp-skeleton-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+.skel { border-radius: 8px; animation: shimmer 1.4s infinite; background: var(--paper-dim);
+  background-size: 200% 100%;
+  background-image: linear-gradient(90deg,var(--paper-dim) 25%,var(--line) 50%,var(--paper-dim) 75%);
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── Responsive ──────────────────────────────────── */
+@media(max-width:1023px){
+  .pdp-grid { grid-template-columns: 1fr; gap: 32px; }
+  .pdp-gallery { position: static; }
+  .pdp-thumbs { display: none; }
+  .pdp-carousel { display: flex; }
+  .pdp-dots { display: flex; }
+  .pdp-main-img-wrap { display: none; }
+  .pdp-sticky-bar { display: flex; align-items: center; }
+  main { padding-bottom: 76px; }
+}
+@media(max-width:600px){
+  .pdp-wrap { padding: 0 16px; }
+  .pdp-title { font-size: 1.5rem; }
+  .pdp-grid { gap: 24px; }
+}
+</style>
 </head>
-<body><div id="site-header"></div>
-<main><div class="wrap breadcrumb"><a href="/">Home</a> / <a href="/shop">Shop</a> / <span id="crumb-name">Product</span></div><div class="wrap pd-grid" id="pd-root" aria-live="polite"><p>Loading product details…</p></div></main>
+<body>
+
+<div id="site-header"></div>
+
+<main>
+  <div class="pdp-wrap">
+    <!-- Breadcrumb -->
+    <nav class="pdp-breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span class="pdp-breadcrumb-sep" aria-hidden="true">/</span>
+      <a href="/shop">Shop</a>
+      <span class="pdp-breadcrumb-sep" aria-hidden="true">/</span>
+      <span id="crumb-name" aria-current="page">Product</span>
+    </nav>
+
+    <!-- Loading skeleton -->
+    <div class="pdp-skeleton" id="pdp-skeleton">
+      <div class="pdp-skeleton-grid">
+        <div class="skel" style="aspect-ratio:1/1;border-radius:12px;"></div>
+        <div style="display:flex;flex-direction:column;gap:16px;padding-top:8px;">
+          <div class="skel" style="height:14px;width:30%;"></div>
+          <div class="skel" style="height:36px;width:85%;"></div>
+          <div class="skel" style="height:28px;width:40%;"></div>
+          <div class="skel" style="height:1px;width:100%;"></div>
+          <div class="skel" style="height:14px;width:20%;"></div>
+          <div style="display:flex;gap:10px;">
+            <div class="skel" style="width:36px;height:36px;border-radius:50%;"></div>
+            <div class="skel" style="width:36px;height:36px;border-radius:50%;"></div>
+            <div class="skel" style="width:36px;height:36px;border-radius:50%;"></div>
+          </div>
+          <div class="skel" style="height:14px;width:20%;margin-top:4px;"></div>
+          <div style="display:flex;gap:8px;">
+            <div class="skel" style="width:52px;height:42px;border-radius:8px;"></div>
+            <div class="skel" style="width:52px;height:42px;border-radius:8px;"></div>
+            <div class="skel" style="width:52px;height:42px;border-radius:8px;"></div>
+          </div>
+          <div class="skel" style="height:50px;width:100%;border-radius:8px;margin-top:8px;"></div>
+          <div class="skel" style="height:48px;width:100%;border-radius:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product content — rendered by JS -->
+    <div id="pdp-root" style="display:none;" aria-live="polite"></div>
+  </div>
+</main>
+
+<!-- Sticky mobile add-to-cart bar -->
+<div class="pdp-sticky-bar" id="pdp-sticky-bar">
+  <div>
+    <div class="pdp-sticky-bar-title" id="sticky-title"></div>
+    <div class="pdp-sticky-bar-price" id="sticky-price"></div>
+  </div>
+  <button class="pdp-sticky-add" id="sticky-add" disabled>Add to cart</button>
+</div>
+
+<!-- Toast -->
+<div class="pdp-toast" id="pdp-toast" aria-live="polite">
+  <span>✓</span><span id="toast-msg">Added to cart</span>
+</div>
+
 <div id="site-footer"></div>
-<script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script><script src="/js/products.js"></script><script src="/js/cart.js"></script><script src="/js/auth.js"></script><script>
-  const reference = productReferenceFromLocation(window.location);
-  loadProducts().then(() => {
-    const p = getProductFromReference(reference);
-    const root = document.getElementById("pd-root");
-    if (!p) { root.textContent = "That product is no longer available."; return; }
-    document.title = p.name + " — Hubator";
-    document.getElementById("crumb-name").textContent = p.name;
-    const variants = p.variants && typeof p.variants.forEach === "function" ? Array.from(p.variants.values()).filter(Boolean) : [];
-    const colors = [];
-    variants.forEach(function(v) {
-      if (v.color && !colors.some(function(c) { return c.name === v.color; })) {
-        colors.push({ name: v.color, hex: v.colorHex || "" });
-      }
+
+<script src="/js/maintenance.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ── Fallback hex map ───────────────────────────── */
+var HEX_FB = {
+  "white":"#FFFFFF","off white":"#FAF9F6","cream":"#F5EFD9","beige":"#E8DCC8",
+  "tan":"#D2B48C","brown":"#7C4A2D","black":"#1A1A1A","charcoal":"#3C4043",
+  "grey":"#9AA0A6","gray":"#9AA0A6","navy":"#1F3A5F","blue":"#2563EB",
+  "sky blue":"#7DD3FC","teal":"#14B8A6","green":"#2F7D4F","olive":"#6B7A3A",
+  "yellow":"#FACC15","mustard":"#D4A017","orange":"#F97316","rust":"#B7410E",
+  "red":"#DC2626","maroon":"#7C2D3B","pink":"#F9A8D4","peach":"#FDBA99",
+  "purple":"#7C3AED","lavender":"#B57EDC"
+};
+function hexOf(name, hex) {
+  if(hex && /^#[a-fA-F0-9]{6}$/.test(hex)) return hex;
+  return HEX_FB[String(name||'').trim().toLowerCase()] || '';
+}
+
+/* ── Toast ──────────────────────────────────────── */
+var toastEl = document.getElementById('pdp-toast');
+var toastMsg = document.getElementById('toast-msg');
+var toastTimer;
+function showToast(msg) {
+  toastMsg.textContent = msg || 'Added to cart';
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2400);
+}
+
+/* ── Quantity stepper state ─────────────────────── */
+var qty = 1;
+
+/* ── DOM refs ───────────────────────────────────── */
+var skeleton  = document.getElementById('pdp-skeleton');
+var pdpRoot   = document.getElementById('pdp-root');
+var crumbEl   = document.getElementById('crumb-name');
+var stickyBar = document.getElementById('pdp-sticky-bar');
+var stickyTitle = document.getElementById('sticky-title');
+var stickyPrice = document.getElementById('sticky-price');
+var stickyAdd   = document.getElementById('sticky-add');
+
+/* ── Main render ────────────────────────────────── */
+loadProducts().then(function(){
+  var ref = productReferenceFromLocation(window.location);
+  var p = ref.value ? getProductFromReference(ref) : null;
+
+  skeleton.style.display = 'none';
+  pdpRoot.style.display = '';
+
+  if(!p) {
+    pdpRoot.innerHTML = '<div style="text-align:center;padding:80px 20px;"><p style="font-size:1.1rem;color:var(--ink-soft);">That product is no longer available.</p><a href="/shop" class="btn btn-outline" style="margin-top:16px;display:inline-flex;">Browse shop</a></div>';
+    return;
+  }
+
+  // Redirect to canonical slug URL
+  if(ref.type !== 'slug' || ref.value !== p.slug) {
+    history.replaceState(null, '', productUrl(p));
+  }
+
+  // Update meta
+  document.title = p.name + ' — Hubator';
+  crumbEl.textContent = p.name;
+  var ogTitle = document.getElementById('og-title');
+  var ogDesc  = document.getElementById('og-desc');
+  var ogImg   = document.getElementById('og-image');
+  if(ogTitle) ogTitle.content = p.name + ' — Hubator';
+  if(ogDesc)  ogDesc.content  = p.desc || ('Shop ' + p.name + ' at Hubator.');
+  if(ogImg && p.img)  ogImg.content  = p.img;
+
+  // Dynamic JSON-LD
+  var schemaEl = document.getElementById('product-schema');
+  if(schemaEl) {
+    var offers = [];
+    if(p.variants && typeof p.variants.forEach === 'function'){
+      p.variants.forEach(function(v){
+        offers.push({
+          '@type': 'Offer',
+          price: String(v.priceOverride != null ? v.priceOverride : p.price),
+          priceCurrency: 'INR',
+          availability: (v.stock == null || v.stock > 0) ? 'InStock' : 'OutOfStock',
+          name: [v.color,v.size].filter(Boolean).join(' / ')
+        });
+      });
+    }
+    if(!offers.length) offers.push({'@type':'Offer',price:String(p.price),priceCurrency:'INR',availability:(p.stock==null||p.stock>0)?'InStock':'OutOfStock'});
+    schemaEl.textContent = JSON.stringify({
+      '@context':'https://schema.org',
+      '@type':'Product',
+      name: p.name,
+      description: p.desc || '',
+      image: p.gallery && p.gallery.length ? p.gallery : (p.img ? [p.img] : []),
+      brand: {'@type':'Brand',name:'Hubator'},
+      offers: offers
     });
-    const hasSizes = variants.some(function(v) { return !!v.size; });
-    // Client-side fallback so swatches render even when a variant has no saved colorHex.
-    const COLOR_HEX_FALLBACK = { "white":"#FFFFFF","off white":"#FAF9F6","cream":"#F5EFD9","beige":"#E8DCC8","tan":"#D2B48C","brown":"#7C4A2D","black":"#1A1A1A","charcoal":"#3C4043","grey":"#9AA0A6","gray":"#9AA0A6","navy":"#1F3A5F","blue":"#2563EB","sky blue":"#7DD3FC","teal":"#14B8A6","green":"#2F7D4F","olive":"#6B7A3A","yellow":"#FACC15","mustard":"#D4A017","orange":"#F97316","rust":"#B7410E","red":"#DC2626","maroon":"#7C2D3B","pink":"#F9A8D4","peach":"#FDBA99","purple":"#7C3AED","lavender":"#B57EDC" };
-    const hexOf = function(c) {
-      if (c && c.hex) return c.hex;
-      return COLOR_HEX_FALLBACK[String(c && c.name ? c.name : "").trim().toLowerCase()] || "";
-    };
-    const mainImg = p.img ? p.img : (p.gallery && p.gallery.length > 0 ? p.gallery[0] : "");
-    const colorImages = Array.isArray(p.colorImages) ? p.colorImages : [];
-    const imagesForColor = function(colorName) {
-      if (!colorName) return [];
-      const wanted = String(colorName).trim().toLowerCase();
-      return colorImages
-        .filter(function(entry) { return entry && typeof entry.url === "string" && String(entry.color || "").trim().toLowerCase() === wanted; })
-        .map(function(entry) { return safeProductImageUrl(entry.url); })
-        .filter(Boolean);
-    };
-    const thumbHtml = function(urls) {
-      return urls.map(function(url, i) {
-        return '<div class="pd-gallery-thumb' + (i === 0 ? " active" : "") + '" data-url="' + escapeHtml(url)
-          + '" style="background-image: url(\'' + escapeHtml(url) + '\')" role="button" tabindex="0" aria-label="View image ' + (i + 2) + '"></div>';
-      }).join("");
-    };
-    const bindGalleryThumbs = function() {
-      root.querySelectorAll(".pd-gallery-thumb").forEach(function(t) {
-        if (t.dataset.thumbBound) return;
-        t.dataset.thumbBound = "1";
-        const activate = function() {
-          const main = root.querySelector(".pd-gallery-main img");
-          const url = t.getAttribute("data-url");
-          if (main && url) main.src = url;
-          root.querySelectorAll(".pd-gallery-thumb").forEach(function(x) { x.classList.remove("active"); });
-          t.classList.add("active");
-        };
-        t.addEventListener("click", activate);
-        t.addEventListener("keydown", function(e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
-      });
-    };
-    let html = '<div class="pd-gallery"><div class="pd-gallery-main"><img src="'
-      + escapeHtml(safeProductImageUrl(mainImg)) + '" alt="' + escapeHtml(p.name) + '"></div>';
-    if (p.gallery && p.gallery.length > 1) {
-      html += '<div class="pd-gallery-thumbs">' + thumbHtml(p.gallery.slice(1)) + "</div>";
-    }
-    html += "</div>";
-    html += '<div class="pd-info"><span class="product-cat">' + escapeHtml(p.category) + "</span>"
-      + '<h1 style="font-size:2rem;">' + escapeHtml(p.name) + "</h1>"
-      + '<div class="pd-price-row"><span class="pd-price" id="pd-price">' + fmt(p.price) + "</span>"
-      + (p.oldPrice ? '<span class="price-old">' + fmt(p.oldPrice) + "</span>" : "")
-      + "</div><p>" + escapeHtml(p.desc) + "</p>"
-      + '<div id="pd-variants"></div>'
-      + '<div class="pd-actions"><button class="btn btn-primary" id="pd-add" data-id="' + escapeHtml(p.id) + '">Add to cart</button>'
-      + '<a href="#" class="btn btn-outline" id="pd-buy" data-id="' + escapeHtml(p.id) + '">Buy now</a></div>'
-      + '<ul class="pd-meta"><li>Prices shown in Indian Rupees</li><li>Shipping is calculated securely at checkout</li></ul>'
-      + "</div>";
-    root.innerHTML = html;
-    bindGalleryThumbs();
-    let selectedColor = colors.length === 1 ? colors[0].name : "";
-    let selectedSize = "";
+  }
 
-    function stockFor(v) { return v && v.stock != null ? v.stock : p.stock; }
-    function variantsForColor(name) {
-      return variants.filter(function(v) { return name ? v.color === name : true; });
-    }
-    function findVariant() {
-      const list = variantsForColor(selectedColor);
-      if (!hasSizes) {
-        const inStock = list.filter(function(v) { return stockFor(v) > 0; });
-        return (inStock.length ? inStock : list)[0] || null;
-      }
-      return list.find(function(v) { return v.size === selectedSize; }) || null;
-    }
-    function priceFor(v) { return v && v.priceOverride != null ? Number(v.priceOverride) : p.price; }
-    function variantIdOf(v) { return v ? String(v._id || "") : ""; }
+  buildPage(p);
 
-    function render() {
-      const v = findVariant();
-      const priceEl = document.getElementById("pd-price");
-      if (priceEl) priceEl.textContent = fmt(v ? priceFor(v) : p.price);
-      const addBtn = document.getElementById("pd-add");
-      const buyBtn = document.getElementById("pd-buy");
-      const inStock = v ? stockFor(v) > 0 : (variants.length === 0 ? (p.stock == null || p.stock > 0) : false);
-      const usable = inStock && (!hasSizes || !!selectedSize) && (colors.length <= 1 || !!selectedColor);
-      addBtn.disabled = !usable;
-      addBtn.onclick = function() { addToCart(p.id, 1, variantIdOf(v)); };
-      if (usable) {
-        buyBtn.setAttribute("href", "/checkout");
-        buyBtn.setAttribute("aria-disabled", "false");
-        buyBtn.onclick = function() { addToCart(p.id, 1, variantIdOf(v)); };
-      } else {
-        buyBtn.setAttribute("href", "#");
-        buyBtn.setAttribute("aria-disabled", "true");
-        buyBtn.onclick = function(event) { event.preventDefault(); };
-      }
+}).catch(function(err){
+  console.error('[Hubator] pdp:', err);
+  skeleton.style.display = 'none';
+  pdpRoot.style.display = '';
+  pdpRoot.innerHTML = '<div style="text-align:center;padding:80px 20px;"><p style="color:var(--rust);">We couldn\'t load this product. Please refresh.</p></div>';
+});
 
-      let out = "";
-      if (colors.length > 1) {
-        out += '<div class="variant-section"><span class="variant-label">Color'
-          + (selectedColor ? '<strong>' + escapeHtml(selectedColor) + '</strong>' : "")
-          + '</span><div class="variant-options" role="group" aria-label="Choose a colour">';
-        colors.forEach(function(c) {
-          const anyStock = variants.some(function(vv) { return vv.color === c.name && stockFor(vv) > 0; });
-          const swatch = hexOf(c);
-          out += '<button type="button" class="variant-chip' + (selectedColor === c.name ? " is-selected" : "") + (anyStock ? "" : " is-unavailable") + (swatch ? "" : " has-name") + '"'
-            + (swatch ? ' style="--swatch:' + escapeHtml(swatch) + '"' : "")
-            + ' data-color="' + escapeHtml(c.name) + '" title="' + escapeHtml(c.name) + (anyStock ? "" : " — out of stock") + '" aria-label="' + escapeHtml(c.name) + '" aria-pressed="' + (selectedColor === c.name ? "true" : "false") + '">'
-            + (swatch ? "" : escapeHtml(c.name)) + "</button>";
-        });
-        out += "</div>";
-        if (!selectedColor) out += '<p class="variant-hint">Choose a colour to see available sizes</p>';
-        out += "</div>";
-      }
-      if (hasSizes) {
-        const sizes = [];
-        variantsForColor(selectedColor).forEach(function(vv) { if (vv.size && sizes.indexOf(vv.size) === -1) sizes.push(vv.size); });
-        out += '<div class="variant-section"><span class="variant-label">Size'
-          + (selectedSize ? '<strong>' + escapeHtml(selectedSize) + '</strong>' : "")
-          + '</span><div class="variant-options" role="group" aria-label="Choose a size">';
-        sizes.forEach(function(s) {
-          const sv = variantsForColor(selectedColor).find(function(vv) { return vv.size === s; });
-          const ok = sv && stockFor(sv) > 0;
-          out += '<button type="button" class="size-chip' + (selectedSize === s ? " is-selected" : "") + (ok ? "" : " is-unavailable") + '"'
-            + ' data-size="' + escapeHtml(s) + '" aria-pressed="' + (selectedSize === s ? "true" : "false") + '"'
-            + (ok ? "" : ' title="Out of stock"') + ">" + escapeHtml(s) + "</button>";
-        });
-        out += "</div>";
-        if (selectedColor || colors.length === 0) {
-          if (!selectedSize) out += '<p class="variant-hint">Choose a size</p>';
-          else if (selectedSize && v && stockFor(v) <= 0) out += '<p class="variant-unavailable">This combination is out of stock</p>';
-        }
-        out += "</div>";
-      }
-      const host = document.getElementById("pd-variants");
-      host.innerHTML = out;
-      host.querySelectorAll("[data-color]").forEach(function(btn) {
-        btn.addEventListener("click", function() {
-          selectedColor = btn.getAttribute("data-color");
-          selectedSize = "";
-          // Swap the gallery to the photos saved for this colour (Voiva-style).
-          const colorPhotos = imagesForColor(selectedColor);
-          if (colorPhotos.length > 0) {
-            const main = root.querySelector(".pd-gallery-main img");
-            if (main) main.src = colorPhotos[0];
-            const thumbsWrap = root.querySelector(".pd-gallery-thumbs");
-            if (thumbsWrap && colorPhotos.length > 1) {
-              thumbsWrap.innerHTML = thumbHtml(colorPhotos.slice(1));
-              bindGalleryThumbs();
-            } else if (thumbsWrap) {
-              thumbsWrap.innerHTML = "";
-            } else if (colorPhotos.length > 1) {
-              // Gallery was rendered without a thumbs strip; build one for this colour.
-              const wrap = document.createElement("div");
-              wrap.className = "pd-gallery-thumbs";
-              wrap.innerHTML = thumbHtml(colorPhotos.slice(1));
-              root.querySelector(".pd-gallery").appendChild(wrap);
-              bindGalleryThumbs();
-            }
-          }
-          render();
-        });
-      });
-      host.querySelectorAll("[data-size]").forEach(function(btn) {
-        btn.addEventListener("click", function() {
-          selectedSize = btn.getAttribute("data-size");
-          render();
-        });
-      });
+/* ════════════════════════════════════════════════
+   BUILD PAGE
+   ════════════════════════════════════════════════ */
+function buildPage(p) {
+  /* --- Parse variants --- */
+  var variants = [];
+  if(p.variants && typeof p.variants.forEach === 'function'){
+    p.variants.forEach(function(v){ if(v) variants.push(v); });
+  }
+  var colors = [];
+  variants.forEach(function(v){
+    if(v.color && !colors.some(function(c){ return c.name===v.color; })){
+      colors.push({ name:v.color, hex: hexOf(v.color, v.colorHex) });
     }
-
-    // Products with nothing meaningful to choose: preselect and hide the picker.
-    if (colors.length <= 1 && !hasSizes) {
-      if (colors.length === 1) selectedColor = colors[0].name;
-      document.getElementById("pd-variants").style.display = "none";
-    }
-    render();
-  }).catch(err => {
-    console.error("[Hubator] product:", err);
-    document.getElementById("pd-root").textContent = "We couldn't load this product. Please refresh and try again.";
   });
-</script></body></html>
+  var hasSizes = variants.some(function(v){ return !!v.size; });
+  var colorImages = Array.isArray(p.colorImages) ? p.colorImages : [];
+
+  /* --- Helpers --- */
+  function stockFor(v) { return v && v.stock != null ? v.stock : (p.stock != null ? p.stock : 999); }
+  function variantsForColor(name) { return variants.filter(function(v){ return !name || v.color===name; }); }
+  function imagesForColor(name) {
+    var wanted = String(name||'').trim().toLowerCase();
+    return colorImages.filter(function(ci){ return ci&&typeof ci.url==='string'&&String(ci.color||'').trim().toLowerCase()===wanted; }).map(function(ci){ return safeProductImageUrl(ci.url); }).filter(Boolean);
+  }
+  function savings(price, old) { return old&&old>price ? Math.round((1-price/old)*100) : 0; }
+  function priceFor(v) { return v&&v.priceOverride!=null ? Number(v.priceOverride) : p.price; }
+  function variantIdOf(v) { return v ? String(v._id||v.id||'') : ''; }
+
+  /* --- Build gallery --- */
+  var allImages = [];
+  if(p.img) allImages.push(safeProductImageUrl(p.img));
+  (p.gallery||[]).forEach(function(u){ var s=safeProductImageUrl(u); if(s&&s!==allImages[0]) allImages.push(s); });
+
+  function galleryHTML(imgs) {
+    if(!imgs || !imgs.length) imgs = ['/favicon.ico'];
+    // Desktop: main + thumbs
+    var desktop = '<div class="pdp-main-img-wrap" id="pdp-main-wrap">' +
+      (savings(p.price, p.oldPrice) > 0 ? '<span class="pdp-gallery-badge">Sale</span>' : '') +
+      '<img class="pdp-main-img" id="pdp-main-img" src="'+escapeHtml(imgs[0])+'" alt="'+escapeHtml(p.name)+'">' +
+      '</div>';
+    if(imgs.length > 1){
+      desktop += '<div class="pdp-thumbs" id="pdp-thumbs">' +
+        imgs.map(function(u,i){
+          return '<div class="pdp-thumb'+(i===0?' active':'')+'" data-idx="'+i+'" data-url="'+escapeHtml(u)+'"><img src="'+escapeHtml(u)+'" alt="'+escapeHtml(p.name)+' image '+(i+1)+'" loading="lazy"></div>';
+        }).join('') +
+      '</div>';
+    }
+    // Mobile: carousel + dots
+    var mobile = '<div class="pdp-carousel" id="pdp-carousel">' +
+      imgs.map(function(u){ return '<div class="pdp-carousel-item"><img src="'+escapeHtml(u)+'" alt="" loading="lazy"></div>'; }).join('') +
+      '</div>';
+    if(imgs.length > 1){
+      mobile += '<div class="pdp-dots" id="pdp-dots">' +
+        imgs.map(function(_,i){ return '<button class="pdp-dot'+(i===0?' active':'')+'" data-idx="'+i+'" aria-label="Image '+(i+1)+'"></button>'; }).join('') +
+      '</div>';
+    }
+    return desktop + mobile;
+  }
+
+  /* --- Build price block --- */
+  function priceBlockHTML(price, old) {
+    var s = savings(price, old);
+    return '<div class="pdp-price-block" id="pdp-price-block">' +
+      (old ? '<span class="pdp-compare">'+fmt(old)+'</span><span class="pdp-price on-sale" id="pdp-price">'+fmt(price)+'</span>' : '<span class="pdp-price" id="pdp-price">'+fmt(price)+'</span>') +
+      (s > 0 ? '<span class="pdp-save-tag">'+s+'% off</span>' : '') +
+    '</div>';
+  }
+
+  /* --- Description/accordion --- */
+  var desc = p.desc || '';
+  var accordionItems = [
+    { title: 'Product Description', body: desc || 'No description available.' },
+    { title: 'Shipping & Returns', body: 'Free shipping on orders above ₹999. Easy 7-day returns on all products.' },
+    { title: 'Care Instructions', body: 'Machine wash cold. Do not bleach. Tumble dry low. Iron on low heat.' }
+  ];
+
+  /* --- Render full page --- */
+  pdpRoot.innerHTML =
+    '<div class="pdp-grid">' +
+    '<div class="pdp-gallery" id="pdp-gallery">' + galleryHTML(allImages) + '</div>' +
+    '<div class="pdp-info">' +
+      '<span class="pdp-cat">'+escapeHtml(p.category)+'</span>' +
+      '<h1 class="pdp-title">'+escapeHtml(p.name)+'</h1>' +
+      priceBlockHTML(p.price, p.oldPrice) +
+      '<hr class="pdp-divider">' +
+      '<div id="pdp-variants"></div>' +
+      '<hr class="pdp-divider">' +
+      '<div class="pdp-qty-row">' +
+        '<span class="pdp-qty-label">Qty</span>' +
+        '<div class="pdp-qty-ctrl">' +
+          '<button class="pdp-qty-btn" id="qty-minus" aria-label="Decrease quantity">−</button>' +
+          '<input class="pdp-qty-val" id="qty-val" type="number" min="1" max="99" value="1" readonly>' +
+          '<button class="pdp-qty-btn" id="qty-plus" aria-label="Increase quantity">+</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="pdp-actions">' +
+        '<button class="pdp-add-btn" id="pdp-add" disabled>Add to cart</button>' +
+        '<a href="#" class="pdp-buy-btn disabled" id="pdp-buy">Buy now</a>' +
+      '</div>' +
+      '<div class="pdp-trust">' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon">🔒</span><span>Secure checkout — Razorpay encrypted</span></div>' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon">📦</span><span>Shipping calculated at checkout</span></div>' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon">🔄</span><span>Easy 7-day returns</span></div>' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon">₹</span><span>Prices shown in Indian Rupees</span></div>' +
+      '</div>' +
+      '<div class="pdp-accordion">' +
+        accordionItems.map(function(item){
+          return '<div class="pdp-accordion-item"><button class="pdp-accordion-head" aria-expanded="false">'+escapeHtml(item.title)+'<span class="pdp-accordion-icon" aria-hidden="true">+</span></button><div class="pdp-accordion-body">'+escapeHtml(item.body)+'</div></div>';
+        }).join('') +
+      '</div>' +
+    '</div>' +
+    '</div>';
+
+  /* ── State ──────────────────────────────────── */
+  var selColor = colors.length === 1 ? colors[0].name : '';
+  var selSize  = '';
+
+  /* ── Sync URL params on load ─────────────────── */
+  (function(){
+    var sp = new URLSearchParams(location.search);
+    var pc = (sp.get('color')||'').trim().toLowerCase();
+    var ps = (sp.get('size')||'').trim();
+    if(pc) { var match = colors.find(function(c){ return c.name.toLowerCase()===pc; }); if(match) selColor=match.name; }
+    if(ps) selSize = ps;
+  })();
+
+  /* ── Variant render ─────────────────────────── */
+  function renderVariants() {
+    var host = document.getElementById('pdp-variants');
+    if(!host) return;
+    var out = '';
+
+    // Colors
+    if(colors.length > 1){
+      out += '<div class="pdp-variant-section"><div class="pdp-variant-label">Color' +
+        (selColor ? '&nbsp;<strong>'+escapeHtml(selColor)+'</strong>' : '') +
+      '</div><div class="pdp-color-options">';
+      colors.forEach(function(c){
+        var anyStock = variants.some(function(v){ return v.color===c.name&&stockFor(v)>0; });
+        var bg = c.hex;
+        var isNamed = !bg;
+        out += '<button type="button" class="pdp-color-chip'+(selColor===c.name?' ':'')+(anyStock?'':' is-unavailable')+(isNamed?' has-name':'') +'"' +
+          (bg ? ' style="background:'+escapeHtml(bg)+';"' : '') +
+          ' data-color="'+escapeHtml(c.name)+'"' +
+          ' title="'+escapeHtml(c.name)+(anyStock?'':' — out of stock')+'"' +
+          ' aria-pressed="'+(selColor===c.name?'true':'false')+'"' +
+          ' aria-label="'+escapeHtml(c.name)+'">' +
+          (isNamed ? escapeHtml(c.name) : '') +
+        '</button>';
+      });
+      out += '</div>';
+      if(!selColor) out += '<p class="pdp-hint">Choose a colour to see available sizes</p>';
+      out += '</div>';
+    }
+
+    // Sizes
+    if(hasSizes){
+      var sizesForColor = [];
+      variantsForColor(selColor||'').forEach(function(v){ if(v.size&&sizesForColor.indexOf(v.size)===-1) sizesForColor.push(v.size); });
+      out += '<div class="pdp-variant-section"><div class="pdp-variant-label">Size' +
+        (selSize ? '&nbsp;<strong>'+escapeHtml(selSize)+'</strong>' : '') +
+      '</div><div class="pdp-size-options">';
+      sizesForColor.forEach(function(s){
+        var sv = variantsForColor(selColor).find(function(v){ return v.size===s; });
+        var inStock = sv && stockFor(sv) > 0;
+        out += '<button type="button" class="pdp-size-chip'+(selSize===s?' ':'')+(inStock?'':' is-unavailable')+'"' +
+          ' data-size="'+escapeHtml(s)+'"' +
+          ' aria-pressed="'+(selSize===s?'true':'false')+'"' +
+          (inStock?'':' title="Out of stock"') + '>'+escapeHtml(s)+'</button>';
+      });
+      out += '</div>';
+      if(selColor || colors.length===0){
+        if(!selSize) out += '<p class="pdp-hint">Choose a size</p>';
+      }
+      out += '</div>';
+    }
+
+    host.innerHTML = out;
+
+    // Re-bind events
+    host.querySelectorAll('[data-color]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        selColor = btn.getAttribute('data-color');
+        selSize  = '';
+        // Swap gallery images
+        var colorPhotos = imagesForColor(selColor);
+        if(colorPhotos.length > 0) swapGallery(colorPhotos);
+        // Persist in URL
+        syncUrl();
+        renderVariants();
+        renderCTA();
+      });
+    });
+    host.querySelectorAll('[data-size]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        selSize = btn.getAttribute('data-size');
+        syncUrl();
+        renderVariants();
+        renderCTA();
+      });
+    });
+  }
+
+  /* ── CTA render ─────────────────────────────── */
+  function renderCTA() {
+    var v = findVariant();
+    var price = v ? priceFor(v) : p.price;
+    var inStock = v ? stockFor(v) > 0 : (variants.length===0 ? (p.stock==null||p.stock>0) : false);
+    var needsColor = colors.length > 1 && !selColor;
+    var needsSize  = hasSizes && !selSize;
+    var usable = inStock && !needsColor && !needsSize;
+
+    // Update price display
+    var priceEl = document.getElementById('pdp-price');
+    if(priceEl) priceEl.textContent = fmt(price);
+
+    // Update buttons
+    var addBtn = document.getElementById('pdp-add');
+    var buyBtn = document.getElementById('pdp-buy');
+    var addLabel = needsColor ? 'Select a colour' : needsSize ? 'Select a size' : inStock ? 'Add to cart' : 'Out of stock';
+    if(addBtn){ addBtn.disabled = !usable; addBtn.textContent = addLabel; }
+    if(buyBtn){ buyBtn.classList.toggle('disabled', !usable); buyBtn.textContent = usable ? 'Buy now' : 'Buy now'; }
+
+    // Sticky bar
+    if(stickyTitle) stickyTitle.textContent = p.name;
+    if(stickyPrice) stickyPrice.textContent = fmt(price);
+    if(stickyAdd){ stickyAdd.disabled = !usable; stickyAdd.textContent = addLabel; }
+
+    // Bind add to cart
+    if(addBtn){
+      addBtn.onclick = function(){
+        if(!usable) return;
+        addToCart(p.id, qty, variantIdOf(v));
+        showToast(p.name + ' added to cart');
+      };
+    }
+    if(stickyAdd){
+      stickyAdd.onclick = function(){
+        if(!usable) return;
+        addToCart(p.id, qty, variantIdOf(v));
+        showToast(p.name + ' added to cart');
+      };
+    }
+    if(buyBtn){
+      buyBtn.onclick = function(e){
+        if(!usable){ e.preventDefault(); return; }
+        addToCart(p.id, qty, variantIdOf(v));
+        window.location.href = '/checkout';
+      };
+    }
+  }
+
+  function findVariant() {
+    var list = variantsForColor(selColor||'');
+    if(!hasSizes){
+      var ok = list.filter(function(v){ return stockFor(v)>0; });
+      return (ok.length?ok:list)[0]||null;
+    }
+    return list.find(function(v){ return v.size===selSize; })||null;
+  }
+
+  /* ── Sync URL ───────────────────────────────── */
+  function syncUrl() {
+    var sp = new URLSearchParams(location.search);
+    if(selColor) sp.set('color', selColor.toLowerCase()); else sp.delete('color');
+    if(selSize)  sp.set('size', selSize);                 else sp.delete('size');
+    var qs = sp.toString();
+    history.replaceState(null, '', location.pathname + (qs ? '?'+qs : ''));
+  }
+
+  /* ── Gallery swap ───────────────────────────── */
+  function swapGallery(imgs) {
+    // Desktop
+    var mainImg = document.getElementById('pdp-main-img');
+    if(mainImg){
+      mainImg.classList.add('fading');
+      setTimeout(function(){ mainImg.src = imgs[0]; mainImg.classList.remove('fading'); }, 180);
+    }
+    var thumbsWrap = document.getElementById('pdp-thumbs');
+    if(thumbsWrap){
+      thumbsWrap.innerHTML = imgs.map(function(u,i){
+        return '<div class="pdp-thumb'+(i===0?' active':'')+'" data-idx="'+i+'" data-url="'+escapeHtml(u)+'"><img src="'+escapeHtml(u)+'" alt="" loading="lazy"></div>';
+      }).join('');
+      bindThumbs();
+    }
+    // Mobile carousel
+    var carousel = document.getElementById('pdp-carousel');
+    if(carousel){
+      carousel.innerHTML = imgs.map(function(u){ return '<div class="pdp-carousel-item"><img src="'+escapeHtml(u)+'" alt="" loading="lazy"></div>'; }).join('');
+      carousel.scrollTo({left:0});
+    }
+    var dotsWrap = document.getElementById('pdp-dots');
+    if(dotsWrap){
+      dotsWrap.innerHTML = imgs.length>1 ? imgs.map(function(_,i){ return '<button class="pdp-dot'+(i===0?' active':'')+'" data-idx="'+i+'" aria-label="Image '+(i+1)+'"></button>'; }).join('') : '';
+      bindCarousel();
+    }
+  }
+
+  /* ── Bind thumbs ────────────────────────────── */
+  function bindThumbs() {
+    var thumbs = document.querySelectorAll('.pdp-thumb');
+    thumbs.forEach(function(t){
+      if(t._bound) return; t._bound=true;
+      t.addEventListener('click', function(){
+        var mainImg = document.getElementById('pdp-main-img');
+        if(mainImg){ mainImg.classList.add('fading'); setTimeout(function(){ mainImg.src=t.dataset.url; mainImg.classList.remove('fading'); }, 180); }
+        thumbs.forEach(function(x){ x.classList.remove('active'); });
+        t.classList.add('active');
+      });
+    });
+    // Click-to-zoom main image
+    var wrap = document.getElementById('pdp-main-wrap');
+    if(wrap && !wrap._zoomBound){ wrap._zoomBound=true; wrap.addEventListener('click', function(){ wrap.classList.toggle('zoomed'); }); }
+  }
+
+  /* ── Bind carousel ──────────────────────────── */
+  function bindCarousel() {
+    var carousel = document.getElementById('pdp-carousel');
+    var dots = document.querySelectorAll('.pdp-dot');
+    if(!carousel||!dots.length) return;
+    dots.forEach(function(dot){
+      if(dot._bound) return; dot._bound=true;
+      dot.addEventListener('click', function(){
+        var idx = Number(dot.dataset.idx);
+        carousel.scrollTo({ left: carousel.offsetWidth*idx, behavior:'smooth' });
+      });
+    });
+    // Update dots on scroll
+    if(!carousel._scrollBound){ carousel._scrollBound=true; carousel.addEventListener('scroll', function(){
+      var idx = Math.round(carousel.scrollLeft / carousel.offsetWidth);
+      dots.forEach(function(d,i){ d.classList.toggle('active',i===idx); });
+    }); }
+  }
+
+  /* ── Qty stepper ────────────────────────────── */
+  var qtyVal = document.getElementById('qty-val');
+  document.getElementById('qty-minus').addEventListener('click',function(){ if(qty>1){ qty--; qtyVal.value=qty; } });
+  document.getElementById('qty-plus').addEventListener('click',function(){ if(qty<99){ qty++; qtyVal.value=qty; } });
+
+  /* ── Accordion ──────────────────────────────── */
+  document.querySelectorAll('.pdp-accordion-head').forEach(function(head){
+    head.addEventListener('click', function(){
+      var item = head.parentElement;
+      item.classList.toggle('open');
+      head.setAttribute('aria-expanded', item.classList.contains('open'));
+    });
+  });
+
+  /* ── First open description ─────────────────── */
+  var firstAcc = document.querySelector('.pdp-accordion-item');
+  if(firstAcc){ firstAcc.classList.add('open'); firstAcc.querySelector('.pdp-accordion-head').setAttribute('aria-expanded','true'); }
+
+  /* ── Init ───────────────────────────────────── */
+  bindThumbs();
+  bindCarousel();
+  renderVariants();
+  renderCTA();
+  syncUrl();
+
+  // Hide variant picker if nothing to choose
+  if(colors.length <= 1 && !hasSizes){
+    var vhost = document.getElementById('pdp-variants');
+    if(vhost) vhost.style.display='none';
+  }
+}
+})();
+</script>
+</body>
+</html>
