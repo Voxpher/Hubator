@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Product — Hubator</title><link rel="stylesheet" href="/css/style.css?v=2">
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Product — Hubator</title><link rel="stylesheet" href="/css/style.css?v=3">
 <meta name="description" content="View product details, size guide and ordering information at Hubator.">
 <meta name="theme-color" content="#FAF7F0">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -36,12 +36,40 @@
       return COLOR_HEX_FALLBACK[String(c && c.name ? c.name : "").trim().toLowerCase()] || "";
     };
     const mainImg = p.img ? p.img : (p.gallery && p.gallery.length > 0 ? p.gallery[0] : "");
+    const colorImages = Array.isArray(p.colorImages) ? p.colorImages : [];
+    const imagesForColor = function(colorName) {
+      if (!colorName) return [];
+      const wanted = String(colorName).trim().toLowerCase();
+      return colorImages
+        .filter(function(entry) { return entry && typeof entry.url === "string" && String(entry.color || "").trim().toLowerCase() === wanted; })
+        .map(function(entry) { return safeProductImageUrl(entry.url); })
+        .filter(Boolean);
+    };
+    const thumbHtml = function(urls) {
+      return urls.map(function(url, i) {
+        return '<div class="pd-gallery-thumb' + (i === 0 ? " active" : "") + '" data-url="' + escapeHtml(url)
+          + '" style="background-image: url(\'' + escapeHtml(url) + '\')" role="button" tabindex="0" aria-label="View image ' + (i + 2) + '"></div>';
+      }).join("");
+    };
+    const bindGalleryThumbs = function() {
+      root.querySelectorAll(".pd-gallery-thumb").forEach(function(t) {
+        if (t.dataset.thumbBound) return;
+        t.dataset.thumbBound = "1";
+        const activate = function() {
+          const main = root.querySelector(".pd-gallery-main img");
+          const url = t.getAttribute("data-url");
+          if (main && url) main.src = url;
+          root.querySelectorAll(".pd-gallery-thumb").forEach(function(x) { x.classList.remove("active"); });
+          t.classList.add("active");
+        };
+        t.addEventListener("click", activate);
+        t.addEventListener("keydown", function(e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
+      });
+    };
     let html = '<div class="pd-gallery"><div class="pd-gallery-main"><img src="'
       + escapeHtml(safeProductImageUrl(mainImg)) + '" alt="' + escapeHtml(p.name) + '"></div>';
     if (p.gallery && p.gallery.length > 1) {
-      html += '<div class="pd-gallery-thumbs">' + p.gallery.slice(1).map((url, i) =>
-        '<div class="pd-gallery-thumb' + (i === 0 ? " active" : "") + '" data-url="' + escapeHtml(String(url))
-        + '" style="background-image: url(\'' + escapeHtml(String(url)) + '\')" role="button" tabindex="0" aria-label="View image ' + (i + 2) + '"></div>').join("") + "</div>";
+      html += '<div class="pd-gallery-thumbs">' + thumbHtml(p.gallery.slice(1)) + "</div>";
     }
     html += "</div>";
     html += '<div class="pd-info"><span class="product-cat">' + escapeHtml(p.category) + "</span>"
@@ -55,17 +83,7 @@
       + '<ul class="pd-meta"><li>Prices shown in Indian Rupees</li><li>Shipping is calculated securely at checkout</li></ul>'
       + "</div>";
     root.innerHTML = html;
-    root.querySelectorAll(".pd-gallery-thumb").forEach(function(t) {
-      const activate = function() {
-        const main = root.querySelector(".pd-gallery-main img");
-        const url = t.getAttribute("data-url");
-        if (main && url) main.src = url;
-        root.querySelectorAll(".pd-gallery-thumb").forEach(function(x) { x.classList.remove("active"); });
-        t.classList.add("active");
-      };
-      t.addEventListener("click", activate);
-      t.addEventListener("keydown", function(e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
-    });
+    bindGalleryThumbs();
     let selectedColor = colors.length === 1 ? colors[0].name : "";
     let selectedSize = "";
 
@@ -147,6 +165,26 @@
         btn.addEventListener("click", function() {
           selectedColor = btn.getAttribute("data-color");
           selectedSize = "";
+          // Swap the gallery to the photos saved for this colour (Voiva-style).
+          const colorPhotos = imagesForColor(selectedColor);
+          if (colorPhotos.length > 0) {
+            const main = root.querySelector(".pd-gallery-main img");
+            if (main) main.src = colorPhotos[0];
+            const thumbsWrap = root.querySelector(".pd-gallery-thumbs");
+            if (thumbsWrap && colorPhotos.length > 1) {
+              thumbsWrap.innerHTML = thumbHtml(colorPhotos.slice(1));
+              bindGalleryThumbs();
+            } else if (thumbsWrap) {
+              thumbsWrap.innerHTML = "";
+            } else if (colorPhotos.length > 1) {
+              // Gallery was rendered without a thumbs strip; build one for this colour.
+              const wrap = document.createElement("div");
+              wrap.className = "pd-gallery-thumbs";
+              wrap.innerHTML = thumbHtml(colorPhotos.slice(1));
+              root.querySelector(".pd-gallery").appendChild(wrap);
+              bindGalleryThumbs();
+            }
+          }
           render();
         });
       });

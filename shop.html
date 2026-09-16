@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shop — Hubator</title>
-<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/style.css?v=3">
 
 <meta name="description" content="Shop curated apparel and fashion from Hubator — unique clothing and accessories">
 <meta name="theme-color" content="#FAF7F0">
@@ -280,8 +280,44 @@
   }
   const grid = document.getElementById("shop-grid");
   const filterBar = document.getElementById("filter-bar");
+  // Group names are clickable from the header "Categories" menu
+  // (/shop?cat=Man). A filter key may therefore be a group
+  // ("Man") or a single category name ("Bengali Man").
+  // Groups expand to every category belonging to that group.
+  const GROUP_OF_CATEGORY = { "Man": "Man", "Woman": "Woman", "Accessories": "Accessories" };
+  let categoryGroups = {};
+  function refreshCategoryGroups() {
+    // Cheap local map: category name -> group name, synced with the
+    // header "Categories" menu (live API, local cache, or static fallback).
+    categoryGroups = Object.assign({}, GROUP_OF_CATEGORY);
+    try {
+      const cached = JSON.parse(localStorage.getItem("hubator_category_nav_v2") || "null");
+      if (Array.isArray(cached)) {
+        cached.forEach(function(entry) {
+          (entry.items || []).forEach(function(item) {
+            const name = typeof item === "string" ? item : item.name || (Array.isArray(item) ? item[0] : "");
+            if (name) categoryGroups[name] = entry.group;
+          });
+        });
+      }
+    } catch (error) { /* keep fallback map */ }
+  }
+  function matchesFilter(product, cat) {
+    if (cat === "All") return true;
+    if (product.category === cat) return true;
+    const catLower = String(cat).toLowerCase();
+    const groupLower = String(categoryGroups[String(product.category || "")] || "").toLowerCase();
+    if (groupLower && groupLower === catLower) return true;
+    // Fallback when the group map hasn't loaded yet: "Man"/"Woman"
+    // only match whole words so "Festival Woman" isn't pulled into "Man".
+    const lower = String(product.category || "").toLowerCase();
+    if (catLower === "man") return lower.split(/[^a-z]+/).includes("man");
+    if (catLower === "woman") return lower.split(/[^a-z]+/).includes("woman");
+    if (catLower === "accessories") return lower === "accessories";
+    return false;
+  }
   function render(cat){
-    const list = cat === "All" ? PRODUCTS : PRODUCTS.filter(p => p.category === cat);
+    const list = PRODUCTS.filter(p => matchesFilter(p, cat));
     grid.innerHTML = list.map(cardHTML).join("") || `<p>There are no products in this category yet.</p>`;
   }
   function selectCategory(cat) {
@@ -300,6 +336,7 @@
   const requestedCat = (params.get("cat") || "").trim();
   let initialCat = requestedCat || "All";
   function syncCategories() {
+    refreshCategoryGroups();
     const existing = new Set(Array.from(document.querySelectorAll(".filter-chip")).map(c => c.dataset.cat));
     const categories = Array.from(new Set(PRODUCTS.map(p => p.category).filter(Boolean))).sort();
     categories.forEach(category => {

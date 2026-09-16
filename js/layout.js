@@ -123,6 +123,159 @@
     { href: "/faq", label: "FAQ", icon: "help" },
   ];
 
+  /* ── Category navigation (MAN / WOMAN / ACCESSORIES) ──────────
+   * Groups come from the dashboard's public categories API and are
+   * cached in localStorage; a static fallback keeps the menu usable
+   * even if the API is unreachable. Links use the shop filter:
+   * /shop?cat=<category name>.
+   */
+  const CATEGORY_NAV_CACHE_KEY = "hubator_category_nav_v2";
+  const CATEGORY_NAV_FALLBACK = [
+    { group: "Man", items: [["Bengali Man", "bengali-man"], ["Festival Man", "festival-man"], ["Graphic Man", "graphic-man"], ["Oversize Man", "oversize-man"], ["Solid Man", "solid-man"], ["Sweatshirt", "sweatshirt"], ["Hoodie Man", "hoodie-man"]] },
+    { group: "Woman", items: [["Bengali Woman", "bengali-woman"], ["Festival Woman", "festival-woman"], ["Graphic Woman", "graphic-woman"]] },
+    { group: "Accessories", items: [["Caps", "caps"]] },
+  ];
+
+  let categoryNav = readCachedCategoryNav();
+
+  function readCachedCategoryNav() {
+    try {
+      const cached = JSON.parse(localStorage.getItem(CATEGORY_NAV_CACHE_KEY) || "null");
+      if (Array.isArray(cached) && cached.length && cached[0] && cached[0].items) return cached;
+    } catch (error) {
+      /* ignore malformed cache */
+    }
+    return CATEGORY_NAV_FALLBACK;
+  }
+
+  function shopCategoryHref(name) {
+    return "/shop?cat=" + encodeURIComponent(name);
+  }
+
+  // Category entries may be { name } objects (live API / cache) or
+  // [name, slug] pairs (static fallback) — normalize before rendering.
+  function categoryItemName(item) {
+    if (typeof item === "string") return item;
+    if (item && typeof item.name === "string") return item.name;
+    if (Array.isArray(item) && typeof item[0] === "string") return item[0];
+    return "";
+  }
+
+  function groupCategories(categories) {
+    const groups = new Map();
+    categories.forEach((category) => {
+      if (!category || !category.name) return;
+      const group = category.group || "Shop";
+      if (!groups.has(group)) groups.set(group, []);
+      groups.get(group).push(category);
+    });
+    const order = ["Man", "Woman", "Accessories"];
+    return Array.from(groups.entries())
+      .sort(([groupA], [groupB]) => {
+        const indexA = order.indexOf(groupA);
+        const indexB = order.indexOf(groupB);
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+        return groupA.localeCompare(groupB);
+      })
+      .map(([group, entries]) => ({
+        group,
+        items: entries.map((entry) => ({ name: String(entry.name) })),
+      }));
+  }
+
+  function fetchCategoryNav() {
+    var url = typeof hubatorApiUrl === "function" ? hubatorApiUrl("/api/public/categories") : null;
+    if (!url || typeof fetch !== "function") return;
+    fetch(url)
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error("HTTP " + response.status))))
+      .then((data) => {
+        const categories = Array.isArray(data && data.categories) ? data.categories : [];
+        if (!categories.length) return;
+        categoryNav = groupCategories(categories);
+        try {
+          localStorage.setItem(CATEGORY_NAV_CACHE_KEY, JSON.stringify(categoryNav));
+        } catch (error) {
+          /* storage may be unavailable; menu still works for this page view */
+        }
+        renderCategoryNav();
+      })
+      .catch(() => {
+        /* keep cached/fallback groups */
+      });
+  }
+
+  function categoryPanelColumns() {
+    return categoryNav.map(({ group, items }) => {
+      const groupIcon = String(group).toLowerCase() === "accessories" ? "bag" : "user";
+      const column = make("div", { class: "nav-cats-column" });
+      append(
+        column,
+        append(
+          make("a", {
+            class: "nav-cats-group",
+            href: shopCategoryHref(group),
+            title: "All " + group + " categories",
+          }),
+          icon(groupIcon),
+          make("span", { text: group })
+        )
+      );
+      const list = make("ul", { class: "nav-cats-list" });
+      items.forEach((item) => {
+        const name = categoryItemName(item);
+        if (!name) return;
+        append(list, append(make("li"), make("a", { href: shopCategoryHref(name), text: name })));
+      });
+      append(column, list);
+      return column;
+    });
+  }
+
+  function categoryNavContainer() {
+    const toggleButton = append(
+      make("button", {
+        type: "button",
+        class: "nav-cat-toggle",
+        "aria-expanded": "false",
+        "aria-haspopup": "true",
+      }),
+      icon("shirt"),
+      make("span", { text: "Categories" })
+    );
+    const panel = make("div", { class: "nav-cats-panel" });
+    categoryPanelColumns().forEach((column) => panel.appendChild(column));
+    return append(append(make("li", { class: "nav-cats" }), toggleButton), panel);
+  }
+
+  function mobileCategoryContent() {
+    const nodes = [];
+    categoryNav.forEach(({ group, items }) => {
+      const list = make("ul", { class: "mobile-cat-group" });
+      append(list, make("li", { class: "mobile-cat-heading", text: group }));
+      items.forEach((item) => {
+        const name = categoryItemName(item);
+        if (!name) return;
+        append(list, append(make("li"), make("a", { href: shopCategoryHref(name), text: name })));
+      });
+      nodes.push(list);
+    });
+    return nodes;
+  }
+
+  function renderCategoryNav() {
+    const container = document.querySelector(".main-nav .nav-cats");
+    if (container) container.replaceWith(categoryNavContainer());
+    const mobile = document.getElementById("mobile-nav-cats");
+    if (mobile) {
+      mobile.replaceChildren(
+        make("p", { class: "mobile-nav-section-title", text: "Shop by category" }),
+        ...mobileCategoryContent()
+      );
+    }
+  }
+
   const FOOTER_COLUMNS = [
     {
       heading: "Shop",
@@ -234,7 +387,7 @@
     if (page === href) link.setAttribute("aria-current", "page");
   }
 
-  function navigationList() {
+  function navigationList(includeCategories) {
     const list = make("ul");
 
     NAV_LINKS.forEach(({ href, label, icon: iconName }) => {
@@ -242,6 +395,8 @@
       markActive(link, href);
       append(list, append(make("li"), link));
     });
+
+    if (includeCategories) append(list, categoryNavContainer());
 
     return list;
   }
@@ -260,7 +415,7 @@
     });
     const nav = append(
       make("nav", { class: "main-nav", "aria-label": "Main navigation" }),
-      navigationList()
+      navigationList(true)
     );
 
     const signInLink = labeledLink(
@@ -373,10 +528,17 @@
       navigationList()
     );
     const account = make("div", { class: "mobile-nav-account" });
+    const categories = append(
+      make("div", { class: "mobile-nav-categories", id: "mobile-nav-cats" }),
+      make("p", { class: "mobile-nav-section-title", text: "Shop by category" })
+    );
+    mobileCategoryContent().forEach((node) => categories.appendChild(node));
+
     const panel = append(
       make("div", { class: "mobile-nav-panel" }),
       heading,
       nav,
+      categories,
       account
     );
     append(drawer, panel);
@@ -671,6 +833,17 @@
       headerPlaceholder.replaceWith(header);
       document.body.prepend(drawer);
     }
+
+    document.addEventListener("click", (event) => {
+      const toggleButton = event.target.closest(".nav-cat-toggle");
+      if (!toggleButton) return;
+      const item = toggleButton.closest(".nav-cats");
+      if (!item) return;
+      const open = item.classList.toggle("open");
+      toggleButton.setAttribute("aria-expanded", String(open));
+    });
+
+    fetchCategoryNav();
 
     const footerPlaceholder = document.getElementById("site-footer");
     if (footerPlaceholder) footerPlaceholder.replaceWith(buildFooter());

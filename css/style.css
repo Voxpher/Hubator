@@ -147,6 +147,48 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 .nav-toggle{display:none;background:none;border:none;font-size:1.4rem;color:var(--ink);padding:4px;}
 
+/* "Categories" mega-dropdown in the main nav (MAN / WOMAN / ACCESSORIES).
+ * Selectors are prefixed with .main-nav on purpose: the generic
+ * ".main-nav ul{display:flex}" rule would otherwise override the
+ * panel's display:none and blow the menu open. */
+.main-nav .nav-cats{position:relative;display:flex;}
+.main-nav .nav-cat-toggle{
+  display:inline-flex;align-items:center;gap:6px;
+  background:none;border:none;cursor:pointer;
+  font-family:inherit;font-size:.9rem;font-weight:500;color:var(--ink);
+  padding:4px 0;white-space:nowrap;
+}
+.main-nav .nav-cat-toggle .ui-icon{width:18px;height:18px;}
+.main-nav .nav-cat-toggle::after{content:"▾";font-size:.7rem;transform:translateY(1px);}
+.main-nav .nav-cat-toggle:hover,
+.main-nav .nav-cats.open .nav-cat-toggle,
+.main-nav .nav-cats:focus-within .nav-cat-toggle{color:var(--gold-deep);}
+.main-nav .nav-cats-panel{
+  display:none;position:absolute;top:calc(100% + 12px);left:-20px;
+  flex-direction:row;align-items:flex-start;gap:34px;
+  min-width:540px;padding:22px 26px;
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:0 18px 38px rgba(22,35,31,.16);z-index:80;
+}
+.main-nav .nav-cats:hover .nav-cats-panel,
+.main-nav .nav-cats.open .nav-cats-panel,
+.main-nav .nav-cats:focus-within .nav-cats-panel{display:flex;}
+.main-nav .nav-cats-column{min-width:130px;}
+.main-nav .nav-cats-group{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--font-mono);font-size:.74rem;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--gold-deep);text-decoration:none;margin-bottom:10px;
+}
+.main-nav .nav-cats-group .ui-icon{width:15px;height:15px;}
+.main-nav .nav-cats-group:hover{text-decoration:underline;}
+.main-nav .nav-cats-list{
+  display:flex;flex-direction:column;gap:0;list-style:none;margin:0;padding:0;
+}
+.main-nav .nav-cats-list a{
+  display:block;padding:6px 0;font-size:.88rem;color:var(--ink);text-decoration:none;white-space:nowrap;
+}
+.main-nav .nav-cats-list a:hover{color:var(--gold-deep);}
+
 /* Mobile nav drawer */
 .mobile-nav{
   display:none;
