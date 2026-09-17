@@ -89,6 +89,8 @@ function productForStorefront(product) {
     gallery: allImageUrls.length > 0 ? allImageUrls : [],
     badge: Number(product.compareAtPrice) > 0 ? "Sale" : null,
     desc: String(product.description || product.shortDescription || ""),
+    fullDescription: String(product.fullDescription || ""),
+    fullDescription: String(product.fullDescription || ""),
     variants: variantMap,
     colorImages: colorImages,
     allowCOD: product.allowCOD !== false,

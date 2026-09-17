@@ -463,6 +463,22 @@
   <span>✓</span><span id="toast-msg">Added to cart</span>
 </div>
 
+<!-- ── Full Description Section (rendered if product has fullDescription) ── -->
+<section id="full-desc-section" style="max-width:1280px;margin:0 auto;padding:0 24px 0;display:none;">
+  <style>
+  .full-desc-wrap { border:1px solid var(--line); border-radius:10px; background:var(--white); padding:28px 32px; margin-bottom:0; }
+  .full-desc-wrap h2 { font-family:var(--font-display); font-size:1.3rem; margin:0 0 18px; }
+  .full-desc-body { font-size:.95rem; line-height:1.75; color:var(--ink-soft); }
+  .full-desc-body p { margin:0 0 1em; }
+  .full-desc-body ul, .full-desc-body ol { margin:0 0 1em; padding-left:1.5em; }
+  .full-desc-body strong { color:var(--ink); }
+  </style>
+  <div class="full-desc-wrap">
+    <h2>Product Details</h2>
+    <div class="full-desc-body" id="full-desc-body"></div>
+  </div>
+</section>
+
 <!-- ── Reviews Section ───────────────────────────────────────────── -->
 <section id="reviews-section" style="max-width:1280px;margin:48px auto 0;padding:0 24px 72px;">
   <style>
@@ -858,6 +874,28 @@ var stickyTitle = document.getElementById('sticky-title');
 var stickyPrice = document.getElementById('sticky-price');
 var stickyAdd   = document.getElementById('sticky-add');
 
+/* ── Fetch trust badge texts from dashboard settings ── */
+(function(){
+  var apiBase = (window.HUBATOR_API_BASE||'').replace(/\/$/,'');
+  if(!apiBase) return;
+  fetch(apiBase+'/api/public/settings')
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(d){
+      if(!d||!d.trustBadges) return;
+      var tb = d.trustBadges;
+      var els = {
+        'trust-secure': tb.secureCheckout,
+        'trust-shipping': tb.shipping,
+        'trust-returns': tb.returns,
+        'trust-currency': tb.currency
+      };
+      Object.keys(els).forEach(function(id){
+        var el = document.getElementById(id);
+        if(el && els[id]) el.textContent = els[id];
+      });
+    }).catch(function(){});
+})();
+
 /* ── Main render ────────────────────────────────── */
 loadProducts().then(function(){
   var ref = productReferenceFromLocation(window.location);
@@ -914,6 +952,20 @@ loadProducts().then(function(){
   }
 
   buildPage(p);
+
+  // Show fullDescription section if product has one (trusted dashboard content — rendered as HTML)
+  var fullDescText = p.fullDescription || '';
+  if(fullDescText && fullDescText.trim()) {
+    var fdSection = document.getElementById('full-desc-section');
+    var fdBody = document.getElementById('full-desc-body');
+    if(fdSection && fdBody) {
+      // fullDescription comes from the admin dashboard (trusted source) — safe to render as HTML
+      fdBody.innerHTML = fullDescText;
+      fdSection.style.display = 'block';
+      fdSection.style.marginTop = '32px';
+      fdSection.style.marginBottom = '48px';
+    }
+  }
 
 }).catch(function(err){
   console.error('[Hubator] pdp:', err);
@@ -1022,11 +1074,11 @@ function buildPage(p) {
         '<button class="pdp-add-btn" id="pdp-add" disabled>Add to cart</button>' +
         '<a href="#" class="pdp-buy-btn disabled" id="pdp-buy">Buy now</a>' +
       '</div>' +
-      '<div class="pdp-trust">' +
-        '<div class="pdp-trust-item"><span class="pdp-trust-icon">🔒</span><span>Secure checkout — Razorpay encrypted</span></div>' +
-        '<div class="pdp-trust-item"><span class="pdp-trust-icon">📦</span><span>Shipping calculated at checkout</span></div>' +
-        '<div class="pdp-trust-item"><span class="pdp-trust-icon">🔄</span><span>Easy 7-day returns</span></div>' +
-        '<div class="pdp-trust-item"><span class="pdp-trust-icon">₹</span><span>Prices shown in Indian Rupees</span></div>' +
+      '<div class="pdp-trust" id="pdp-trust">' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg></span><span id="trust-secure">Secure checkout — Razorpay encrypted</span></div>' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4h13v13H1Z"/><path d="M14 9h4l4 4v4h-8"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span><span id="trust-shipping">Shipping calculated at checkout</span></div>' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 4-6 6 6 6"/><path d="M3 10h11a6 6 0 0 1 0 12h-3"/></svg></span><span id="trust-returns">Easy 7-day returns</span></div>' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon" style="font-family:var(--font-mono);font-size:.8rem;font-weight:700;">₹</span><span id="trust-currency">Prices shown in Indian Rupees</span></div>' +
       '</div>' +
       '<div class="pdp-accordion">' +
         accordionItems.map(function(item){
