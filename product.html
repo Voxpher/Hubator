@@ -978,13 +978,13 @@ loadProducts().then(function(){
 
   buildPage(p);
 
-  // Show fullDescription section if product has one (trusted dashboard content — rendered as HTML)
-  var fullDescText = p.fullDescription || '';
+  // Show Product Details section — uses fullDescription if set, falls back to description
+  var fullDescText = p.fullDescription || p.description || '';
   if(fullDescText && fullDescText.trim()) {
     var fdSection = document.getElementById('full-desc-section');
     var fdBody = document.getElementById('full-desc-body');
     if(fdSection && fdBody) {
-      // fullDescription comes from the admin dashboard (trusted source) — safe to render as HTML
+      // Content comes from the admin dashboard (trusted source) — safe to render as HTML
       fdBody.innerHTML = fullDescText;
       fdSection.style.display = 'block';
       fdSection.style.marginTop = '32px';
