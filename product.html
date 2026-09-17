@@ -1109,11 +1109,6 @@ function buildPage(p) {
         '<div class="pdp-trust-item"><span class="pdp-trust-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 4-6 6 6 6"/><path d="M3 10h11a6 6 0 0 1 0 12h-3"/></svg></span><span id="trust-returns">Easy 7-day returns</span></div>' +
         '<div class="pdp-trust-item"><span class="pdp-trust-icon" style="font-family:var(--font-mono);font-size:.8rem;font-weight:700;">₹</span><span id="trust-currency">Prices shown in Indian Rupees</span></div>' +
       '</div>' +
-      '<div class="pdp-accordion">' +
-        accordionItems.map(function(item){
-          return '<div class="pdp-accordion-item"><button class="pdp-accordion-head" aria-expanded="false">'+escapeHtml(item.title)+'<span class="pdp-accordion-icon" aria-hidden="true">+</span></button><div class="pdp-accordion-body">'+escapeHtml(item.body)+'</div></div>';
-        }).join('') +
-      '</div>' +
     '</div>' +
     '</div>';
 
