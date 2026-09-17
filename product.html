@@ -710,7 +710,7 @@ function loadReviews(append) {
       if(list && !append) {
         list.innerHTML = '<div style="padding:20px 0;color:var(--ink-soft);font-size:.88rem;">' +
           (isAbort ? 'Reviews are taking longer than usual.' : 'Couldn\'t load reviews right now.') +
-          ' <button onclick="rvPage=1;loadReviews(false);" style="background:none;border:none;color:var(--gold-deep);cursor:pointer;font-size:.88rem;text-decoration:underline;padding:0;">Try again</button>' +
+          ' <button onclick="retryReviews();" style="background:none;border:none;color:var(--gold-deep);cursor:pointer;font-size:.88rem;text-decoration:underline;padding:0;">Try again</button>' +
           '</div>';
       }
     });
@@ -720,6 +720,7 @@ window.loadMoreReviews = function(){
   rvPage++;
   loadReviews(true);
 };
+window.retryReviews = function(){ rvPage=1; loadReviews(false); };
 
 window.toggleReviewForm = function(){
   var f=document.getElementById('rv-form-wrap');
