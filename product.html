@@ -161,6 +161,10 @@
 .pdp-divider {
   border: none; border-top: 1px solid var(--line); margin: 20px 0;
 }
+/* Short description — shown above fold near price */
+.pdp-short-desc {
+  font-size: .96rem; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.6;
+}
 
 /* ── Variant sections ────────────────────────────── */
 .pdp-variant-section { margin-bottom: 20px; }
@@ -1087,6 +1091,7 @@ function buildPage(p) {
     '<div class="pdp-info">' +
       '<span class="pdp-cat">'+escapeHtml(p.category)+'</span>' +
       '<h1 class="pdp-title">'+escapeHtml(p.name)+'</h1>' +
+      (p.shortDescription ? '<p class="pdp-short-desc">'+escapeHtml(p.shortDescription)+'</p>' : '') +
       priceBlockHTML(p.price, p.oldPrice) +
       '<hr class="pdp-divider">' +
       '<div id="pdp-variants"></div>' +
