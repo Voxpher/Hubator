@@ -636,8 +636,13 @@ function fmtDate(iso) {
 
 function loadReviews(append) {
   if(!reviewSlug) return;
-  fetch(API+'/api/public/reviews?product='+encodeURIComponent(reviewSlug)+'&page='+rvPage+'&limit='+rvLimit)
-    .then(function(r){ return r.ok?r.json():null; })
+  var ctrl = new AbortController();
+  var timer = setTimeout(function(){ ctrl.abort(); }, 10000); // 10s timeout
+  var list = document.getElementById('rv-list');
+  var empty = document.getElementById('rv-empty');
+  if(!append && list) list.innerHTML = '<div style="padding:20px 0;color:var(--ink-soft);font-size:.88rem;">Loading reviews…</div>';
+  fetch(API+'/api/public/reviews?product='+encodeURIComponent(reviewSlug)+'&page='+rvPage+'&limit='+rvLimit, { signal: ctrl.signal })
+    .then(function(r){ clearTimeout(timer); return r.ok?r.json():Promise.reject(new Error('HTTP '+r.status)); })
     .then(function(data){
       if(!data) return;
       rvTotal = data.total || 0;
@@ -698,7 +703,17 @@ function loadReviews(append) {
       var loadMore = document.getElementById('rv-load-more');
       var loaded = (rvPage-1)*rvLimit+reviews.length;
       loadMore.style.display = loaded < rvTotal ? 'block' : 'none';
-    }).catch(function(){});
+    }).catch(function(err){
+      clearTimeout(timer);
+      var list = document.getElementById('rv-list');
+      var isAbort = err && err.name === 'AbortError';
+      if(list && !append) {
+        list.innerHTML = '<div style="padding:20px 0;color:var(--ink-soft);font-size:.88rem;">' +
+          (isAbort ? 'Reviews are taking longer than usual.' : 'Couldn\'t load reviews right now.') +
+          ' <button onclick="rvPage=1;loadReviews(false);" style="background:none;border:none;color:var(--gold-deep);cursor:pointer;font-size:.88rem;text-decoration:underline;padding:0;">Try again</button>' +
+          '</div>';
+      }
+    });
 }
 
 window.loadMoreReviews = function(){
@@ -820,9 +835,14 @@ function initReviews(){
   if(reviewSlug) loadReviews(false);
 }
 
-// Wait for products.js to set API base
-if(window.HUBATOR_API_BASE) { initReviews(); }
-else { window.addEventListener('load', initReviews); }
+// Wait for config.js to set HUBATOR_API_BASE — poll up to 3s then init
+(function waitForApi(){
+  if(window.HUBATOR_API_BASE) { initReviews(); return; }
+  var attempts = 0;
+  var t = setInterval(function(){
+    if(window.HUBATOR_API_BASE || ++attempts > 30){ clearInterval(t); initReviews(); }
+  }, 100);
+})();
 })();
 </script>
 
@@ -1045,11 +1065,19 @@ function buildPage(p) {
 
   /* --- Description/accordion --- */
   var desc = p.desc || '';
-  var accordionItems = [
-    { title: 'Product Description', body: desc || 'No description available.' },
-    { title: 'Shipping & Returns', body: 'Free shipping on orders above ₹999. Easy 7-day returns on all products.' },
-    { title: 'Care Instructions', body: 'Machine wash cold. Do not bleach. Tumble dry low. Iron on low heat.' }
-  ];
+  var accordionItems = [];
+  // Only add sections if their show toggle is true (default true for existing products)
+  if(p.showDescription !== false) {
+    accordionItems.push({ title: 'Product Description', body: desc || 'No description available.' });
+  }
+  if(p.showShippingReturns !== false) {
+    var shippingBody = p.shippingReturns || 'Free shipping on orders above \u20b9999. Easy 7-day returns on all products.';
+    accordionItems.push({ title: 'Shipping & Returns', body: shippingBody });
+  }
+  if(p.showCareInstructions !== false) {
+    var careBody = p.careInstructions || 'Machine wash cold. Do not bleach. Tumble dry low. Iron on low heat.';
+    accordionItems.push({ title: 'Care Instructions', body: careBody });
+  }
 
   /* --- Render full page --- */
   pdpRoot.innerHTML =
