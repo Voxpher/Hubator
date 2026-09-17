@@ -115,7 +115,7 @@
     },
   };
 
-  const NAV_LINKS_FALLBACK = [
+  const NAV_LINKS = [
     { href: "/", label: "Home", icon: "home" },
     { href: "/shop", label: "Shop", icon: "shop" },
     { href: "/about", label: "About", icon: "info" },
@@ -123,9 +123,7 @@
     { href: "/faq", label: "FAQ", icon: "help" },
   ];
 
-  var NAV_LINKS = NAV_LINKS_FALLBACK;
-
-  const FOOTER_COLUMNS_FALLBACK = [
+  /* ── Category navigation (MAN / WOMAN / ACCESSORIES) ──────────
    * Groups come from the dashboard's public categories API and are
    * cached in localStorage; a static fallback keeps the menu usable
    * even if the API is unreachable. Links use the shop filter:
@@ -278,7 +276,7 @@
     }
   }
 
-  const FOOTER_COLUMNS_FALLBACK = [
+  const FOOTER_COLUMNS = [
     {
       heading: "Shop",
       links: [
@@ -316,8 +314,6 @@
       ],
     },
   ];
-
-  var FOOTER_COLUMNS = FOOTER_COLUMNS_FALLBACK;
 
   function make(tag, attrs) {
     const node = document.createElement(tag);
@@ -828,62 +824,56 @@
   }
 
   /* ── Fetch nav menus from dashboard ───────────────────────────
-   * Fetches /api/public/navigation from the dashboard and replaces
-   * NAV_LINKS and FOOTER_COLUMNS. Falls back to hardcoded values
-   * if the fetch fails or returns empty menus.
+   * After the header/footer are built with hardcoded defaults,
+   * fetch live nav data from the dashboard and re-render if changed.
+   * Falls back silently — hardcoded nav still shows if fetch fails.
    */
   function fetchNavMenus() {
-    var url = typeof hubatorApiUrl === "function" ? hubatorApiUrl("/api/public/navigation") : null;
-    if (!url || typeof fetch !== "function") return;
-    fetch(url)
+    var base = typeof hubatorApiUrl === "function" ? hubatorApiUrl("/api/public/navigation") : null;
+    if (!base || typeof fetch !== "function") return;
+    fetch(base)
       .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
       .then(function(data) {
         var menus = Array.isArray(data && data.menus) ? data.menus : [];
-        if (!menus.length) return; // no saved menus yet — keep fallback
+        if (!menus.length) return; // no saved menus yet — keep defaults
 
+        // Update main nav
         var mainMenu = menus.find(function(m) { return m.id === "main"; });
         if (mainMenu && Array.isArray(mainMenu.links) && mainMenu.links.length) {
-          NAV_LINKS = mainMenu.links.map(function(l) {
-            return { href: l.href || "/", label: l.label || "", icon: l.icon || "home", openInNewTab: !!l.openInNewTab };
-          }).sort(function(a, b) { return (a.sortOrder || 0) - (b.sortOrder || 0); });
-
-          // Re-render desktop nav
-          var mainNav = document.querySelector(".main-nav ul");
-          if (mainNav) {
-            var newList = navigationList(true);
-            mainNav.replaceWith(newList);
-            // Re-attach category panel toggle
-          }
-          // Re-render mobile nav links
-          var mobileNav = document.querySelector(".mobile-nav nav");
-          if (mobileNav) {
-            var mobileList = navigationList();
-            mobileNav.replaceChildren(mobileList);
-          }
-        }
-
-        // Footer menus
-        var footerMenuIds = ["footer-shop", "footer-company", "footer-legal"];
-        var hasFooterMenus = footerMenuIds.some(function(id) {
-          return menus.find(function(m) { return m.id === id && m.links && m.links.length; });
-        });
-        if (hasFooterMenus) {
-          FOOTER_COLUMNS = menus
-            .filter(function(m) { return m.id && m.id.startsWith("footer-") && m.links && m.links.length; })
-            .map(function(m) {
-              return {
-                heading: m.title.replace(/^Footer — /, ""),
-                links: m.links.map(function(l) {
-                  return { href: l.href || "/", label: l.label || "", icon: l.icon || "home" };
-                }),
-              };
+          var liveLinks = mainMenu.links
+            .slice()
+            .sort(function(a, b) { return (a.sortOrder || 0) - (b.sortOrder || 0); });
+          // Replace nav link items (preserve categories dropdown)
+          var navList = document.querySelector(".main-nav > ul");
+          if (navList) {
+            // Remove all non-categories links and re-insert
+            Array.from(navList.querySelectorAll("li:not(.nav-cats)")).forEach(function(li) { li.remove(); });
+            var catLi = navList.querySelector("li.nav-cats");
+            liveLinks.forEach(function(l) {
+              var link = labeledLink(l.href || "/", l.label || "", l.icon || "home");
+              markActive(link, l.href || "/");
+              if (l.openInNewTab) link.setAttribute("target", "_blank");
+              var li = make("li");
+              li.appendChild(link);
+              navList.insertBefore(li, catLi || null);
             });
-          // Re-render footer
-          var footer = document.querySelector(".site-footer");
-          if (footer) footer.replaceWith(buildFooter());
+          }
+          // Update mobile nav links
+          var mobileNavList = document.querySelector(".mobile-nav nav > ul");
+          if (mobileNavList) {
+            Array.from(mobileNavList.children).forEach(function(li) { li.remove(); });
+            liveLinks.forEach(function(l) {
+              var link = labeledLink(l.href || "/", l.label || "", l.icon || "home");
+              markActive(link, l.href || "/");
+              if (l.openInNewTab) link.setAttribute("target", "_blank");
+              var li = make("li");
+              li.appendChild(link);
+              mobileNavList.appendChild(li);
+            });
+          }
         }
       })
-      .catch(function() { /* keep fallback nav */ });
+      .catch(function() { /* keep hardcoded nav */ });
   }
 
   function initialize() {
