@@ -1069,7 +1069,9 @@ function buildPage(p) {
   }
 
   /* --- Description/accordion --- */
-  var desc = p.desc || '';
+  // fullDescription is the field the dashboard writes; legacy `description`
+  // is only a fallback for products saved before the split.
+  var desc = p.fullDescription || p.desc || '';
   var accordionItems = [];
   // Only add sections if their show toggle is true (default true for existing products)
   if(p.showDescription !== false) {

@@ -515,8 +515,8 @@
       swatchesHTML += '</div>';
     }
 
-    var shortDesc = p.shortDescription || "";
-    var fullDesc = p.fullDescription || "";
+    var shortDesc = (p.shortDescription || "").trim();
+    var fullDesc = (p.fullDescription || "").trim();
 
     return (
       '<div class="product-card" data-cat="' + escapeHtml(p.category) + '">' +
@@ -533,13 +533,14 @@
             '<span class="ticket ' + (p.oldPrice ? "on-sale" : "") + '">' +
               (p.oldPrice ? '<span class="price-old">' + fmt(p.oldPrice) + '</span>' : "") + fmt(p.price) +
             '</span>' +
-            (fullDesc ? '<span class="product-full-desc" title="' + escapeHtml(fullDesc) + '">ℹ</span>' : '') +
-            (hasVariants ? ' <div class="product-variants">' + Array.from(p.variants.keys()).slice(0, 2).map(function (k) {
-              var v = p.variants.get(k);
-              var c = v.color || "";
-              var s = v.size || "";
-              return "<span>" + c + (s ? " Size: " + s : "") + "</span>";
-            }).join(" ") + '</div>' : "") +
+            (hasVariants ? '<div class="product-variants">' +
+              colors.slice(0, 2).map(function (name) {
+                var sizes = [];
+                p.variants.forEach(function (v) {
+                  if (v.color === name && v.size && sizes.indexOf(v.size) === -1) sizes.push(v.size);
+                });
+                return '<span>' + escapeHtml(name) + (sizes.length ? " · " + escapeHtml(sizes.join(", ")) : "") + '</span>';
+              }).join("") + '</div>' : "") +
             '<button class="add-btn" data-id="' + escapeHtml(p.id) + '" aria-label="' +
               (available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock") + '" ' +
               (available ? "" : "disabled") + ' onclick="addToCart(this.dataset.id)">' + (available ? "+" : "—") + '</button>' +

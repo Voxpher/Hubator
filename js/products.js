@@ -88,7 +88,7 @@ function productForStorefront(product) {
     img: primaryUrl,
     gallery: allImageUrls.length > 0 ? allImageUrls : [],
     badge: Number(product.compareAtPrice) > 0 ? "Sale" : null,
-    desc: String(product.description || product.shortDescription || ""),
+    desc: String(product.shortDescription || product.fullDescription || product.description || ""),
     shortDescription: String(product.shortDescription || ""),
     description: String(product.description || ""),
     fullDescription: String(product.fullDescription || ""),
@@ -107,7 +107,6 @@ function productForStorefront(product) {
     soldIndividually: !!product.soldIndividually,
     isPhysical: product.isPhysical !== false,
     weight: product.weight || null,
-    fullDescription: String(product.fullDescription || ""),
     variants: variantMap,
     colorImages: colorImages,
     allowCOD: product.allowCOD !== false,
@@ -150,7 +149,9 @@ function _fetchProducts(path) {
 
   var cacheKey = path.indexOf("?placement=") !== -1 ? "placement:" + path.split("=")[1] : "all";
 
-  return fetch(url).then(function(res) {
+  // cache:"no-store" — the product catalogue must reflect dashboard edits immediately;
+  // the 5-minute localStorage cache below is the only intentional reuse.
+  return fetch(url, { cache: "no-store" }).then(function(res) {
     if (!res.ok) {
       var cached = readProductCache(cacheKey);
       if (cached) return cached;
