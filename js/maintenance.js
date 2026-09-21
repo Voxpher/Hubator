@@ -8,7 +8,7 @@
  * implementation separate avoids duplicating it across HTML pages.
  */
 
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 (function () {
   "use strict";
