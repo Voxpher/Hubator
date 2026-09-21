@@ -114,6 +114,8 @@ function productForStorefront(product) {
     placements: product.placements || [],
     stock: product.stock == null ? null : Math.max(0, Number(product.stock) || 0),
     sortOrder: Number(product.sortOrder) || 0,
+    updatedAt: product.updatedAt || product.updated_at || null,
+    createdAt: product.createdAt || product.created_at || null,
     hasVariants: variants.length > 0,
     lowestVariantStock: lowestVariantStock,
   };

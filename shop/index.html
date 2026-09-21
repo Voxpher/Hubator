@@ -4,151 +4,313 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shop — Hubator</title>
-<link rel="stylesheet" href="/css/style.css?v=4">
+<link rel="stylesheet" href="/css/style.css?v=3">
 
-<meta name="description" content="Shop curated apparel and accessories from Hubator — unique clothing and accessories">
+<meta name="description" content="Shop the Hubator collection — apparel and accessories, updated live from our studio. Filter by category, price, colour and size.">
 <meta name="theme-color" content="#FAF7F0">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/favicon.ico">
 <meta property="og:title" content="Shop — Hubator">
-<meta property="og:description" content="Shop curated apparel and accessories from Hubator — unique clothing and accessories">
+<meta property="og:description" content="Shop the Hubator collection — apparel and accessories, updated live from our studio.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Hubator">
 <meta name="twitter:card" content="summary">
+
 <style>
-  /* ── Shop-specific overrides ─────────────────────────────── */
-  .shop-layout { display: flex; gap: 28px; align-items: flex-start; }
-  .shop-sidebar {
-    width: 220px; flex-shrink: 0;
-    border: 1px solid var(--line); border-radius: 8px;
-    background: var(--white); padding: 18px;
-    position: sticky; top: 80px;
-  }
-  .shop-sidebar h3 {
-    font-family: var(--font-mono); font-size: .72rem; text-transform: uppercase;
-    letter-spacing: .08em; color: var(--ink-soft); margin: 0 0 10px;
-  }
-  .shop-sidebar h3 + h3 { margin-top: 18px; }
-  .sidebar-cats { display: flex; flex-direction: column; gap: 2px; }
-  .sidebar-cats button {
-    background: none; border: none; text-align: left; padding: 7px 10px;
-    border-radius: 4px; font-size: .88rem; cursor: pointer; color: var(--ink);
-    font-family: var(--font-body);
-  }
-  .sidebar-cats button:hover { background: var(--paper-dim); }
-  .sidebar-cats button.active { background: var(--ink); color: var(--paper); }
-  .color-swatches-sidebar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-  .color-swatch-btn {
-    width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent;
-    cursor: pointer; transition: transform .15s, box-shadow .15s;
-    title: attr(data-name);
-  }
-  .color-swatch-btn:hover { transform: scale(1.15); }
-  .color-swatch-btn.active { border-color: var(--ink); box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--ink); }
-  .size-chips-sidebar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-  .size-chip-btn {
-    font-family: var(--font-mono); font-size: .74rem;
-    border: 1px solid var(--line); border-radius: 20px; padding: 5px 11px;
-    background: var(--white); cursor: pointer; color: var(--ink);
-  }
-  .size-chip-btn:hover { border-color: var(--ink); }
-  .size-chip-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-  .price-filter { margin-top: 4px; }
-  .price-filter input[type=range] { width: 100%; }
-  .price-range-labels { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: .72rem; color: var(--ink-soft); margin-top: 4px; }
-  .clear-filters-btn {
-    width: 100%; margin-top: 14px; padding: 7px 12px; border-radius: 4px;
-    border: 1px dashed var(--line); background: none; font-size: .8rem;
-    color: var(--ink-soft); cursor: pointer; font-family: var(--font-mono);
-  }
-  .clear-filters-btn:hover { border-color: var(--ink); color: var(--ink); }
+  /* ===== Hubator Shop — scoped "shp-" prefix, nothing here collides with style.css ===== */
+  .shp-breadcrumb{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--ink-soft);margin:18px 0 6px;}
+  .shp-breadcrumb a{color:var(--ink-soft);text-decoration:none;}
+  .shp-breadcrumb a:hover{color:var(--ink);text-decoration:underline;}
+  .shp-breadcrumb svg{width:12px;height:12px;opacity:.5;}
 
-  /* Product card swatches — row */
-  .card-swatches { display: flex; flex-direction: row; flex-wrap: wrap; gap: 5px; margin: 4px 0 2px; }
-  .card-swatch {
-    width: 16px; height: 16px; border-radius: 50%;
-    border: 1px solid rgba(22,35,31,.18); display: inline-block;
-    flex-shrink: 0;
+  .shp-head{margin:6px 0 22px;}
+  .shp-eyebrow{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--rust);}
+  .shp-head h1{font-family:var(--font-display);font-size:clamp(1.9rem,4vw,2.7rem);margin:8px 0 6px;color:var(--ink);line-height:1.1;}
+  .shp-head p{color:var(--ink-soft);max-width:60ch;margin:0;font-size:.95rem;}
+
+  /* ---- Toolbar ---- */
+  .shp-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .shp-filter-btn{display:none;align-items:center;gap:8px;padding:10px 16px;border:1px solid var(--ink);border-radius:999px;background:var(--white);color:var(--ink);font-size:.86rem;font-weight:600;cursor:pointer;font-family:inherit;}
+  .shp-filter-btn svg{width:16px;height:16px;}
+  .shp-filter-btn .shp-count-badge{background:var(--rust);color:#fff;border-radius:999px;min-width:20px;height:20px;font-size:.68rem;display:inline-flex;align-items:center;justify-content:center;padding:0 6px;font-weight:700;}
+  .shp-search{flex:1;min-width:180px;max-width:340px;position:relative;}
+  .shp-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-soft);pointer-events:none;}
+  .shp-search input{width:100%;padding:10px 12px 10px 36px;border:1px solid var(--line);border-radius:999px;background:var(--white);color:var(--ink);font-size:.88rem;font-family:inherit;outline:none;}
+  .shp-search input:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(22,35,31,.08);}
+  .shp-results{font-size:.82rem;color:var(--ink-soft);font-family:var(--font-mono);white-space:nowrap;}
+  .shp-sort{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .shp-sort label{font-size:.78rem;color:var(--ink-soft);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em;}
+  .shp-sort select{font-size:.86rem;padding:10px 34px 10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2316231F' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;color:var(--ink);cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;}
+  .shp-sort select:focus{border-color:var(--ink);outline:none;}
+
+  /* ---- Active filter pills ---- */
+  .shp-pills{display:none;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center;}
+  .shp-pills.shp-show{display:flex;}
+  .shp-pill{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:var(--white);border-radius:999px;padding:6px 8px 6px 12px;font-size:.76rem;font-weight:500;}
+  .shp-pill button{background:rgba(255,255,255,.18);border:none;color:#fff;width:18px;height:18px;border-radius:50%;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;}
+  .shp-pill button svg{width:10px;height:10px;}
+  .shp-pill button:hover{background:rgba(255,255,255,.35);}
+  .shp-pills-clear{background:none;border:none;color:var(--rust);font-size:.8rem;cursor:pointer;text-decoration:underline;font-family:inherit;padding:4px;}
+
+  /* ---- Layout ---- */
+  .shp-layout{display:flex;gap:32px;align-items:flex-start;}
+  .shp-main{flex:1;min-width:0;}
+
+  .shp-sidebar{width:272px;flex-shrink:0;position:sticky;top:96px;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:6px 20px 20px;max-height:calc(100vh - 120px);overflow-y:auto;}
+  .shp-sec{padding:16px 0;border-bottom:1px solid var(--line);}
+  .shp-sec:last-child{border-bottom:none;}
+  .shp-sec-title{font-family:var(--font-mono);text-transform:uppercase;font-size:.7rem;letter-spacing:.1em;color:var(--ink);margin:0 0 12px;font-weight:600;}
+  .shp-check{display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;font-size:.88rem;color:var(--ink);user-select:none;}
+  .shp-check input{width:16px;height:16px;accent-color:var(--ink);cursor:pointer;flex-shrink:0;margin:0;}
+  .shp-check .shp-n{margin-left:auto;font-size:.75rem;color:var(--ink-soft);font-family:var(--font-mono);}
+  .shp-swatches{display:flex;flex-wrap:wrap;gap:10px;}
+  .shp-swatch{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0;position:relative;flex-shrink:0;transition:transform .12s ease;}
+  .shp-swatch:hover{transform:scale(1.12);}
+  .shp-swatch.shp-on{border-color:var(--ink);box-shadow:0 0 0 2px var(--white),0 0 0 4px var(--ink);}
+  .shp-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .shp-chip{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--white);cursor:pointer;font-size:.82rem;color:var(--ink);font-family:inherit;min-width:44px;transition:all .12s ease;}
+  .shp-chip:hover{border-color:var(--ink);}
+  .shp-chip.shp-on{background:var(--ink);color:var(--white);border-color:var(--ink);}
+  .shp-stars-row{display:flex;flex-direction:column;gap:2px;}
+  .shp-star-btn{display:flex;align-items:center;gap:8px;padding:7px 8px;background:none;border:1px solid transparent;border-radius:8px;cursor:pointer;font-family:inherit;color:var(--ink);font-size:.84rem;text-align:left;width:100%;}
+  .shp-star-btn:hover{background:var(--paper);}
+  .shp-star-btn.shp-on{border-color:var(--ink);background:var(--paper);}
+  .shp-star-btn .shp-ssvg{display:inline-flex;gap:1px;}
+  .shp-star-btn .shp-ssvg svg{width:14px;height:14px;}
+  .shp-clear{width:100%;margin-top:6px;padding:11px 16px;background:none;border:1px solid var(--line);border-radius:10px;color:var(--ink);font-size:.84rem;font-weight:600;cursor:pointer;font-family:inherit;}
+  .shp-clear:hover{border-color:var(--ink);background:var(--paper);}
+
+  /* Price slider */
+  .shp-price-vals{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.82rem;margin-bottom:10px;}
+  .shp-price-vals span{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:4px 10px;}
+  .shp-slider{position:relative;height:34px;}
+  .shp-track{position:absolute;left:0;right:0;top:15px;height:4px;background:var(--line);border-radius:2px;}
+  .shp-fill{position:absolute;top:15px;height:4px;background:var(--ink);border-radius:2px;}
+  .shp-slider input[type=range]{position:absolute;left:0;right:0;top:8px;width:100%;height:18px;margin:0;-webkit-appearance:none;appearance:none;background:transparent;pointer-events:none;}
+  .shp-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:all;width:18px;height:18px;border-radius:50%;background:var(--white);border:2px solid var(--ink);cursor:grab;}
+  .shp-slider input[type=range]::-moz-range-thumb{pointer-events:all;width:18px;height:18px;border-radius:50%;background:var(--white);border:2px solid var(--ink);cursor:grab;}
+  .shp-slider input[type=range]::-moz-range-track{background:transparent;}
+
+  /* ---- Product grid ---- */
+  .shp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 22px;}
+  .shp-card{background:var(--white);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;position:relative;transition:transform .18s ease,box-shadow .18s ease;}
+  .shp-card:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(22,35,31,.12);}
+  .shp-media{position:relative;display:block;aspect-ratio:4/5;background:var(--paper-dim);overflow:hidden;}
+  .shp-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s ease,transform .5s ease;}
+  .shp-media img.shp-img-b{opacity:0;}
+  .shp-card:hover .shp-media img.shp-img-b{opacity:1;}
+  .shp-card:hover .shp-media img.shp-img-a{transform:scale(1.04);}
+  .shp-media.shp-noimg{display:flex;align-items:center;justify-content:center;}
+  .shp-media.shp-noimg svg{width:44px;height:44px;color:var(--line);}
+  .shp-badges{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:6px;z-index:2;}
+  .shp-badge{font-family:var(--font-mono);font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:999px;color:#fff;}
+  .shp-badge.shp-sale{background:var(--rust);}
+  .shp-badge.shp-new{background:var(--ink);}
+  .shp-soldout{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(250,247,240,.55);z-index:2;}
+  .shp-soldout span{font-family:var(--font-mono);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:var(--white);border:1px solid var(--line);padding:8px 16px;border-radius:999px;color:var(--ink-soft);}
+  .shp-quickadd{position:absolute;left:10px;right:10px;bottom:10px;z-index:2;padding:12px;border:none;border-radius:10px;background:rgba(22,35,31,.92);color:#fff;font-size:.84rem;font-weight:600;cursor:pointer;font-family:inherit;transform:translateY(140%);opacity:0;transition:transform .22s ease,opacity .22s ease;backdrop-filter:blur(4px);}
+  .shp-quickadd:hover{background:var(--ink);}
+  @media (hover:hover){
+    .shp-card:hover .shp-quickadd{transform:translateY(0);opacity:1;}
+    .shp-addbtn{display:none;}
   }
+  .shp-info{padding:14px 16px 16px;display:flex;flex-direction:column;gap:7px;flex:1;}
+  .shp-vendor{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);}
+  .shp-title{margin:0;font-size:.95rem;font-weight:500;line-height:1.35;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em;}
+  .shp-title a{color:inherit;text-decoration:none;}
+  .shp-title a:hover{text-decoration:underline;}
+  .shp-rating{display:flex;align-items:center;gap:6px;min-height:18px;}
+  .shp-rating .shp-ssvg{display:inline-flex;gap:1px;}
+  .shp-rating .shp-ssvg svg{width:13px;height:13px;}
+  .shp-rating .shp-rcount{font-size:.75rem;color:var(--ink-soft);}
+  .shp-dots{display:flex;gap:6px;align-items:center;min-height:18px;}
+  .shp-dot{width:16px;height:16px;border-radius:50%;border:1px solid var(--line);cursor:pointer;padding:0;flex-shrink:0;}
+  .shp-dot.shp-on{box-shadow:0 0 0 2px var(--white),0 0 0 3px var(--ink);}
+  .shp-dot-more{font-size:.68rem;color:var(--ink-soft);font-family:var(--font-mono);}
+  .shp-price-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:4px;}
+  .shp-price{font-size:1.02rem;font-weight:700;color:var(--ink);}
+  .shp-price.shp-was-sale{color:var(--rust);}
+  .shp-compare{font-size:.84rem;color:var(--ink-soft);text-decoration:line-through;}
+  .shp-save{font-size:.68rem;font-weight:700;color:var(--rust);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.05em;}
+  .shp-addbtn{margin-top:8px;padding:11px;border:1px solid var(--ink);border-radius:10px;background:var(--white);color:var(--ink);font-size:.84rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s ease;}
+  .shp-addbtn:hover:not(:disabled){background:var(--ink);color:var(--white);}
+  .shp-addbtn:disabled{opacity:.45;cursor:not-allowed;border-color:var(--line);color:var(--ink-soft);}
 
-  /* "Add to cart" button — full text, gold accent */
-  .add-to-cart-btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 8px 14px; background: var(--ink); color: var(--paper);
-    border: none; border-radius: var(--radius); font-size: .8rem; font-weight: 600;
-    font-family: var(--font-body); cursor: pointer; white-space: nowrap;
-    transition: background .2s, transform .15s;
-    flex-shrink: 0;
+  /* Skeletons */
+  .shp-skel{background:var(--white);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .shp-skel-media{aspect-ratio:4/5;background:linear-gradient(100deg,var(--paper-dim) 40%,#e9e2d2 50%,var(--paper-dim) 60%);background-size:200% 100%;animation:shp-shimmer 1.3s infinite;}
+  .shp-skel-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;}
+  .shp-skel-line{height:12px;border-radius:6px;background:linear-gradient(100deg,var(--paper-dim) 40%,#e9e2d2 50%,var(--paper-dim) 60%);background-size:200% 100%;animation:shp-shimmer 1.3s infinite;}
+  @keyframes shp-shimmer{to{background-position:-200% 0;}}
+
+  /* Load more / states */
+  .shp-more-wrap{text-align:center;margin:34px 0 10px;}
+  .shp-showing{font-size:.8rem;color:var(--ink-soft);font-family:var(--font-mono);margin-bottom:12px;}
+  .shp-loadmore{padding:13px 38px;border:1px solid var(--ink);border-radius:999px;background:var(--white);color:var(--ink);font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s ease;}
+  .shp-loadmore:hover{background:var(--ink);color:var(--white);}
+  .shp-state{grid-column:1/-1;text-align:center;padding:64px 20px;color:var(--ink-soft);}
+  .shp-state svg{width:52px;height:52px;margin-bottom:14px;color:var(--line);}
+  .shp-state h3{color:var(--ink);font-family:var(--font-display);font-size:1.4rem;margin:0 0 8px;}
+  .shp-state p{margin:0 0 18px;font-size:.9rem;}
+
+  /* Mobile filter sheet */
+  .shp-backdrop{display:none;position:fixed;inset:0;background:rgba(22,35,31,.45);z-index:60;opacity:0;transition:opacity .25s ease;}
+  .shp-backdrop.shp-open{display:block;opacity:1;}
+  .shp-sheet-head{display:none;}
+  .shp-apply{display:none;}
+
+  @media (max-width:1024px){
+    .shp-grid{grid-template-columns:repeat(3,1fr);gap:20px 16px;}
   }
-  .add-to-cart-btn:hover { background: var(--gold-deep); transform: translateY(-1px); }
-  .add-to-cart-btn:disabled { background: var(--paper-dim); color: var(--ink-soft); cursor: not-allowed; transform: none; }
-
-  /* Product foot — price on top, button below */
-  .product-foot { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .product-foot-row { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 8px; }
-
-  .shop-main { flex: 1; min-width: 0; }
-  .shop-results-count { font-family: var(--font-mono); font-size: .76rem; color: var(--ink-soft); margin-bottom: 16px; }
-
-  @media(max-width:760px){
-    .shop-layout { flex-direction: column; }
-    .shop-sidebar { width: 100%; position: static; }
+  @media (max-width:900px){
+    .shp-layout{display:block;}
+    .shp-filter-btn{display:inline-flex;}
+    .shp-sidebar{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-height:84vh;z-index:61;border-radius:20px 20px 0 0;border:none;border-top:1px solid var(--line);box-shadow:0 -12px 40px rgba(22,35,31,.25);padding:0 20px 110px;transform:translateY(102%);transition:transform .28s ease;overflow-y:auto;}
+    .shp-sidebar.shp-open{transform:translateY(0);}
+    .shp-sheet-head{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--white);padding:16px 0 12px;z-index:2;border-bottom:1px solid var(--line);margin-bottom:4px;}
+    .shp-sheet-head strong{font-family:var(--font-display);font-size:1.15rem;}
+    .shp-sheet-head button{background:var(--paper);border:1px solid var(--line);width:34px;height:34px;border-radius:50%;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--ink);}
+    .shp-sheet-head button svg{width:14px;height:14px;}
+    .shp-apply{display:block;position:fixed;left:16px;right:16px;bottom:16px;z-index:62;padding:15px;border:none;border-radius:12px;background:var(--ink);color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit;transform:translateY(140%);transition:transform .28s ease;box-shadow:0 8px 24px rgba(22,35,31,.3);}
+    .shp-apply.shp-open{transform:translateY(0);}
+    .shp-search{order:3;flex-basis:100%;max-width:none;}
+    .shp-sort{margin-left:0;}
   }
+  @media (max-width:640px){
+    .shp-grid{grid-template-columns:repeat(2,1fr);gap:14px 12px;}
+    .shp-info{padding:10px 12px 12px;}
+    .shp-title{font-size:.84rem;min-height:2.6em;}
+    .shp-price{font-size:.94rem;}
+    .shp-toolbar{gap:10px;}
+    .shp-results{display:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .shp-card,.shp-media img,.shp-quickadd{transition:none;}
+    .shp-skel-media,.shp-skel-line{animation:none;}
+  }
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--rust);outline-offset:2px;}
 </style>
 </head>
+
 <body>
+
+<!-- SVG icon sprite (no emojis anywhere on this page) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="shp-i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+    <symbol id="shp-i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="shp-i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="shp-i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="shp-i-star" viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z"/></symbol>
+    <symbol id="shp-i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h15l-1.5 12.5a1 1 0 0 1-1 .5H8.5a1 1 0 0 1-1-.5L6 8z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></symbol>
+  </defs>
+</svg>
 
 <div id="site-header"></div>
 
 <main>
-  <div class="wrap breadcrumb"><a href="/">Home</a> / Shop</div>
-  <section class="page-hero">
-    <div class="wrap">
-      <span class="eyebrow">All products</span>
-      <h1 style="font-size:2.4rem;">Shop the collection</h1>
-      <p>Curated apparel and accessories crafted for you.</p>
+  <div class="wrap">
+    <nav class="shp-breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <svg><use href="#shp-i-chev"/></svg>
+      <span aria-current="page">Shop</span>
+    </nav>
+
+    <div class="shp-head">
+      <span class="shp-eyebrow">The collection</span>
+      <h1>Shop all products</h1>
+      <p>Everything in the Hubator studio, updated live from our dashboard — filter by category, price, colour and size to find your fit.</p>
     </div>
-  </section>
 
-  <section class="section" style="padding-top:28px;">
-    <div class="wrap">
-      <div class="shop-layout">
-
-        <!-- Sidebar filters -->
-        <aside class="shop-sidebar" id="shop-sidebar">
-          <h3>Categories</h3>
-          <div class="sidebar-cats" id="sidebar-cats">
-            <button class="active" data-cat="All">All</button>
-          </div>
-
-          <h3>Color</h3>
-          <div class="color-swatches-sidebar" id="color-swatches-sidebar"></div>
-
-          <h3>Size</h3>
-          <div class="size-chips-sidebar" id="size-chips-sidebar"></div>
-
-          <h3>Price</h3>
-          <div class="price-filter">
-            <input type="range" id="price-range-slider" min="0" max="10000" step="10" value="10000">
-            <div class="price-range-labels">
-              <span>₹0</span>
-              <span id="price-range-max-label">₹10000</span>
-            </div>
-          </div>
-
-          <button class="clear-filters-btn" id="clear-filters-btn">Clear all filters</button>
-        </aside>
-
-        <!-- Product grid -->
-        <div class="shop-main">
-          <div class="shop-results-count" id="results-count"></div>
-          <div class="product-grid" id="shop-grid"></div>
-        </div>
-
+    <div class="shp-toolbar">
+      <button type="button" class="shp-filter-btn" id="shp-filter-btn" aria-haspopup="dialog">
+        <svg><use href="#shp-i-filter"/></svg>
+        Filters
+        <span class="shp-count-badge" id="shp-active-count">0</span>
+      </button>
+      <div class="shp-search">
+        <svg><use href="#shp-i-search"/></svg>
+        <input type="search" id="shp-search" placeholder="Search products…" aria-label="Search products" autocomplete="off">
+      </div>
+      <span class="shp-results" id="shp-results" role="status">Loading…</span>
+      <div class="shp-sort">
+        <label for="shp-sort">Sort</label>
+        <select id="shp-sort">
+          <option value="featured">Featured</option>
+          <option value="newest">Newest</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating-desc">Top Rated</option>
+          <option value="discount-desc">Biggest Discount</option>
+          <option value="name-asc">Name: A to Z</option>
+        </select>
       </div>
     </div>
-  </section>
+
+    <div class="shp-pills" id="shp-pills" aria-live="polite"></div>
+
+    <div class="shp-layout">
+      <aside class="shp-sidebar" id="shp-sidebar" role="dialog" aria-label="Product filters" aria-modal="false">
+        <div class="shp-sheet-head">
+          <strong>Filters</strong>
+          <button type="button" id="shp-close" aria-label="Close filters"><svg><use href="#shp-i-x"/></svg></button>
+        </div>
+
+        <div class="shp-sec" id="shp-sec-avail">
+          <h3 class="shp-sec-title">Availability</h3>
+          <label class="shp-check"><input type="checkbox" id="shp-instock"><span>In stock only</span></label>
+          <label class="shp-check"><input type="checkbox" id="shp-onsale"><span>On sale</span></label>
+        </div>
+
+        <div class="shp-sec" id="shp-sec-price">
+          <h3 class="shp-sec-title">Price</h3>
+          <div class="shp-price-vals"><span id="shp-pmin-label">₹0</span><span id="shp-pmax-label">₹0</span></div>
+          <div class="shp-slider">
+            <div class="shp-track"></div>
+            <div class="shp-fill" id="shp-pfill"></div>
+            <input type="range" id="shp-pmin" min="0" max="10000" step="10" value="0" aria-label="Minimum price">
+            <input type="range" id="shp-pmax" min="0" max="10000" step="10" value="10000" aria-label="Maximum price">
+          </div>
+        </div>
+
+        <div class="shp-sec" id="shp-sec-cat">
+          <h3 class="shp-sec-title">Category</h3>
+          <div id="shp-cats"></div>
+        </div>
+
+        <div class="shp-sec" id="shp-sec-color" hidden>
+          <h3 class="shp-sec-title">Colour</h3>
+          <div class="shp-swatches" id="shp-colors"></div>
+        </div>
+
+        <div class="shp-sec" id="shp-sec-size" hidden>
+          <h3 class="shp-sec-title">Size</h3>
+          <div class="shp-chips" id="shp-sizes"></div>
+        </div>
+
+        <div class="shp-sec" id="shp-sec-rating" hidden>
+          <h3 class="shp-sec-title">Rating</h3>
+          <div class="shp-stars-row" id="shp-ratings"></div>
+        </div>
+
+        <div class="shp-sec">
+          <button type="button" class="shp-clear" id="shp-clear">Clear all filters</button>
+        </div>
+      </aside>
+
+      <div class="shp-main">
+        <div class="shp-grid" id="shp-grid" aria-live="polite"></div>
+        <div class="shp-more-wrap" id="shp-more-wrap" hidden>
+          <div class="shp-showing" id="shp-showing"></div>
+          <button type="button" class="shp-loadmore" id="shp-loadmore">Load more products</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
+
+<div class="shp-backdrop" id="shp-backdrop"></div>
+<button type="button" class="shp-apply" id="shp-apply">Show results</button>
 
 <div id="site-footer"></div>
 
@@ -159,252 +321,670 @@
 <script src="/js/cart.js"></script>
 <script src="/js/auth.js"></script>
 <script>
-(function() {
-  var grid = document.getElementById("shop-grid");
-  var sidebarCats = document.getElementById("sidebar-cats");
-  var colorSwatches = document.getElementById("color-swatches-sidebar");
-  var sizeChips = document.getElementById("size-chips-sidebar");
-  var priceSlider = document.getElementById("price-range-slider");
-  var priceLabel = document.getElementById("price-range-max-label");
-  var clearBtn = document.getElementById("clear-filters-btn");
-  var resultsCount = document.getElementById("results-count");
+(function () {
+  "use strict";
 
-  var activeCat = "All";
-  var activeColors = new Set();
-  var activeSizes = new Set();
-  var maxPrice = 10000;
-  var globalMaxPrice = 10000;
+  /* ============ Helpers ============ */
+  function $(id) { return document.getElementById(id); }
+  function escA(s) { return String(s == null ? "" : s).replace(/"/g, "&quot;"); }
+  function debounce(fn, ms) {
+    var t = null;
+    return function () {
+      var args = arguments, self = this;
+      clearTimeout(t);
+      t = setTimeout(function () { fn.apply(self, args); }, ms);
+    };
+  }
+  function starSvg(filled) {
+    return '<svg viewBox="0 0 24 24" fill="' + (filled ? "#C99A2E" : "none") + '"' +
+      (filled ? "" : ' stroke="#D8D2C4" stroke-width="1.6"') + '><use href="#shp-i-star"/></svg>';
+  }
+  function starsRow(rating) {
+    var full = Math.round(Number(rating) || 0), out = "";
+    for (var i = 1; i <= 5; i++) out += starSvg(i <= full);
+    return '<span class="shp-ssvg" aria-hidden="true">' + out + "</span>";
+  }
 
-  // ── Product card HTML ────────────────────────────────────────
+  /* ============ Elements ============ */
+  var grid = $("shp-grid"), resultsEl = $("shp-results"), pillsEl = $("shp-pills"),
+      sortSel = $("shp-sort"), searchInput = $("shp-search"),
+      sidebar = $("shp-sidebar"), backdrop = $("shp-backdrop"),
+      filterBtn = $("shp-filter-btn"), activeCountEl = $("shp-active-count"),
+      closeBtn = $("shp-close"), applyBtn = $("shp-apply"), clearBtn = $("shp-clear"),
+      pminInput = $("shp-pmin"), pmaxInput = $("shp-pmax"),
+      pminLabel = $("shp-pmin-label"), pmaxLabel = $("shp-pmax-label"), pfill = $("shp-pfill"),
+      catsEl = $("shp-cats"), colorsEl = $("shp-colors"), sizesEl = $("shp-sizes"), ratingsEl = $("shp-ratings"),
+      moreWrap = $("shp-more-wrap"), showingEl = $("shp-showing"), loadMoreBtn = $("shp-loadmore"),
+      instockBox = $("shp-instock"), onsaleBox = $("shp-onsale");
+
+  /* ============ State ============ */
+  var PAGE_SIZE = 12;
+  var state = {
+    categories: new Set(), colors: new Set(), sizes: new Set(),
+    minRating: 0, minPrice: 0, maxPrice: 10000,
+    sort: "featured", search: "", onSale: false, inStockOnly: false,
+    visible: PAGE_SIZE
+  };
+  var bounds = { min: 0, max: 10000 };
+  var allProducts = [];
+  var ratingsById = {};   // product id -> { avg, count }
+  var ratingsReady = false;
+  var initToken = 0;
+  var booted = false;
+
+  /* Category group map — keeps header "Categories" menu links like /shop?cat=Man working */
+  var GROUP_OF_CATEGORY = { "Man": "Man", "Woman": "Woman", "Accessories": "Accessories" };
+  var categoryGroups = {};
+  function refreshCategoryGroups() {
+    categoryGroups = Object.assign({}, GROUP_OF_CATEGORY);
+    try {
+      var cached = JSON.parse(localStorage.getItem("hubator_category_nav_v2") || "null");
+      if (Array.isArray(cached)) cached.forEach(function (entry) {
+        (entry.items || []).forEach(function (item) {
+          var name = typeof item === "string" ? item : (item.name || "");
+          if (name) categoryGroups[name] = entry.group;
+        });
+      });
+    } catch (e) { /* keep fallback */ }
+  }
+
+  /* ============ Derive filter options from the live dashboard catalog ============ */
+  function deriveOptions(products) {
+    var catCounts = {}, colorMap = {}, sizeCounts = {};
+    var minP = Infinity, maxP = 0;
+    products.forEach(function (p) {
+      if (p.category) catCounts[p.category] = (catCounts[p.category] || 0) + 1;
+      if (typeof p.price === "number") {
+        if (p.price < minP) minP = p.price;
+        if (p.price > maxP) maxP = p.price;
+      }
+      // Colours: prefer dashboard colour→photo map, fall back to variants
+      (p.colorImages || []).forEach(function (c) {
+        if (!c || !c.color) return;
+        var key = String(c.color).toLowerCase();
+        if (!colorMap[key]) colorMap[key] = { name: c.color, hex: c.colorHex || "#cccccc", count: 0 };
+        colorMap[key].count++;
+      });
+      if (p.variants && p.variants.forEach) p.variants.forEach(function (v) {
+        if (v.color) {
+          var key = String(v.color).toLowerCase();
+          if (!colorMap[key]) colorMap[key] = { name: v.color, hex: v.colorHex || "#cccccc", count: 0 };
+          colorMap[key].count++;
+        }
+        if (v.size) sizeCounts[v.size] = (sizeCounts[v.size] || 0) + 1;
+      });
+    });
+    if (minP === Infinity) minP = 0;
+    if (maxP <= minP) maxP = minP + 100;
+    var sizeOrder = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+    return {
+      categories: Object.keys(catCounts).sort().map(function (n) { return { name: n, count: catCounts[n] }; }),
+      colors: Object.keys(colorMap).map(function (k) { return colorMap[k]; })
+        .sort(function (a, b) { return a.name.localeCompare(b.name); }),
+      sizes: Object.keys(sizeCounts).sort(function (a, b) {
+        var ia = sizeOrder.indexOf(a), ib = sizeOrder.indexOf(b);
+        if (ia === -1 && ib === -1) return a.localeCompare(b);
+        if (ia === -1) return 1; if (ib === -1) return -1; return ia - ib;
+      }).map(function (n) { return { name: n, count: sizeCounts[n] }; }),
+      minPrice: Math.floor(minP / 10) * 10,
+      maxPrice: Math.ceil(maxP / 10) * 10
+    };
+  }
+
+  /* ============ Build sidebar ============ */
+  function buildSidebar(opts) {
+    catsEl.innerHTML = "";
+    opts.categories.forEach(function (opt) {
+      var row = document.createElement("label");
+      row.className = "shp-check";
+      var input = document.createElement("input");
+      input.type = "checkbox"; input.value = opt.name;
+      input.checked = state.categories.has(opt.name);
+      input.addEventListener("change", function () {
+        if (input.checked) state.categories.add(opt.name); else state.categories.delete(opt.name);
+        onFilterChange();
+      });
+      var label = document.createElement("span"); label.textContent = opt.name;
+      var n = document.createElement("span"); n.className = "shp-n"; n.textContent = opt.count;
+      row.appendChild(input); row.appendChild(label); row.appendChild(n);
+      catsEl.appendChild(row);
+    });
+
+    var colorSec = $("shp-sec-color");
+    if (opts.colors.length) {
+      colorSec.hidden = false; colorsEl.innerHTML = "";
+      opts.colors.forEach(function (opt) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "shp-swatch" + (state.colors.has(opt.name) ? " shp-on" : "");
+        btn.style.background = opt.hex;
+        btn.title = opt.name; btn.setAttribute("aria-label", "Filter by colour " + opt.name);
+        btn.setAttribute("aria-pressed", state.colors.has(opt.name) ? "true" : "false");
+        btn.addEventListener("click", function () {
+          if (state.colors.has(opt.name)) state.colors.delete(opt.name); else state.colors.add(opt.name);
+          btn.classList.toggle("shp-on");
+          btn.setAttribute("aria-pressed", state.colors.has(opt.name) ? "true" : "false");
+          onFilterChange();
+        });
+        colorsEl.appendChild(btn);
+      });
+    } else colorSec.hidden = true;
+
+    var sizeSec = $("shp-sec-size");
+    if (opts.sizes.length) {
+      sizeSec.hidden = false; sizesEl.innerHTML = "";
+      opts.sizes.forEach(function (opt) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "shp-chip" + (state.sizes.has(opt.name) ? " shp-on" : "");
+        btn.textContent = opt.name; btn.title = opt.count + " products";
+        btn.setAttribute("aria-pressed", state.sizes.has(opt.name) ? "true" : "false");
+        btn.addEventListener("click", function () {
+          if (state.sizes.has(opt.name)) state.sizes.delete(opt.name); else state.sizes.add(opt.name);
+          btn.classList.toggle("shp-on");
+          btn.setAttribute("aria-pressed", state.sizes.has(opt.name) ? "true" : "false");
+          onFilterChange();
+        });
+        sizesEl.appendChild(btn);
+      });
+    } else sizeSec.hidden = true;
+
+    bounds = { min: opts.minPrice, max: opts.maxPrice };
+    pminInput.min = bounds.min; pminInput.max = bounds.max;
+    pmaxInput.min = bounds.min; pmaxInput.max = bounds.max;
+    if (state.minPrice < bounds.min || state.minPrice === 0) state.minPrice = bounds.min;
+    if (state.maxPrice >= 10000 || state.maxPrice > bounds.max) state.maxPrice = bounds.max;
+    pminInput.value = state.minPrice; pmaxInput.value = state.maxPrice;
+    updatePriceUI();
+  }
+
+  function buildRatingFilter() {
+    var sec = $("shp-sec-rating");
+    var any = Object.keys(ratingsById).some(function (id) { return ratingsById[id].avg > 0; });
+    if (!any) { sec.hidden = true; return; }
+    sec.hidden = false; ratingsEl.innerHTML = "";
+    [4, 3].forEach(function (n) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "shp-star-btn" + (state.minRating === n ? " shp-on" : "");
+      btn.innerHTML = starsRow(n) + "<span>&amp; up</span>";
+      btn.setAttribute("aria-pressed", state.minRating === n ? "true" : "false");
+      btn.addEventListener("click", function () {
+        state.minRating = (state.minRating === n) ? 0 : n;
+        Array.prototype.forEach.call(ratingsEl.children, function (c) { c.classList.remove("shp-on"); });
+        if (state.minRating === n) btn.classList.add("shp-on");
+        onFilterChange();
+      });
+      ratingsEl.appendChild(btn);
+    });
+  }
+
+  /* ============ Price slider ============ */
+  function updatePriceUI() {
+    var min = Math.min(Number(pminInput.value), Number(pmaxInput.value));
+    var max = Math.max(Number(pminInput.value), Number(pmaxInput.value));
+    pminLabel.textContent = "₹" + min.toLocaleString("en-IN");
+    pmaxLabel.textContent = "₹" + max.toLocaleString("en-IN");
+    var range = (bounds.max - bounds.min) || 1;
+    var l = ((min - bounds.min) / range) * 100, r = ((max - bounds.min) / range) * 100;
+    pfill.style.left = l + "%"; pfill.style.width = Math.max(0, r - l) + "%";
+  }
+  pminInput.addEventListener("input", function () {
+    if (Number(pminInput.value) > Number(pmaxInput.value)) pminInput.value = pmaxInput.value;
+    updatePriceUI();
+  });
+  pmaxInput.addEventListener("input", function () {
+    if (Number(pmaxInput.value) < Number(pminInput.value)) pmaxInput.value = pminInput.value;
+    updatePriceUI();
+  });
+  pminInput.addEventListener("change", function () { state.minPrice = Math.min(Number(pminInput.value), Number(pmaxInput.value)); onFilterChange(); });
+  pmaxInput.addEventListener("change", function () { state.maxPrice = Math.max(Number(pminInput.value), Number(pmaxInput.value)); onFilterChange(); });
+
+  /* ============ Matching ============ */
+  function matchesCategory(p) {
+    if (!state.categories.size) return true;
+    if (state.categories.has(p.category)) return true;
+    var g = categoryGroups[p.category || ""];
+    return g ? state.categories.has(g) : false;
+  }
+  function productColors(p) {
+    var out = [], seen = {};
+    (p.colorImages || []).forEach(function (c) {
+      if (c && c.color && !seen[String(c.color).toLowerCase()]) {
+        seen[String(c.color).toLowerCase()] = 1;
+        out.push({ name: c.color, hex: c.colorHex || "#cccccc", url: c.url || "" });
+      }
+    });
+    if (p.variants && p.variants.forEach) p.variants.forEach(function (v) {
+      if (v.color && !seen[String(v.color).toLowerCase()]) {
+        seen[String(v.color).toLowerCase()] = 1;
+        out.push({ name: v.color, hex: v.colorHex || "#cccccc", url: "" });
+      }
+    });
+    return out;
+  }
+  function matchesColor(p) {
+    if (!state.colors.size) return true;
+    var cols = productColors(p).map(function (c) { return c.name.toLowerCase(); });
+    var hit = false;
+    state.colors.forEach(function (c) { if (cols.indexOf(c.toLowerCase()) !== -1) hit = true; });
+    return hit;
+  }
+  function matchesSize(p) {
+    if (!state.sizes.size) return true;
+    if (!p.variants) return false;
+    var hit = false;
+    p.variants.forEach(function (v) { if (v.size && state.sizes.has(v.size)) hit = true; });
+    return hit;
+  }
+  function matchesRating(p) {
+    if (!state.minRating) return true;
+    var r = ratingsById[p.id];
+    return r && r.avg >= state.minRating;
+  }
+  function matchesPrice(p) {
+    return typeof p.price === "number" && p.price >= state.minPrice && p.price <= state.maxPrice;
+  }
+  function matchesSale(p) { return !state.onSale || !!p.oldPrice; }
+  function matchesStock(p) {
+    return !state.inStockOnly || (typeof productIsPurchasable === "function" ? productIsPurchasable(p) : true);
+  }
+  function matchesSearch(p) {
+    if (!state.search) return true;
+    var hay = (p.name + " " + p.category + " " + (p.vendor || "")).toLowerCase();
+    return state.search.split(/\s+/).every(function (w) { return w && hay.indexOf(w) !== -1; });
+  }
+  function filteredProducts() {
+    return allProducts.filter(function (p) {
+      return matchesCategory(p) && matchesColor(p) && matchesSize(p) && matchesRating(p) &&
+             matchesPrice(p) && matchesSale(p) && matchesStock(p) && matchesSearch(p);
+    });
+  }
+  function discountPct(p) {
+    if (!p.oldPrice || p.oldPrice <= p.price) return 0;
+    return Math.round((1 - p.price / p.oldPrice) * 100);
+  }
+  function sortProducts(list) {
+    var arr = list.slice();
+    switch (state.sort) {
+      case "price-asc": return arr.sort(function (a, b) { return a.price - b.price; });
+      case "price-desc": return arr.sort(function (a, b) { return b.price - a.price; });
+      case "rating-desc": return arr.sort(function (a, b) {
+        var ra = ratingsById[a.id], rb = ratingsById[b.id];
+        return ((rb && rb.avg) || 0) - ((ra && ra.avg) || 0);
+      });
+      case "discount-desc": return arr.sort(function (a, b) { return discountPct(b) - discountPct(a); });
+      case "name-asc": return arr.sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });
+      case "newest": return arr.sort(function (a, b) {
+        return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
+      });
+      default: return arr.sort(function (a, b) { return (a.sortOrder || 0) - (b.sortOrder || 0); });
+    }
+  }
+
+  /* ============ Card rendering (Shopify/WooCommerce style) ============ */
   function cardHTML(p) {
-    var available = productIsPurchasable(p);
+    var purchasable = typeof productIsPurchasable === "function" ? productIsPurchasable(p) : true;
+    var hasVariants = p.variants && p.variants.size > 0;
+    var pct = discountPct(p);
+    var isNew = (p.placements || []).some(function (pl) { return /new-arrival/i.test(pl); }) ||
+      (p.createdAt && (Date.now() - new Date(p.createdAt).getTime()) < 30 * 24 * 3600 * 1000);
+    var url = productUrl(p);
+    var imgA = safeProductImageUrl(p.img);
+    var imgB = (p.gallery && p.gallery[1]) ? safeProductImageUrl(p.gallery[1]) : "";
+    var r = ratingsById[p.id];
 
-    // Color swatches from colorImages or variants — deduplicated, row layout
-    var swatchColors = [];
-    if (Array.isArray(p.colorImages) && p.colorImages.length > 0) {
-      p.colorImages.forEach(function(ci) {
-        if (ci.color && !swatchColors.find(function(s) { return s.name === ci.color; })) {
-          swatchColors.push({ name: ci.color, hex: ci.colorHex || "" });
-        }
-      });
-    }
-    if (swatchColors.length === 0 && p.variants) {
-      p.variants.forEach(function(v) {
-        if (v.color && !swatchColors.find(function(s) { return s.name === v.color; })) {
-          swatchColors.push({ name: v.color, hex: v.colorHex || "" });
-        }
-      });
+    var badges = "";
+    if (pct > 0) badges += '<span class="shp-badge shp-sale">Sale −' + pct + "%</span>";
+    if (isNew) badges += '<span class="shp-badge shp-new">New</span>';
+
+    var mediaInner;
+    if (imgA) {
+      mediaInner =
+        '<img class="shp-img-a" src="' + escA(imgA) + '" alt="' + escA(p.name) + '" loading="lazy">' +
+        (imgB && imgB !== imgA ? '<img class="shp-img-b" src="' + escA(imgB) + '" alt="" aria-hidden="true" loading="lazy">' : "");
+    } else {
+      mediaInner = "";
     }
 
-    var swatchesHTML = swatchColors.length > 0
-      ? '<div class="card-swatches">' + swatchColors.slice(0, 6).map(function(s) {
-          var bg = s.hex || "#ccc";
-          return '<span class="card-swatch" style="background:' + escapeHtml(bg) + ';" title="' + escapeHtml(s.name) + '"></span>';
-        }).join("") + (swatchColors.length > 6 ? '<span style="font-family:var(--font-mono);font-size:.65rem;color:var(--ink-soft);align-self:center;">+' + (swatchColors.length - 6) + '</span>' : '') + '</div>'
+    var quickAdd = "";
+    if (purchasable) {
+      quickAdd = hasVariants
+        ? '<button type="button" class="shp-quickadd" data-act="options" data-url="' + escA(url) + '">Select options</button>'
+        : '<button type="button" class="shp-quickadd" data-act="add" data-id="' + escA(p.id) + '">Add to cart</button>';
+    }
+
+    var ratingHTML = "";
+    if (r && r.avg > 0) {
+      ratingHTML = '<div class="shp-rating">' + starsRow(r.avg) +
+        '<span class="shp-rcount">(' + r.count + ")</span></div>";
+    }
+
+    var colors = productColors(p).slice(0, 5);
+    var dotsHTML = "";
+    if (colors.length > 1) {
+      dotsHTML = '<div class="shp-dots" role="group" aria-label="Available colours">' +
+        colors.map(function (c, i) {
+          return '<button type="button" class="shp-dot' + (i === 0 ? " shp-on" : "") + '" style="background:' + escA(c.hex) + '"' +
+            ' title="' + escA(c.name) + '" aria-label="View in ' + escA(c.name) + '"' +
+            ' data-img="' + escA(c.url || "") + '"></button>';
+        }).join("") +
+        (productColors(p).length > 5 ? '<span class="shp-dot-more">+' + (productColors(p).length - 5) + "</span>" : "") +
+        "</div>";
+    }
+
+    var priceHTML = '<div class="shp-price-row">' +
+      '<span class="shp-price' + (p.oldPrice ? " shp-was-sale" : "") + '">' + fmt(p.price) + "</span>" +
+      (p.oldPrice ? '<span class="shp-compare">' + fmt(p.oldPrice) + "</span>" : "") +
+      (pct > 0 ? '<span class="shp-save">Save ' + pct + "%</span>" : "") +
+      "</div>";
+
+    var touchBtn = "";
+    if (purchasable) {
+      touchBtn = hasVariants
+        ? '<button type="button" class="shp-addbtn" data-act="options" data-url="' + escA(url) + '">Select options</button>'
+        : '<button type="button" class="shp-addbtn" data-act="add" data-id="' + escA(p.id) + '">Add to cart</button>';
+    } else {
+      touchBtn = '<button type="button" class="shp-addbtn" disabled>Sold out</button>';
+    }
+
+    return (
+      '<article class="shp-card" data-id="' + escA(p.id) + '">' +
+        '<a class="shp-media' + (imgA ? "" : " shp-noimg") + '" href="' + escA(url) + '" aria-label="' + escA(p.name) + '">' +
+          (badges ? '<div class="shp-badges">' + badges + "</div>" : "") +
+          (imgA ? mediaInner : '<svg><use href="#shp-i-bag"/></svg>') +
+          (!purchasable ? '<div class="shp-soldout"><span>Sold out</span></div>' : "") +
+        "</a>" +
+        quickAdd +
+        '<div class="shp-info">' +
+          '<div class="shp-vendor">' + escapeHtml(p.category) + "</div>" +
+          '<h3 class="shp-title" title="' + escA(p.name) + '"><a href="' + escA(url) + '">' + escapeHtml(p.name) + "</a></h3>" +
+          ratingHTML + dotsHTML + priceHTML + touchBtn +
+        "</div>" +
+      "</article>"
+    );
+  }
+
+  function skeletonHTML() {
+    var out = "";
+    for (var i = 0; i < 8; i++) {
+      out += '<div class="shp-skel"><div class="shp-skel-media"></div><div class="shp-skel-body">' +
+        '<div class="shp-skel-line" style="width:40%"></div>' +
+        '<div class="shp-skel-line" style="width:90%"></div>' +
+        '<div class="shp-skel-line" style="width:55%"></div></div></div>';
+    }
+    return out;
+  }
+
+  /* ============ Render ============ */
+  function render() {
+    var list = sortProducts(filteredProducts());
+    var total = list.length;
+    var shown = list.slice(0, state.visible);
+
+    if (!booted) { grid.innerHTML = ""; return; }
+    if (!allProducts.length) {
+      grid.innerHTML =
+        '<div class="shp-state"><svg><use href="#shp-i-bag"/></svg>' +
+        "<h3>No products yet</h3><p>New products added in your dashboard will appear here automatically.</p></div>";
+      resultsEl.textContent = "";
+      moreWrap.hidden = true;
+      renderPills();
+      return;
+    }
+    if (!total) {
+      grid.innerHTML =
+        '<div class="shp-state"><svg><use href="#shp-i-search"/></svg>' +
+        "<h3>No products found</h3><p>Try removing some filters or search for something else.</p>" +
+        '<button type="button" class="shp-loadmore" id="shp-empty-clear">Clear all filters</button></div>';
+      var ec = $("shp-empty-clear");
+      if (ec) ec.addEventListener("click", clearAll);
+    } else {
+      grid.innerHTML = shown.map(cardHTML).join("");
+    }
+
+    resultsEl.textContent = allProducts.length
+      ? total + (total === 1 ? " product" : " products")
       : "";
 
-    return '<div class="product-card" data-cat="' + escapeHtml(p.category) + '">' +
-      '<a href="' + productUrl(p) + '" class="product-media">' +
-        (p.badge ? '<span class="product-badge ticket ' + (p.badge === "Sale" ? "on-sale" : "") + '">' + escapeHtml(p.badge) + '</span>' : "") +
-        '<img src="' + escapeHtml(safeProductImageUrl(p.img)) + '" alt="' + escapeHtml(p.name) + '" loading="lazy">' +
-      '</a>' +
-      '<div class="product-body">' +
-        '<span class="product-cat">' + escapeHtml(p.category) + '</span>' +
-        '<h4><a href="' + productUrl(p) + '">' + escapeHtml(p.name) + '</a></h4>' +
-        swatchesHTML +
-        '<div class="product-foot">' +
-          '<div class="product-foot-row">' +
-            '<span class="ticket ' + (p.oldPrice ? "on-sale" : "") + '">' +
-              (p.oldPrice ? '<span class="price-old">' + fmt(p.oldPrice) + '</span>' : "") +
-              fmt(p.price) +
-            '</span>' +
-          '</div>' +
-          '<div class="product-foot-row">' +
-            '<a href="' + productUrl(p) + '" class="add-to-cart-btn" aria-label="View ' + escapeHtml(p.name) + '">View &amp; Buy</a>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  // ── Filtering ────────────────────────────────────────────────
-  function matchesFilters(p) {
-    // Category
-    if (activeCat !== "All" && p.category !== activeCat) return false;
-    // Color
-    if (activeColors.size > 0) {
-      var productColors = new Set();
-      (p.colorImages || []).forEach(function(ci) { if (ci.color) productColors.add(ci.color); });
-      if (p.variants) { p.variants.forEach(function(v) { if (v.color) productColors.add(v.color); }); }
-      var matched = false;
-      activeColors.forEach(function(c) { if (productColors.has(c)) matched = true; });
-      if (!matched) return false;
+    if (total > state.visible) {
+      moreWrap.hidden = false;
+      showingEl.textContent = "Showing " + shown.length + " of " + total + " products";
+      loadMoreBtn.style.display = "";
+    } else {
+      moreWrap.hidden = total === 0 || !allProducts.length;
+      if (total > 0) {
+        showingEl.textContent = "Showing all " + total + " products";
+        loadMoreBtn.style.display = "none";
+      }
     }
-    // Size
-    if (activeSizes.size > 0) {
-      var productSizes = new Set();
-      if (p.variants) { p.variants.forEach(function(v) { if (v.size) productSizes.add(v.size); }); }
-      var matched = false;
-      activeSizes.forEach(function(s) { if (productSizes.has(s)) matched = true; });
-      if (!matched) return false;
+    renderPills();
+    activeCountEl.textContent = activeFilterCount();
+  }
+
+  function renderPills() {
+    var pills = [];
+    function pill(label, clear) {
+      pills.push({ label: label, clear: clear });
     }
-    // Price
-    if (p.price > maxPrice) return false;
-    return true;
-  }
+    state.categories.forEach(function (c) { pill(c, function () { state.categories.delete(c); }); });
+    state.colors.forEach(function (c) { pill(c, function () { state.colors.delete(c); }); });
+    state.sizes.forEach(function (s) { pill("Size " + s, function () { state.sizes.delete(s); }); });
+    if (state.minRating) pill(starsText(state.minRating), function () { state.minRating = 0; });
+    if (state.minPrice > bounds.min || state.maxPrice < bounds.max)
+      pill("₹" + state.minPrice + " – ₹" + state.maxPrice, function () {
+        state.minPrice = bounds.min; state.maxPrice = bounds.max;
+        pminInput.value = bounds.min; pmaxInput.value = bounds.max; updatePriceUI();
+      });
+    if (state.onSale) pill("On sale", function () { state.onSale = false; onsaleBox.checked = false; });
+    if (state.inStockOnly) pill("In stock", function () { state.inStockOnly = false; instockBox.checked = false; });
+    if (state.search) pill("“" + state.search + "”", function () { state.search = ""; searchInput.value = ""; });
 
-  function render() {
-    var list = (window.PRODUCTS || []).filter(matchesFilters);
-    grid.innerHTML = list.map(cardHTML).join("") || '<p style="grid-column:1/-1;color:var(--ink-soft);">No products match your filters.</p>';
-    if (resultsCount) resultsCount.textContent = list.length + " product" + (list.length === 1 ? "" : "s");
+    if (!pills.length) { pillsEl.classList.remove("shp-show"); pillsEl.innerHTML = ""; return; }
+    pillsEl.classList.add("shp-show");
+    pillsEl.innerHTML = "";
+    pills.forEach(function (pl) {
+      var s = document.createElement("span");
+      s.className = "shp-pill";
+      var t = document.createElement("span"); t.textContent = pl.label;
+      var b = document.createElement("button");
+      b.type = "button"; b.setAttribute("aria-label", "Remove filter " + pl.label);
+      b.innerHTML = '<svg><use href="#shp-i-x"/></svg>';
+      b.addEventListener("click", function () { pl.clear(); syncSidebarChecks(); render(); syncUrl(); });
+      s.appendChild(t); s.appendChild(b); pillsEl.appendChild(s);
+    });
+    var clr = document.createElement("button");
+    clr.type = "button"; clr.className = "shp-pills-clear"; clr.textContent = "Clear all";
+    clr.addEventListener("click", clearAll);
+    pillsEl.appendChild(clr);
   }
+  function starsText(n) { return "Rated " + n + "+ stars"; }
 
-  // ── Category sidebar ─────────────────────────────────────────
-  function buildCategories() {
-    var cats = Array.from(new Set((window.PRODUCTS || []).map(function(p) { return p.category; }).filter(Boolean))).sort();
-    sidebarCats.innerHTML = "";
-    var allBtn = document.createElement("button");
-    allBtn.textContent = "All";
-    allBtn.dataset.cat = "All";
-    if (activeCat === "All") allBtn.classList.add("active");
-    sidebarCats.appendChild(allBtn);
-    cats.forEach(function(cat) {
-      var btn = document.createElement("button");
-      btn.textContent = cat;
-      btn.dataset.cat = cat;
-      if (activeCat === cat) btn.classList.add("active");
-      sidebarCats.appendChild(btn);
+  function syncSidebarChecks() {
+    Array.prototype.forEach.call(catsEl.querySelectorAll("input"), function (i) {
+      i.checked = state.categories.has(i.value);
+    });
+    Array.prototype.forEach.call(colorsEl.querySelectorAll(".shp-swatch"), function (b) {
+      var on = state.colors.has(b.title);
+      b.classList.toggle("shp-on", on); b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    Array.prototype.forEach.call(sizesEl.querySelectorAll(".shp-chip"), function (b) {
+      var on = state.sizes.has(b.textContent);
+      b.classList.toggle("shp-on", on); b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    Array.prototype.forEach.call(ratingsEl.querySelectorAll(".shp-star-btn"), function (b, idx) {
+      var n = [4, 3][idx];
+      b.classList.toggle("shp-on", state.minRating === n);
     });
   }
 
-  sidebarCats.addEventListener("click", function(e) {
-    var btn = e.target.closest("button[data-cat]");
-    if (!btn) return;
-    activeCat = btn.dataset.cat;
-    document.querySelectorAll("#sidebar-cats button").forEach(function(b) {
-      b.classList.toggle("active", b.dataset.cat === activeCat);
+  function activeFilterCount() {
+    var n = state.categories.size + state.colors.size + state.sizes.size + (state.minRating ? 1 : 0);
+    if (state.minPrice > bounds.min || state.maxPrice < bounds.max) n++;
+    if (state.onSale) n++; if (state.inStockOnly) n++; if (state.search) n++;
+    return n;
+  }
+
+  function clearAll() {
+    state.categories.clear(); state.colors.clear(); state.sizes.clear();
+    state.minRating = 0; state.minPrice = bounds.min; state.maxPrice = bounds.max;
+    state.search = ""; state.onSale = false; state.inStockOnly = false; state.visible = PAGE_SIZE;
+    searchInput.value = ""; sortSel.value = "featured"; state.sort = "featured";
+    instockBox.checked = false; onsaleBox.checked = false;
+    pminInput.value = bounds.min; pmaxInput.value = bounds.max; updatePriceUI();
+    buildSidebar(deriveOptions(allProducts));
+    buildRatingFilter();
+    render(); syncUrl();
+  }
+
+  /* ============ Ratings (progressive enhancement from dashboard reviews API) ============ */
+  function fetchRatings(products) {
+    var base = (window.HUBATOR_API_BASE || "").replace(/\/$/, "");
+    if (!base) { ratingsReady = true; return; }
+    var queue = products.filter(function (p) { return p.slug && p.enableReviews !== false; }).slice(0, 60);
+    Promise.allSettled(queue.map(function (p) {
+      return fetch(base + "/api/public/reviews?product=" + encodeURIComponent(p.slug) + "&limit=1")
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (data) {
+          if (data && typeof data.avgRating === "number" && data.total > 0)
+            ratingsById[p.id] = { avg: data.avgRating, count: data.total };
+        }).catch(function () { /* ratings are optional */ });
+    })).then(function () {
+      ratingsReady = true;
+      buildRatingFilter();
+      render();
     });
+  }
+
+  /* ============ URL sync (shareable filtered links) ============ */
+  function syncUrl() {
+    try {
+      var url = new URL(location.href), q = url.searchParams;
+      state.categories.size ? q.set("category", Array.from(state.categories).join(",")) : q.delete("category");
+      state.colors.size ? q.set("colors", Array.from(state.colors).join(",")) : q.delete("colors");
+      state.sizes.size ? q.set("sizes", Array.from(state.sizes).join(",")) : q.delete("sizes");
+      state.minRating ? q.set("minRating", state.minRating) : q.delete("minRating");
+      state.minPrice > bounds.min ? q.set("minPrice", state.minPrice) : q.delete("minPrice");
+      state.maxPrice < bounds.max ? q.set("maxPrice", state.maxPrice) : q.delete("maxPrice");
+      state.sort !== "featured" ? q.set("sort", state.sort) : q.delete("sort");
+      state.search ? q.set("q", state.search) : q.delete("q");
+      state.onSale ? q.set("sale", "1") : q.delete("sale");
+      state.inStockOnly ? q.set("instock", "1") : q.delete("instock");
+      q.delete("cat");
+      history.replaceState({}, "", url);
+    } catch (e) { /* non-fatal */ }
+  }
+  function readUrlState() {
+    var q = new URLSearchParams(location.search);
+    var catParam = (q.get("category") || q.get("cat") || "").trim();
+    catParam.split(",").forEach(function (c) { if (c.trim()) state.categories.add(c.trim()); });
+    (q.get("colors") || "").split(",").forEach(function (c) { if (c.trim()) state.colors.add(c.trim()); });
+    (q.get("sizes") || "").split(",").forEach(function (s) { if (s.trim()) state.sizes.add(s.trim()); });
+    state.minRating = Number(q.get("minRating")) || 0;
+    if (q.get("minPrice")) state.minPrice = Number(q.get("minPrice"));
+    if (q.get("maxPrice")) state.maxPrice = Number(q.get("maxPrice"));
+    if (q.get("sort")) state.sort = q.get("sort");
+    if (q.get("q")) { state.search = q.get("q"); searchInput.value = state.search; }
+    state.onSale = q.get("sale") === "1"; onsaleBox.checked = state.onSale;
+    state.inStockOnly = q.get("instock") === "1"; instockBox.checked = state.inStockOnly;
+    sortSel.value = state.sort;
+  }
+
+  function onFilterChange() {
+    state.visible = PAGE_SIZE;
+    render(); syncUrl();
+  }
+
+  /* ============ Mobile sheet ============ */
+  function openSheet() {
+    sidebar.classList.add("shp-open"); backdrop.classList.add("shp-open"); applyBtn.classList.add("shp-open");
+    sidebar.setAttribute("aria-modal", "true");
+    document.body.style.overflow = "hidden";
+  }
+  function closeSheet() {
+    sidebar.classList.remove("shp-open"); backdrop.classList.remove("shp-open"); applyBtn.classList.remove("shp-open");
+    sidebar.setAttribute("aria-modal", "false");
+    document.body.style.overflow = "";
+  }
+  filterBtn.addEventListener("click", openSheet);
+  closeBtn.addEventListener("click", closeSheet);
+  backdrop.addEventListener("click", closeSheet);
+  applyBtn.addEventListener("click", closeSheet);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
+
+  /* ============ Toolbar events ============ */
+  sortSel.addEventListener("change", function () { state.sort = sortSel.value; onFilterChange(); });
+  searchInput.addEventListener("input", debounce(function () {
+    state.search = searchInput.value.trim().toLowerCase();
+    onFilterChange();
+  }, 250));
+  instockBox.addEventListener("change", function () { state.inStockOnly = instockBox.checked; onFilterChange(); });
+  onsaleBox.addEventListener("change", function () { state.onSale = onsaleBox.checked; onFilterChange(); });
+  clearBtn.addEventListener("click", clearAll);
+  loadMoreBtn.addEventListener("click", function () {
+    state.visible += PAGE_SIZE;
     render();
   });
 
-  // ── Color swatches sidebar ───────────────────────────────────
-  function buildColorSwatches(filterData) {
-    colorSwatches.innerHTML = "";
-    if (!filterData || !filterData.colors || filterData.colors.length === 0) {
-      colorSwatches.innerHTML = '<span style="font-size:.78rem;color:var(--ink-soft);">—</span>';
+  /* ============ Card interactions (delegated) ============ */
+  grid.addEventListener("click", function (e) {
+    var dot = e.target.closest(".shp-dot");
+    if (dot) {
+      e.preventDefault(); e.stopPropagation();
+      var card = dot.closest(".shp-card");
+      var img = card && card.querySelector(".shp-img-a");
+      if (img && dot.getAttribute("data-img")) img.src = dot.getAttribute("data-img");
+      Array.prototype.forEach.call(card.querySelectorAll(".shp-dot"), function (d) { d.classList.remove("shp-on"); });
+      dot.classList.add("shp-on");
       return;
     }
-    // Build hex map from products
-    var hexMap = {};
-    (window.PRODUCTS || []).forEach(function(p) {
-      (p.colorImages || []).forEach(function(ci) { if (ci.color && ci.colorHex) hexMap[ci.color] = ci.colorHex; });
-      if (p.variants) { p.variants.forEach(function(v) { if (v.color && v.colorHex) hexMap[v.color] = v.colorHex; }); }
+    var btn = e.target.closest("[data-act]");
+    if (btn) {
+      e.preventDefault(); e.stopPropagation();
+      if (btn.getAttribute("data-act") === "add") {
+        if (typeof addToCart === "function") addToCart(btn.getAttribute("data-id"), 1);
+      } else {
+        location.href = btn.getAttribute("data-url");
+      }
+    }
+  });
+
+  /* ============ Boot ============ */
+  function init(products) {
+    var token = ++initToken;
+    booted = true;
+    allProducts = (products || []).filter(function (p) { return p && p.showInShop !== false; });
+    refreshCategoryGroups();
+    readUrlState();
+
+    // Expand legacy group params (?cat=Man) into member categories
+    var opts = deriveOptions(allProducts);
+    var expanded = new Set();
+    state.categories.forEach(function (c) {
+      if (opts.categories.some(function (o) { return o.name === c; })) expanded.add(c);
+      else opts.categories.forEach(function (o) { if (categoryGroups[o.name] === c) expanded.add(o.name); });
     });
-    filterData.colors.forEach(function(colorName) {
-      var btn = document.createElement("button");
-      btn.className = "color-swatch-btn";
-      btn.dataset.color = colorName;
-      btn.title = colorName;
-      btn.setAttribute("aria-label", colorName);
-      var hex = hexMap[colorName] || "#cccccc";
-      btn.style.background = hex;
-      if (activeColors.has(colorName)) btn.classList.add("active");
-      colorSwatches.appendChild(btn);
-    });
+    state.categories = expanded;
+
+    buildSidebar(opts);
+    render();
+    if (token === initToken) fetchRatings(allProducts);
   }
 
-  colorSwatches.addEventListener("click", function(e) {
-    var btn = e.target.closest(".color-swatch-btn");
-    if (!btn) return;
-    var c = btn.dataset.color;
-    if (activeColors.has(c)) { activeColors.delete(c); btn.classList.remove("active"); }
-    else { activeColors.add(c); btn.classList.add("active"); }
-    render();
+  grid.innerHTML = skeletonHTML();
+  loadProducts().then(init).catch(function (err) {
+    console.error("[Hubator] shop:", err && err.message);
+    grid.innerHTML =
+      '<div class="shp-state"><svg><use href="#shp-i-bag"/></svg>' +
+      "<h3>Couldn't load the collection</h3><p>Please check your connection and try again.</p>" +
+      '<button type="button" class="shp-loadmore" onclick="location.reload()">Retry</button></div>';
+    resultsEl.textContent = "";
   });
 
-  // ── Size chips sidebar ───────────────────────────────────────
-  function buildSizeChips(filterData) {
-    sizeChips.innerHTML = "";
-    if (!filterData || !filterData.sizes || filterData.sizes.length === 0) {
-      sizeChips.innerHTML = '<span style="font-size:.78rem;color:var(--ink-soft);">—</span>';
-      return;
-    }
-    filterData.sizes.forEach(function(size) {
-      var btn = document.createElement("button");
-      btn.className = "size-chip-btn";
-      btn.dataset.size = size;
-      btn.textContent = size;
-      if (activeSizes.has(size)) btn.classList.add("active");
-      sizeChips.appendChild(btn);
-    });
-  }
-
-  sizeChips.addEventListener("click", function(e) {
-    var btn = e.target.closest(".size-chip-btn");
-    if (!btn) return;
-    var s = btn.dataset.size;
-    if (activeSizes.has(s)) { activeSizes.delete(s); btn.classList.remove("active"); }
-    else { activeSizes.add(s); btn.classList.add("active"); }
-    render();
+  window.addEventListener("hubator:products-loaded", function () {
+    if (typeof loadProducts === "function") loadProducts().then(init).catch(function () {});
   });
-
-  // ── Price slider ─────────────────────────────────────────────
-  priceSlider.addEventListener("input", function() {
-    maxPrice = Number(priceSlider.value);
-    priceLabel.textContent = fmt(maxPrice);
-    render();
-  });
-
-  // ── Clear filters ────────────────────────────────────────────
-  clearBtn.addEventListener("click", function() {
-    activeCat = "All";
-    activeColors.clear();
-    activeSizes.clear();
-    maxPrice = globalMaxPrice;
-    priceSlider.value = globalMaxPrice;
-    priceLabel.textContent = fmt(globalMaxPrice);
-    document.querySelectorAll("#sidebar-cats button").forEach(function(b) { b.classList.toggle("active", b.dataset.cat === "All"); });
-    document.querySelectorAll(".color-swatch-btn").forEach(function(b) { b.classList.remove("active"); });
-    document.querySelectorAll(".size-chip-btn").forEach(function(b) { b.classList.remove("active"); });
-    render();
-  });
-
-  // ── URL param: ?cat= ─────────────────────────────────────────
-  var params = new URLSearchParams(location.search);
-  var requestedCat = (params.get("cat") || "").trim();
-
-  // ── Boot ─────────────────────────────────────────────────────
-  var filterData = null;
-  fetchFilterOptions().then(function(data) {
-    filterData = data;
-    if (data && data.priceMax > 0) {
-      globalMaxPrice = data.priceMax;
-      maxPrice = data.priceMax;
-      priceSlider.max = data.priceMax;
-      priceSlider.value = data.priceMax;
-      priceLabel.textContent = fmt(data.priceMax);
-    }
-    buildColorSwatches(filterData);
-    buildSizeChips(filterData);
-  }).catch(function() {});
-
-  loadProducts().then(function(products) {
-    if (requestedCat) activeCat = requestedCat;
-    buildCategories();
-    buildColorSwatches(filterData);
-    buildSizeChips(filterData);
-    render();
-  }).catch(function(err) {
-    console.error("[Hubator] shop:", err);
-    grid.innerHTML = "<p>We couldn't load the collection. Please refresh and try again.</p>";
-  });
-
-  window.addEventListener("hubator:products-loaded", function() {
-    buildCategories();
-    render();
-  });
-
-  window.addEventListener("hubator:cart-changed", function() {
+  window.addEventListener("hubator:cart-changed", function () {
     if (typeof updateCartBadge === "function") updateCartBadge();
   });
 })();
