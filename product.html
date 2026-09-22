@@ -605,7 +605,7 @@
 <script>
 /* ── Reviews JS ──────────────────────────────────────────────── */
 (function(){
-var API = (window.HUBATOR_API_BASE||'').replace(/\/$/,'');
+function apiBase(){ return (window.HUBATOR_API_BASE||'').replace(/\/$/,''); }
 var reviewSlug = '';
 var rvPage = 1;
 var rvTotal = 0;
@@ -645,7 +645,7 @@ function loadReviews(append) {
   var list = document.getElementById('rv-list');
   var empty = document.getElementById('rv-empty');
   if(!append && list) list.innerHTML = '<div style="padding:20px 0;color:var(--ink-soft);font-size:.88rem;">Loading reviews…</div>';
-  fetch(API+'/api/public/reviews?product='+encodeURIComponent(reviewSlug)+'&page='+rvPage+'&limit='+rvLimit, { signal: ctrl.signal })
+  fetch(apiBase()+'/api/public/reviews?product='+encodeURIComponent(reviewSlug)+'&page='+rvPage+'&limit='+rvLimit, { signal: ctrl.signal })
     .then(function(r){ clearTimeout(timer); return r.ok?r.json():Promise.reject(new Error('HTTP '+r.status)); })
     .then(function(data){
       if(!data) return;
@@ -787,14 +787,14 @@ window.submitReview = function(){
   if(rvPhotos.length > 0){
     var fd = new FormData();
     rvPhotos.forEach(function(f){ fd.append('photos',f); });
-    uploadPromise = fetch(API+'/api/public/reviews/upload',{ method:'POST', body:fd })
+    uploadPromise = fetch(apiBase()+'/api/public/reviews/upload',{ method:'POST', body:fd })
       .then(function(r){ return r.json(); })
       .then(function(d){ return d.urls||[]; })
       .catch(function(){ return []; });
   }
 
   uploadPromise.then(function(photoUrls){
-    return fetch(API+'/api/public/reviews',{
+    return fetch(apiBase()+'/api/public/reviews',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ productSlug:reviewSlug, rating:rvRating, reviewerName:name, reviewerEmail:email, body:body, photos:photoUrls })
