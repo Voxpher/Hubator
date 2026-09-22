@@ -191,7 +191,8 @@ async function startCheckout(form) {
     var items = lines.map(function(l) {
       return { productId: l.product.id, quantity: l.qty, variantId: l.variantId || undefined };
     });
-    var res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });
+    var discountCode = typeof getAppliedDiscountCode === "function" ? getAppliedDiscountCode() : "";
+    var res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: items, discountCode: discountCode || undefined }) });
     var text = await res.text();
     try { rzpData = JSON.parse(text); } catch(e) { rzpData = {}; }
     if (!res.ok) throw new Error(rzpData.error || ("Payment initiation failed (" + res.status + ")"));
@@ -225,6 +226,7 @@ async function startCheckout(form) {
               customer: { name: fullName, email: snap.email, phone: snap.phone },
               shippingAddress: { name: fullName, line1: snap.address, line2: snap.address2 || undefined, city: snap.city, state: snap.state || snap.city, postalCode: snap.postalCode, country: snap.country, phone: snap.phone },
               items: lines.map(function(l) { return { productId: l.product.id, quantity: l.qty, variantId: l.variantId || undefined }; }),
+              discountCode: (typeof getAppliedDiscountCode === "function" ? getAppliedDiscountCode() : "") || undefined,
               shippingMethod: "Standard",
             }),
           });
@@ -243,6 +245,7 @@ async function startCheckout(form) {
             shippingAddress: data.shippingAddress || { line1: snap.address, line2: snap.address2, city: snap.city, state: snap.state, postalCode: snap.postalCode, country: snap.country },
           }));
           try { localStorage.removeItem(CART_KEY); } catch (e) { /* Confirmation can still proceed. */ }
+          if (typeof clearAppliedDiscountCode === "function") clearAppliedDiscountCode();
           window.dispatchEvent(new CustomEvent("hubator:cart-changed"));
 
           // Do not make a successful paid order depend on account activation.
