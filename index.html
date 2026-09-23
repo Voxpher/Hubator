@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -71,19 +71,8 @@
     </div>
   </section>
 
-  <section class="section section-alt">
-    <div class="wrap">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow">Just landed</span>
-          <h2>Featured products</h2>
-          <p>A rotating edit of new arrivals and staff picks.</p>
-        </div>
-        <a href="/shop" class="btn btn-outline btn-sm">View all</a>
-      </div>
-      <div class="product-grid" id="featured-grid"></div>
-    </div>
-  </section>
+  <!-- Homepage product sections, built in Dashboard -> Homepage -->
+  <div id="home-sections"></div>
 
   <section class="section">
     <div class="wrap">
@@ -117,63 +106,7 @@
 <script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
 <script src="/js/products.js"></script>
 <script src="/js/cart.js"></script><script src="/js/auth.js"></script>
-<script>
-  const grid = document.getElementById("featured-grid");
+<script src="/js/home-sections.js"></script>
 
-  // Show skeletons immediately so grid is never blank while products load
-  grid.innerHTML = Array(4).fill('<div class="product-card skeleton"></div>').join('');
-
-  async function renderFeatured() {
-    let items;
-    try {
-      items = await loadProductsByPlacement("home-featured");
-    } catch (err) {
-      console.error("[Hubator] featured products:", err);
-      grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">We couldn’t load featured products. Please refresh and try again.</p>';
-      return;
-    }
-
-    if (!items.length) {
-      grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">There are no featured products right now.</p>';
-      return;
-    }
-
-    grid.innerHTML = "";
-    items.forEach(p => {
-      const available = productIsPurchasable(p);
-      grid.innerHTML += `
-        <div class="product-card">
-          <a href="${productUrl(p)}" class="product-media">
-            ${p.badge ? `<span class="product-badge ticket ${p.badge==='Sale'?'on-sale':''}">${escapeHtml(p.badge)}</span>` : ""}
-            <img src="${escapeHtml(safeProductImageUrl(p.img))}" alt="${escapeHtml(p.name)}">
-          </a>
-          <div class="product-body">
-            <span class="product-cat">${escapeHtml(p.category)}</span>
-            <h4><a href="${productUrl(p)}">${escapeHtml(p.name)}</a></h4>
-            <div class="product-foot">
-              <span class="ticket ${p.oldPrice ? 'on-sale' : ''}">${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ""}${fmt(p.price)}</span>
-              <button class="add-btn" data-id="${escapeHtml(p.id)}" aria-label="${available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock"}" ${available ? "" : "disabled"} onclick="addToCart(this.dataset.id)">${available ? "+" : "—"}</button>
-            </div>
-          </div>
-        </div>`;
-    });
-  }
-
-  async function showError(err) {
-    console.error("[Hubator] featured products:", err);
-    grid.innerHTML = '<p style="color:var(--ink-soft);padding:16px 0;">We couldn’t load featured products. Please refresh and try again.</p>';
-  }
-
-  document.addEventListener("DOMContentLoaded", async function() {
-    // Show skeletons immediately
-    grid.innerHTML = Array(4).fill('<div class="product-card skeleton"></div>').join('');
-    // Then load real data
-    try {
-      await renderFeatured();
-    } catch (err) {
-      showError(err);
-    }
-  });
-</script>
 </body>
 </html>
