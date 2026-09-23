@@ -1,11 +1,34 @@
-/* Hubator homepage sections.
- * Renders the product containers built in Dashboard -> Homepage.
+/* Hubator homepage blocks.
+ * Renders the content blocks built in Dashboard -> Homepage, in order.
  * Source: GET {HUBATOR_API_BASE}/api/public/home  (public, no key needed)
  * Depends on js/products.js (hubatorApiUrl, productForStorefront, productUrl,
  * productIsPurchasable, safeProductImageUrl, escapeHtml, fmt) and js/cart.js (addToCart).
  */
 (function () {
   "use strict";
+
+  /* ---------- shared ---------- */
+
+  function sectionHead(s, opts) {
+    opts = opts || {};
+    var head =
+      '<div class="section-head"><div>' +
+        (s.eyebrow ? '<span class="eyebrow">' + escapeHtml(s.eyebrow) + "</span>" : "") +
+        (s.title && !opts.hideTitle ? "<h2>" + escapeHtml(s.title) + "</h2>" : "") +
+        (s.subtitle ? "<p>" + escapeHtml(s.subtitle) + "</p>" : "") +
+      "</div>" +
+      (s.viewAllUrl && opts.viewAll !== false
+        ? '<a href="' + escapeHtml(s.viewAllUrl) + '" class="btn btn-outline btn-sm">' + escapeHtml(s.viewAllLabel || "View all") + "</a>"
+        : "") +
+      "</div>";
+    return head;
+  }
+
+  function wrapSection(s, inner, opts) {
+    return '<section class="section"><div class="wrap">' + sectionHead(s, opts) + inner + "</div></section>";
+  }
+
+  /* ---------- products block (existing) ---------- */
 
   function cardHTML(p) {
     var available = productIsPurchasable(p);
@@ -36,21 +59,7 @@
     );
   }
 
-  function sectionShell(s, inner) {
-    var head =
-      '<div class="section-head"><div>' +
-        (s.eyebrow ? '<span class="eyebrow">' + escapeHtml(s.eyebrow) + "</span>" : "") +
-        "<h2>" + escapeHtml(s.title) + "</h2>" +
-        (s.subtitle ? "<p>" + escapeHtml(s.subtitle) + "</p>" : "") +
-      "</div>" +
-      (s.viewAllUrl
-        ? '<a href="' + escapeHtml(s.viewAllUrl) + '" class="btn btn-outline btn-sm">' + escapeHtml(s.viewAllLabel || "View all") + "</a>"
-        : "") +
-      "</div>";
-    return '<section class="section"><div class="wrap">' + head + inner + "</div></section>";
-  }
-
-  function renderSection(s) {
+  function renderProducts(s) {
     var products = (s.products || [])
       .map(function (raw) {
         try {
@@ -66,7 +75,7 @@
 
     if (s.layout === "carousel") {
       var id = "hs-car-" + String(s.id).replace(/[^a-zA-Z0-9_-]/g, "");
-      return sectionShell(
+      return wrapSection(
         s,
         '<div class="hs-carousel-wrap">' +
           '<button type="button" class="hs-arrow hs-prev" data-target="' + id + '" aria-label="Scroll products left">&lsaquo;</button>' +
@@ -79,8 +88,7 @@
     if (s.layout === "marquee") {
       var autoplay = s.autoplay !== false;
       var speed = Math.max(10, Math.min(120, Number(s.speed) || 30));
-      // Two copies back-to-back so the -50% loop is seamless.
-      return sectionShell(
+      return wrapSection(
         s,
         '<div class="hs-marquee"><div class="hs-marquee-track' + (autoplay ? "" : " hs-paused") + '"' +
           (autoplay ? ' style="animation-duration:' + speed + 's;"' : "") +
@@ -89,10 +97,97 @@
     }
 
     var cols = Math.max(2, Math.min(4, Number(s.columns) || 4));
-    return sectionShell(
-      s,
-      '<div class="product-grid hs-grid-cols-' + cols + '">' + cards + "</div>"
+    return wrapSection(s, '<div class="product-grid hs-grid-cols-' + cols + '">' + cards + "</div>");
+  }
+
+  /* ---------- banner block ---------- */
+
+  function renderBanner(s) {
+    if (!s.imageUrl) return "";
+    var alignCls = s.align === "left" ? "hb-left" : "hb-center";
+    var inner =
+      '<div class="hb-banner ' + alignCls + '" style="background-image:url(\'' + escapeHtml(s.imageUrl).replace(/'/g, "%27") + '\');">' +
+        (s.overlay === false ? "" : '<div class="hb-overlay"></div>') +
+        '<div class="hb-content">' +
+          (s.eyebrow ? '<span class="eyebrow hb-eyebrow">' + escapeHtml(s.eyebrow) + "</span>" : "") +
+          (s.title ? "<h2>" + escapeHtml(s.title) + "</h2>" : "") +
+          (s.subtitle ? "<p>" + escapeHtml(s.subtitle) + "</p>" : "") +
+          (s.viewAllUrl ? '<a href="' + escapeHtml(s.viewAllUrl) + '" class="btn btn-gold">' + escapeHtml(s.viewAllLabel || "Shop now") + "</a>" : "") +
+        "</div>" +
+      "</div>";
+    return '<section class="section"><div class="wrap">' + inner + "</div></section>";
+  }
+
+  /* ---------- text block ---------- */
+
+  function renderText(s) {
+    var paras = String(s.body || "")
+      .split(/\n\s*\n/)
+      .map(function (p) { return p.trim(); })
+      .filter(Boolean)
+      .map(function (p) { return "<p>" + escapeHtml(p).replace(/\n/g, "<br>") + "</p>"; })
+      .join("");
+    if (!paras && !s.title) return "";
+    var alignCls = s.align === "left" ? "hb-left" : "hb-center";
+    return (
+      '<section class="section"><div class="wrap"><div class="hb-text ' + alignCls + '">' +
+        (s.eyebrow ? '<span class="eyebrow">' + escapeHtml(s.eyebrow) + "</span>" : "") +
+        (s.title ? "<h2>" + escapeHtml(s.title) + "</h2>" : "") +
+        paras +
+      "</div></div></section>"
     );
+  }
+
+  /* ---------- image block ---------- */
+
+  function renderImage(s) {
+    if (!s.imageUrl) return "";
+    var img = '<img src="' + escapeHtml(s.imageUrl) + '" alt="' + escapeHtml(s.imageAlt || s.title || "") + '" loading="lazy">';
+    var inner = s.viewAllUrl
+      ? '<a href="' + escapeHtml(s.viewAllUrl) + '" class="hb-image-link">' + img + "</a>"
+      : img;
+    return '<section class="section"><div class="wrap"><div class="hb-image">' + inner + "</div></section>";
+  }
+
+  /* ---------- categories block ---------- */
+
+  var CAT_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>';
+
+  function renderCategories(s) {
+    var items = s.categories || [];
+    if (!items.length) return "";
+    var cards = items
+      .map(function (c) {
+        var label = c.count === 1 ? "1 item" : c.count + " items";
+        return (
+          '<a class="cat-card" href="' + escapeHtml(c.url || ("/shop?cat=" + encodeURIComponent(c.name))) + '">' +
+            '<span class="cat-icon">' + CAT_ICON + "</span>" +
+            "<h4>" + escapeHtml(c.name) + "</h4>" +
+            "<span>" + escapeHtml(label) + "</span>" +
+          "</a>"
+        );
+      })
+      .join("");
+    return wrapSection(s, '<div class="cat-grid">' + cards + "</div>", { viewAll: false });
+  }
+
+  /* ---------- spacer block ---------- */
+
+  function renderSpacer(s) {
+    var h = Math.max(8, Math.min(240, Number(s.height) || 48));
+    return '<div class="hb-spacer" style="height:' + h + 'px;" aria-hidden="true"></div>';
+  }
+
+  /* ---------- dispatch ---------- */
+
+  function renderBlock(s) {
+    var t = s.blockType || "products";
+    if (t === "banner") return renderBanner(s);
+    if (t === "text") return renderText(s);
+    if (t === "image") return renderImage(s);
+    if (t === "categories") return renderCategories(s);
+    if (t === "spacer") return renderSpacer(s);
+    return renderProducts(s);
   }
 
   function bindArrows(root) {
@@ -129,7 +224,7 @@
       })
       .then(function (data) {
         var sections = data && Array.isArray(data.sections) ? data.sections : [];
-        mount.innerHTML = sections.map(renderSection).join("");
+        mount.innerHTML = sections.map(renderBlock).join("");
         bindArrows(mount);
       })
       .catch(function (err) {
