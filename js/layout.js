@@ -279,6 +279,7 @@
   const FOOTER_COLUMNS = [
     {
       heading: "Shop",
+      menu: "footer-shop",
       links: [
         { href: "/", label: "Home", icon: "home" },
         { href: "/shop", label: "Shop", icon: "shop" },
@@ -289,6 +290,7 @@
     },
     {
       heading: "Company",
+      menu: "footer-company",
       links: [
         { href: "/about", label: "About", icon: "info" },
         { href: "/contact", label: "Contact", icon: "mail" },
@@ -297,6 +299,7 @@
     },
     {
       heading: "Account",
+      menu: "",
       links: [
         { href: "/account", label: "My account", icon: "user" },
         { href: "/login", label: "Sign in", icon: "user" },
@@ -306,6 +309,7 @@
     },
     {
       heading: "Legal",
+      menu: "footer-legal",
       links: [
         { href: "/privacy-policy", label: "Privacy Policy", icon: "shield" },
         { href: "/terms-conditions", label: "Terms & Conditions", icon: "document" },
@@ -732,17 +736,18 @@
     );
     const grid = append(make("div", { class: "footer-grid" }), brand);
 
-    FOOTER_COLUMNS.forEach(({ heading, links }) => {
+    FOOTER_COLUMNS.forEach(({ heading, menu, links }) => {
       const list = make("ul");
 
       links.forEach(({ href, label, icon: iconName }) => {
         append(list, append(make("li"), labeledLink(href, label, iconName)));
       });
 
-      append(
-        grid,
-        append(make("div"), make("h5", { text: heading }), list)
-      );
+      const col = append(make("div"), make("h5", { text: heading }), list);
+      // Dashboard-driven columns get a hook so fetchNavMenus() can swap
+      // their links live. Columns without a menu id keep the hardcoded list.
+      if (menu) col.setAttribute("data-nav-menu", menu);
+      append(grid, col);
     });
 
     const bottom = append(
@@ -872,6 +877,27 @@
             });
           }
         }
+
+        // Footer columns follow the dashboard too: Footer — Shop, Footer —
+        // Company and Footer — Legal replace the matching footer column links
+        // live. Hardcoded lists stay as the offline fallback.
+        ["footer-shop", "footer-company", "footer-legal"].forEach(function(menuId) {
+          var footerMenu = menus.find(function(m) { return m.id === menuId; });
+          if (!footerMenu || !Array.isArray(footerMenu.links) || !footerMenu.links.length) return;
+          var colList = document.querySelector('[data-nav-menu="' + menuId + '"] ul');
+          if (!colList) return;
+          colList.innerHTML = "";
+          footerMenu.links
+            .slice()
+            .sort(function(a, b) { return (a.sortOrder || 0) - (b.sortOrder || 0); })
+            .forEach(function(l) {
+              var link = labeledLink(l.href || "/", l.label || "", l.icon || "home");
+              if (l.openInNewTab) link.setAttribute("target", "_blank");
+              var li = make("li");
+              li.appendChild(link);
+              colList.appendChild(li);
+            });
+        });
       })
       .catch(function() { /* keep hardcoded nav */ });
   }
