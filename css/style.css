@@ -836,6 +836,13 @@ section.section.hb-hero-section{padding-top:0;padding-bottom:0;}
 .sh-tag span{font-family:var(--font-mono);font-size:.7rem;font-weight:600;background:var(--gold);color:var(--ink);padding:5px 11px;border-radius:999px;letter-spacing:.04em;}
 .site-hero-wave{position:absolute;left:0;right:0;bottom:-1px;height:72px;z-index:1;pointer-events:none;}
 .site-hero-wave svg{display:block;width:100%;height:100%;}
+/* Calm the hero when it is scrolled out of view. The infinite background drift
+   and floating cards keep the GPU busy on every scroll frame even when the hero
+   is off-screen, which can make the sticky header paint stretched on the home
+   page. Killing the animations off-screen keeps scrolling smooth everywhere. */
+.site-hero.is-offscreen .site-hero-bg,
+.site-hero.is-offscreen .sh-card,
+.site-hero.is-offscreen .pulse-dot{animation:none;}
 @media(max-width:960px){
   .site-hero{min-height:0;}
   .site-hero-inner{grid-template-columns:1fr;gap:40px;padding-top:56px;padding-bottom:88px;}
