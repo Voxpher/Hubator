@@ -146,7 +146,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   width:18px;height:18px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
 }
-.nav-toggle{display:none;background:none;border:none;font-size:1.4rem;color:var(--ink);padding:4px;}
+.nav-toggle{display:none;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:rgba(22,35,31,.06);border:none;color:var(--ink);cursor:pointer;padding:0;transition:background .2s ease,transform .15s ease;}
+.nav-toggle:hover{background:rgba(22,35,31,.11);}
+.nav-toggle:active{transform:scale(.93);}
+.nav-toggle .ui-icon{width:22px;height:22px;}
 
 /* "Categories" mega-dropdown in the main nav (MAN / WOMAN / ACCESSORIES).
  * Selectors are prefixed with .main-nav on purpose: the generic
@@ -198,13 +201,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 .mobile-nav.open{display:block;}
 .mobile-nav-panel{
-  position:absolute;top:0;left:0;bottom:0;width:280px;
-  background:var(--paper);padding:24px;
-  overflow-y:auto;
+  position:absolute;top:0;left:0;bottom:0;width:min(300px,84vw);
+  background:var(--paper);padding:20px 24px 24px;
+  overflow-y:auto;border-radius:0 20px 20px 0;
+  box-shadow:0 24px 60px rgba(22,35,31,.25);
 }
 .mobile-nav-close{
-  background:none;border:none;font-size:1.5rem;float:right;margin-bottom:24px;color:var(--ink);
+  display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;
+  background:rgba(22,35,31,.06);border:none;float:right;margin-bottom:20px;color:var(--ink);cursor:pointer;
 }
+.mobile-nav-close .ui-icon{width:20px;height:20px;}
 .mobile-nav-panel ul{display:flex;flex-direction:column;gap:0;}
 .mobile-nav-panel li a{
   display:block;padding:14px 0;font-size:1.05rem;font-weight:500;
@@ -571,7 +577,7 @@ textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius
 
   .main-nav{display:none;}
   .header-actions .btn-sm{display:none;}
-  .nav-toggle{display:block;}
+  .nav-toggle{display:inline-flex;}
 
   .hero{padding:36px 0 48px;}
   .hero-stack{display:none;} /* hidden on small mobile — text-only hero */
@@ -798,7 +804,7 @@ section.section.hb-hero-section{padding-top:0;padding-bottom:0;}
    A Hero-height banner block placed FIRST in Dashboard → Homepage
    replaces it (campaign takeover). v5-hero, 2026-09-26.
    ═══════════════════════════════════════════════════════════════════ */
-.site-hero{position:relative;overflow:hidden;background:var(--ink);color:var(--paper);min-height:clamp(560px,88vh,820px);display:flex;align-items:center;}
+.site-hero{position:relative;overflow:hidden;background:var(--ink);color:var(--paper);min-height:clamp(560px,88vh,820px);min-height:clamp(560px,88svh,820px);display:flex;align-items:center;}
 .site-hero-bg{position:absolute;inset:-12%;background:radial-gradient(900px 520px at 78% 16%,rgba(201,154,46,.30),transparent 60%),radial-gradient(720px 520px at 10% 88%,rgba(124,148,115,.22),transparent 60%),linear-gradient(160deg,#1C2C26 0%,#16231F 55%,#0F1815 100%);animation:heroDrift 26s ease-in-out infinite alternate;}
 .site-hero-bg::after{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(250,247,240,.055) 1px,transparent 1.5px);background-size:22px 22px;}
 @keyframes heroDrift{from{transform:scale(1) translate(0,0);}to{transform:scale(1.12) translate(-2%,2%);}}
