@@ -276,6 +276,15 @@
       })
       .then(function (data) {
         var sections = data && Array.isArray(data.sections) ? data.sections : [];
+        // Permanent hero takeover: a Hero-height banner as the FIRST dashboard
+        // block replaces the hardcoded hero (use it for sale campaigns).
+        try {
+          var firstBlock = sections[0];
+          if (firstBlock && firstBlock.blockType === "banner" && firstBlock.bannerHeight === "hero") {
+            var heroEl = document.getElementById("site-hero");
+            if (heroEl) heroEl.remove();
+          }
+        } catch (e) {}
         mount.innerHTML = sections.map(renderBlock).join("");
         bindArrows(mount);
       })

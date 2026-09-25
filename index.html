@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hubator — Curated Apparel & Fashion</title>
 <meta name="description" content="Curated apparel and fashion — unique clothing and stylish wear from independent designers">
-<link rel="stylesheet" href="/css/style.css?v=5">
+<link rel="stylesheet" href="/css/style.css?v=6">
 
 <meta name="theme-color" content="#FAF7F0">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -21,8 +21,49 @@
 <div id="site-header"></div>
 
 <main>
-  <!-- Homepage content, built in Dashboard -> Homepage.
-       The top hero is a Banner block (height: Hero) — add/reorder it there. -->
+  <!-- == Permanent hero — hardcoded brand section, like the header & footer.
+       It always shows. To run a campaign takeover instead, add a Banner
+       block with height "Hero (full screen)" as the FIRST block in
+       Dashboard -> Homepage; it will replace this hero. == -->
+  <section class="site-hero" id="site-hero">
+    <div class="site-hero-bg" aria-hidden="true"></div>
+    <div class="wrap site-hero-inner">
+      <div class="site-hero-copy">
+        <span class="site-hero-eyebrow"><span class="pulse-dot" aria-hidden="true"></span>New drops every week</span>
+        <h1>Wear something<br>with a <em>story</em>.</h1>
+        <p class="site-hero-lede">Hubator curates apparel from independent designers &mdash; small runs, honest materials, nothing mass-produced.</p>
+        <div class="site-hero-actions">
+          <a href="/shop" class="btn btn-gold btn-lg">Shop the collection</a>
+          <a href="/about" class="btn btn-ghost-light btn-lg">Our story</a>
+        </div>
+        <ul class="site-hero-trust">
+          <li>Free shipping on eligible orders</li>
+          <li>30-day returns</li>
+          <li>Secure checkout</li>
+        </ul>
+      </div>
+      <div class="site-hero-visual" aria-hidden="true">
+        <div class="sh-card sh-card-1">
+          <img src="https://res.cloudinary.com/ew0qvpba/image/upload/v1789452854/White_swtshirt_1.jpg" alt="" loading="eager" onerror="this.closest('.sh-card').classList.add('sh-noimg');this.remove();">
+          <div class="sh-ph">H</div>
+          <div class="sh-tag"><strong>The Everyday Edit</strong><span>New</span></div>
+        </div>
+        <div class="sh-card sh-card-2">
+          <img src="https://res.cloudinary.com/ew0qvpba/image/upload/v1789452852/black_swtshirt_1.jpg" alt="" loading="lazy" onerror="this.closest('.sh-card').classList.add('sh-noimg');this.remove();">
+          <div class="sh-ph">H</div>
+          <div class="sh-tag"><strong>Bestsellers</strong><span>Hot</span></div>
+        </div>
+        <div class="sh-card sh-card-3">
+          <img src="https://res.cloudinary.com/ew0qvpba/image/upload/v1789452855/lavender_swtshirt_1.jpg" alt="" loading="lazy" onerror="this.closest('.sh-card').classList.add('sh-noimg');this.remove();">
+          <div class="sh-ph">H</div>
+          <div class="sh-tag"><strong>In Soft Hues</strong><span>New</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="site-hero-wave" aria-hidden="true"><svg viewBox="0 0 1440 70" preserveAspectRatio="none" focusable="false"><path d="M0,42 C240,74 480,8 720,32 C960,56 1200,68 1440,36 L1440,70 L0,70 Z" fill="#FAF7F0"/></svg></div>
+  </section>
+
+  <!-- Dashboard blocks (Dashboard -> Homepage) render below the hero. -->
   <div id="home-sections"></div>
 
   <section class="section">
@@ -57,7 +98,7 @@
 <script src="/js/maintenance.js"></script><script src="/js/layout.js"></script><script src="/js/config.js"></script>
 <script src="/js/products.js"></script>
 <script src="/js/cart.js"></script><script src="/js/auth.js"></script>
-<script src="/js/home-sections.js?v=4"></script>
+<script src="/js/home-sections.js?v=5"></script>
 
 </body>
 </html>
