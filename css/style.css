@@ -112,7 +112,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   position:sticky;top:0;z-index:50;
   background:var(--paper);
   border-bottom:1px solid var(--line);
-  transform:translateZ(0);
 }
 .header-bar{
   display:flex;align-items:center;justify-content:space-between;

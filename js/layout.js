@@ -280,10 +280,10 @@
     {
       heading: "Shop",
       links: [
-        { href: "/shop", label: "All products", icon: "shop" },
-        { href: "/shop?cat=Apparel", label: "Apparel", icon: "shirt" },
-        { href: "/shop?cat=Home", label: "Home", icon: "home" },
-        { href: "/shop?cat=Kitchen", label: "Kitchen", icon: "cup" },
+        { href: "/", label: "Home", icon: "home" },
+        { href: "/shop", label: "Shop", icon: "shop" },
+        { href: "/shop?cat=Man", label: "Man", icon: "shirt" },
+        { href: "/shop?cat=Woman", label: "Woman", icon: "shirt" },
         { href: "/shop?cat=Accessories", label: "Accessories", icon: "bag" },
       ],
     },
