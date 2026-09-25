@@ -724,3 +724,72 @@ textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius
   .hb-banner{min-height:260px;padding:36px 24px;}
   .hb-banner h2{font-size:1.6rem;}
 }
+
+/* ================================================================
+   Homepage v4 — new block styles + responsive overhaul
+   (appended; later rules override earlier ones)
+   ================================================================ */
+
+/* ---- Banner: background lives in its own layer so blur never
+        touches the text. Supports image or video background. ---- */
+.hb-banner{background:none;padding:clamp(28px,6vw,56px) clamp(20px,6vw,48px);}
+.hb-bg{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;}
+.hb-bg-video{width:100%;height:100%;object-fit:cover;display:block;}
+.hb-blur{filter:blur(14px);transform:scale(1.08);}
+.hb-overlay{background:#141a18;} /* strength comes from inline opacity */
+.hb-content{max-width:620px;}
+.hb-banner h2{font-size:clamp(1.6rem,4.6vw,2.3rem);}
+.hb-banner p{font-size:clamp(.95rem,2.4vw,1.05rem);}
+.hb-right .hb-content{margin:0 0 0 auto;text-align:right;}
+
+/* Banner heights */
+.hb-banner.hb-tall{min-height:560px;}
+section.section.hb-hero-section{padding-top:0;padding-bottom:0;}
+.hb-banner.hb-hero{min-height:calc(100vh - 72px);min-height:calc(100svh - 72px);border-radius:0;}
+.hb-hero .hb-content{max-width:720px;}
+.hb-hero h2{font-size:clamp(2rem,7vw,3.4rem);}
+
+/* Outline-light button (banner button style option) */
+.btn-outline-light{border:1.5px solid rgba(255,253,248,.85);color:#FFFDF8;background:transparent;}
+.btn-outline-light:hover{background:rgba(255,253,248,.14);color:#FFFDF8;}
+
+/* ---- Video block ---- */
+.hb-video{position:relative;aspect-ratio:16/9;background:#0c0e0d;border-radius:18px;overflow:hidden;}
+.hb-video video{width:100%;height:100%;object-fit:cover;display:block;}
+
+/* ---- Text block type scale ---- */
+.hb-text h2{font-size:clamp(1.5rem,4vw,1.9rem);}
+
+/* ---- "View all" buttons: proper touch targets on mobile ---- */
+@media(max-width:640px){
+  .section-head{gap:12px;}
+  .section-head .hb-viewall{
+    flex:1 1 100%;
+    min-height:46px;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:.9rem;
+    padding:12px 20px;
+  }
+}
+
+/* ---- Product cards: comfortable on small phones ---- */
+@media(max-width:1024px){
+  .hs-grid-cols-4{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:700px){
+  /* arrows off on touch — swipe with scroll-snap instead */
+  .hs-arrow{display:none;}
+  .hs-carousel{scroll-padding:0 16px;}
+  .hs-grid-cols-4,.hs-grid-cols-3{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:480px){
+  .add-btn{width:40px;height:40px;}
+  .product-grid{gap:12px;}
+}
+
+/* ---- Banner content stacks cleanly on phones ---- */
+@media(max-width:560px){
+  .hb-banner.hb-tall{min-height:420px;}
+  .hb-banner .hb-content .btn{width:100%;}
+  .hb-right .hb-content{text-align:left;margin:0;}
+}

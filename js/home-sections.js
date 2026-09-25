@@ -18,7 +18,7 @@
         (s.subtitle ? "<p>" + escapeHtml(s.subtitle) + "</p>" : "") +
       "</div>" +
       (s.viewAllUrl && opts.viewAll !== false
-        ? '<a href="' + escapeHtml(s.viewAllUrl) + '" class="btn btn-outline btn-sm">' + escapeHtml(s.viewAllLabel || "View all") + "</a>"
+        ? '<a href="' + escapeHtml(s.viewAllUrl) + '" class="btn btn-outline btn-sm hb-viewall">' + escapeHtml(s.viewAllLabel || "View all") + "</a>"
         : "") +
       "</div>";
     return head;
@@ -28,7 +28,7 @@
     return '<section class="section"><div class="wrap">' + sectionHead(s, opts) + inner + "</div></section>";
   }
 
-  /* ---------- products block (existing) ---------- */
+  /* ---------- products block ---------- */
 
   function cardHTML(p) {
     var available = productIsPurchasable(p);
@@ -100,21 +100,57 @@
     return wrapSection(s, '<div class="product-grid hs-grid-cols-' + cols + '">' + cards + "</div>");
   }
 
-  /* ---------- banner block ---------- */
+  /* ---------- banner block ----------
+   * Background: video (mp4) when videoUrl is set, else image.
+   * bannerHeight: standard | tall | hero (hero = full-screen, full-bleed). */
 
   function renderBanner(s) {
-    if (!s.imageUrl) return "";
-    var alignCls = s.align === "left" ? "hb-left" : "hb-center";
+    var hasVideo = Boolean(s.videoUrl);
+    var hasImage = Boolean(s.imageUrl);
+    if (!hasVideo && !hasImage) return "";
+
+    var alignCls = s.align === "left" ? "hb-left" : s.align === "right" ? "hb-right" : "hb-center";
+    var heightCls = s.bannerHeight === "hero" ? " hb-hero" : s.bannerHeight === "tall" ? " hb-tall" : "";
+    var blurCls = s.blurBackground ? " hb-blur" : "";
+
+    var bgHtml;
+    if (hasVideo) {
+      bgHtml =
+        '<div class="hb-bg' + blurCls + '">' +
+          '<video class="hb-bg-video" src="' + escapeHtml(s.videoUrl) + '"' +
+            (hasImage ? ' poster="' + escapeHtml(s.imageUrl) + '"' : "") +
+            ' autoplay muted loop playsinline aria-hidden="true" tabindex="-1"></video>' +
+        "</div>";
+    } else {
+      bgHtml =
+        '<div class="hb-bg' + blurCls + '" style="background-image:url(\'' +
+          escapeHtml(s.imageUrl).replace(/'/g, "%27") + '\');"></div>';
+    }
+
+    var overlayHtml = "";
+    if (s.overlay !== false) {
+      var op = Math.max(0, Math.min(90, Number(s.overlayOpacity != null ? s.overlayOpacity : 45))) / 100;
+      overlayHtml = '<div class="hb-overlay" style="opacity:' + op + ';"></div>';
+    }
+
+    var btnCls = s.buttonStyle === "outline" ? "btn btn-outline-light" : "btn btn-gold";
+
     var inner =
-      '<div class="hb-banner ' + alignCls + '" style="background-image:url(\'' + escapeHtml(s.imageUrl).replace(/'/g, "%27") + '\');">' +
-        (s.overlay === false ? "" : '<div class="hb-overlay"></div>') +
+      '<div class="hb-banner ' + alignCls + heightCls + '">' +
+        bgHtml +
+        overlayHtml +
         '<div class="hb-content">' +
           (s.eyebrow ? '<span class="eyebrow hb-eyebrow">' + escapeHtml(s.eyebrow) + "</span>" : "") +
           (s.title ? "<h2>" + escapeHtml(s.title) + "</h2>" : "") +
           (s.subtitle ? "<p>" + escapeHtml(s.subtitle) + "</p>" : "") +
-          (s.viewAllUrl ? '<a href="' + escapeHtml(s.viewAllUrl) + '" class="btn btn-gold">' + escapeHtml(s.viewAllLabel || "Shop now") + "</a>" : "") +
+          (s.viewAllUrl ? '<a href="' + escapeHtml(s.viewAllUrl) + '" class="' + btnCls + '">' + escapeHtml(s.viewAllLabel || "Shop now") + "</a>" : "") +
         "</div>" +
       "</div>";
+
+    // Hero banners are full-bleed (edge to edge); others sit in the page wrap as cards.
+    if (s.bannerHeight === "hero") {
+      return '<section class="section hb-hero-section">' + inner + "</section>";
+    }
     return '<section class="section"><div class="wrap">' + inner + "</div></section>";
   }
 
@@ -128,7 +164,7 @@
       .map(function (p) { return "<p>" + escapeHtml(p).replace(/\n/g, "<br>") + "</p>"; })
       .join("");
     if (!paras && !s.title) return "";
-    var alignCls = s.align === "left" ? "hb-left" : "hb-center";
+    var alignCls = s.align === "left" ? "hb-left" : s.align === "right" ? "hb-right" : "hb-center";
     return (
       '<section class="section"><div class="wrap"><div class="hb-text ' + alignCls + '">' +
         (s.eyebrow ? '<span class="eyebrow">' + escapeHtml(s.eyebrow) + "</span>" : "") +
@@ -147,6 +183,21 @@
       ? '<a href="' + escapeHtml(s.viewAllUrl) + '" class="hb-image-link">' + img + "</a>"
       : img;
     return '<section class="section"><div class="wrap"><div class="hb-image">' + inner + "</div></section>";
+  }
+
+  /* ---------- video block ---------- */
+
+  function renderVideo(s) {
+    if (!s.videoUrl) return "";
+    var attrs = 'src="' + escapeHtml(s.videoUrl) + '"';
+    if (s.imageUrl) attrs += ' poster="' + escapeHtml(s.imageUrl) + '"';
+    if (s.videoAutoplay !== false) attrs += " autoplay";
+    if (s.videoMuted !== false) attrs += " muted";
+    if (s.videoLoop !== false) attrs += " loop";
+    if (s.videoControls) attrs += " controls";
+    attrs += ' playsinline preload="metadata"';
+    var inner = '<div class="hb-video"><video ' + attrs + "></video></div>";
+    return wrapSection(s, inner, { viewAll: false });
   }
 
   /* ---------- categories block ---------- */
@@ -185,6 +236,7 @@
     if (t === "banner") return renderBanner(s);
     if (t === "text") return renderText(s);
     if (t === "image") return renderImage(s);
+    if (t === "video") return renderVideo(s);
     if (t === "categories") return renderCategories(s);
     if (t === "spacer") return renderSpacer(s);
     return renderProducts(s);
