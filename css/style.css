@@ -112,6 +112,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   position:sticky;top:0;z-index:50;
   background:var(--paper);
   border-bottom:1px solid var(--line);
+  /* FIX (header stretch on scroll, home page): the hero's infinite GPU
+     animations below force the sticky header to repaint on every scroll
+     frame, which Chrome smears as a vertical "stretch". Pinning the header
+     to its own compositor layer isolates its paint so it stays pixel-stable.
+     Safe: the mobile drawer is fixed to <body>, not inside the header. */
+  transform:translateZ(0);
 }
 .header-bar{
   display:flex;align-items:center;justify-content:space-between;
@@ -690,23 +696,32 @@ textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius
 .variant-unavailable{font-size:.85rem;color:#B4232A;margin:8px 0 0;}
 .line-variant{display:block;font-size:.78rem;color:var(--ink-soft);margin-top:2px;}
 
-/* ── Homepage product sections (Dashboard -> Homepage) ─────────── */
-.hs-grid-cols-2{grid-template-columns:repeat(2,1fr);}
-.hs-grid-cols-3{grid-template-columns:repeat(3,1fr);}
-.hs-grid-cols-4{grid-template-columns:repeat(4,1fr);}
-.hs-carousel-wrap{position:relative;}
-.hs-carousel{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 4px 14px;scrollbar-width:thin;}
-.hs-carousel .product-card{flex:0 0 270px;scroll-snap-align:start;}
-.hs-arrow{position:absolute;top:36%;z-index:2;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--white);color:var(--ink);font-size:1.4rem;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.12);display:grid;place-items:center;}
-.hs-arrow:hover{background:var(--ink);color:var(--white);border-color:var(--ink);}
-.hs-prev{left:-14px;}
-.hs-next{right:-14px;}
-.hs-marquee{overflow:hidden;padding:4px 0 10px;}
-.hs-marquee-track{display:flex;gap:22px;width:max-content;animation:hs-scroll linear infinite;}
-.hs-marquee-track.hs-paused{animation:none;overflow-x:auto;width:auto;}
-.hs-marquee-track .product-card{flex:0 0 270px;}
-.hs-marquee:hover .hs-marquee-track{animation-play-state:paused;}
-@keyframes hs-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+/* ── Homepage product sections (hardcoded — edit HOME_SECTIONS in js/home-products.js) ── */
+.hp-section{padding:56px 0 8px;}
+.hp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;}
+.hp-head h2{font-family:var(--font-display);font-size:1.9rem;margin:0;}
+.hp-sub{color:var(--ink-soft);margin:6px 0 0;}
+.hp-viewall{font-weight:600;color:var(--gold-deep);white-space:nowrap;}
+.hp-grid{display:grid;gap:22px;}
+.hp-cols-2{grid-template-columns:repeat(2,1fr);}
+.hp-cols-3{grid-template-columns:repeat(3,1fr);}
+.hp-cols-4{grid-template-columns:repeat(4,1fr);}
+.hp-carousel-wrap{position:relative;}
+.hp-carousel{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 4px 14px;scrollbar-width:thin;}
+.hp-carousel .product-card{flex:0 0 270px;scroll-snap-align:start;}
+.hp-arrow{position:absolute;top:36%;z-index:2;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--white);color:var(--ink);font-size:1.4rem;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.12);display:grid;place-items:center;}
+.hp-arrow:hover{background:var(--ink);color:var(--white);border-color:var(--ink);}
+.hp-prev{left:-14px;}
+.hp-next{right:-14px;}
+.hp-marquee{overflow:hidden;padding:4px 0 10px;}
+.hp-marquee-track{display:flex;gap:22px;width:max-content;animation:hp-scroll 30s linear infinite;}
+.hp-marquee-track .product-card{flex:0 0 270px;}
+.hp-marquee:hover .hp-marquee-track{animation-play-state:paused;}
+@keyframes hp-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@media(max-width:960px){
+  .hp-cols-3,.hp-cols-4{grid-template-columns:repeat(2,1fr);}
+  .hp-section{padding:40px 0 4px;}
+}
 
 /* ── Homepage content blocks (banner / text / image) ───────────── */
 .hb-banner{position:relative;min-height:340px;border-radius:18px;overflow:hidden;background-size:cover;background-position:center;display:flex;align-items:center;padding:56px 48px;}
