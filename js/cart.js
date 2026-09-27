@@ -81,7 +81,11 @@ function variantOfProduct(product, variantId) {
 }
 
 function variantPriceOf(product, variant) {
-  return variant && variant.priceOverride != null ? Number(variant.priceOverride) : product.price;
+  if (variant && variant.priceOverride != null) {
+    var n = Number(variant.priceOverride);
+    if (isFinite(n)) return n;
+  }
+  return product.price;
 }
 
 function addToCart(id, qty, variantId) {
@@ -89,13 +93,21 @@ function addToCart(id, qty, variantId) {
   variantId = variantId ? String(variantId) : "";
   var productId = String(id);
   var live = typeof getProductById === "function" ? getProductById(productId) : null;
-  if (live && typeof productIsPurchasable === "function" && !productIsPurchasable(live)) {
+  if (!live) {
+    showToast("Products are still loading. Please try again.");
+    return false;
+  }
+  if (typeof productIsPurchasable === "function" && !productIsPurchasable(live)) {
     showToast("This product is currently out of stock.");
     return false;
   }
   var variant = variantOfProduct(live, variantId);
   if (variantId && !variant) {
     showToast("Please choose an available option first.");
+    return false;
+  }
+  if (variant && variant.enabled === false) {
+    showToast("This option is no longer available.");
     return false;
   }
 
@@ -133,9 +145,12 @@ function addToCart(id, qty, variantId) {
     }
     if (snapshot) item.snapshot = snapshot;
   } else {
-    if (variant && variant.stock != null && variant.stock < 1) {
-      showToast("Sorry, this option is out of stock.");
-      return false;
+    if (variant && variant.stock != null) {
+      if (variant.stock < 1) {
+        showToast("Sorry, this option is out of stock.");
+        return false;
+      }
+      amount = Math.min(amount, variant.stock);
     }
     cart.push({ id: productId, qty: amount, snapshot: snapshot });
   }
@@ -177,7 +192,7 @@ function setQty(id, qty, variantId) {
 // ── Read helpers ──────────────────────────────────────────────────────────────
 
 function cartCount() {
-  return getCart().reduce(function(total, line) { return total + line.qty; }, 0);
+  return cartLines().reduce(function(total, line) { return total + line.qty; }, 0);
 }
 
 function cartLines() {
@@ -216,7 +231,7 @@ function cartLines() {
 
 function cartHasUnavailableItems() {
   return cartLines().some(function(line) {
-    if (line.variantKey && line.variant && line.variant.stock != null) {
+    if (line.variantId && line.variant && line.variant.stock != null) {
       return line.variant.stock < line.qty;
     }
     return line.product.stock != null && line.product.stock < line.qty;
@@ -253,6 +268,15 @@ window.addEventListener("hubator:products-loaded", function() {
       updated = true;
     }
   });
+  // Drop lines for products that no longer exist — but ONLY when the catalog
+  // loaded OK. Never prune on a failed/empty fetch, or a network blip would
+  // empty the cart.
+  if (window.PRODUCTS && window.PRODUCTS.length) {
+    var kept = cart.filter(function(line) {
+      return typeof getProductById === "function" && getProductById(line.id);
+    });
+    if (kept.length !== cart.length) { cart = kept; updated = true; }
+  }
   if (updated) saveCart(cart);
 });
 

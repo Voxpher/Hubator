@@ -81,12 +81,8 @@ textarea:focus-visible {
 }
 
 /* Header */
-
-.site-header .header-bar {
-  min-height: 76px;
-  padding: 12px var(--wrap-h);
-  gap: 20px;
-}
+/* Header-bar dimensions now live in css/style.css so first paint is already
+   final (no height jump when this file finishes loading). */
 
 .main-nav {
   min-width: 0;
@@ -175,20 +171,11 @@ textarea:focus-visible {
   border-radius: 10px;
 }
 
-.nav-toggle {
-  align-items: center;
-  justify-content: center;
-  width: var(--touch-target);
-  height: var(--touch-target);
-  padding: 8px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-}
-
+/* The circular v9 menu button is defined in css/style.css — no override here. */
 .nav-toggle .ui-icon,
 .mobile-nav-close .ui-icon {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 /* Mobile navigation */
@@ -602,9 +589,6 @@ body.nav-drawer-open {
 /* Tablet landscape */
 
 @media (max-width: 1100px) {
-  .site-header .header-bar {
-    gap: 16px;
-  }
 
   .main-nav ul {
     gap: 12px;
@@ -732,12 +716,6 @@ body.nav-drawer-open {
 @media (max-width: 680px) {
   :root {
     --wrap-h: 16px;
-  }
-
-  .site-header .header-bar {
-    min-height: 68px;
-    gap: 12px;
-    padding-block: 10px;
   }
 
   .header-actions {

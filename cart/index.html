@@ -28,6 +28,7 @@
 <script src="/js/config.js"></script>
 <script src="/js/products.js"></script>
 <script src="/js/cart.js"></script>
+<script src="/js/discount.js"></script>
 <script src="/js/auth.js"></script>
 <script>
   function renderCart() {
@@ -36,7 +37,7 @@
     root.innerHTML = "";
 
     if (!lines.length) {
-      root.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="es-icon" style="color:var(--ink-soft)"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div><h2>Your cart is empty</h2><p>Nothing here yet \u2014 go find something worth keeping.</p><a href="/shop" class="btn btn-primary">Browse the shop</a></div>';
+      root.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="es-icon" style="color:var(--ink-soft)"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div><h2>Your cart is empty</h2><p>Nothing here yet — go find something worth keeping.</p><a href="/shop" class="btn btn-primary">Browse the shop</a></div>';
       return;
     }
 
@@ -136,22 +137,29 @@
     const sh = document.createElement("h3"); sh.textContent = "Order summary"; sh.style.marginBottom = "18px";
     summary.appendChild(sh);
 
-    [["Subtotal", fmt(subtotal)], ["Shipping", "Calculated at checkout"]].forEach(function(pair) {
-      const r = document.createElement("div"); r.className = "summary-row";
-      const l = document.createElement("span"); l.textContent = pair[0];
-      const v = document.createElement("span"); v.textContent = pair[1];
-      r.appendChild(l); r.appendChild(v); summary.appendChild(r);
-    });
+    const subRow = document.createElement("div"); subRow.className = "summary-row";
+    const subL = document.createElement("span"); subL.textContent = "Subtotal";
+    const subV = document.createElement("span"); subV.textContent = fmt(subtotal);
+    subRow.appendChild(subL); subRow.appendChild(subV); summary.appendChild(subRow);
 
-    const promoRow = document.createElement("div"); promoRow.className = "promo-row";
-    const promoInput = document.createElement("input"); promoInput.type = "text"; promoInput.placeholder = "Promo code"; promoInput.setAttribute("aria-label", "Promo code");
-    const promoBtn = document.createElement("button"); promoBtn.className = "btn btn-outline btn-sm"; promoBtn.textContent = "Apply"; promoBtn.type = "button";
-    promoBtn.onclick = function() { showToast("Promo codes are not available for this order."); };
-    promoRow.appendChild(promoInput); promoRow.appendChild(promoBtn); summary.appendChild(promoRow);
+    // Discount row (filled by renderDiscountState)
+    const discRow = document.createElement("div"); discRow.className = "summary-row"; discRow.id = "discount-row"; discRow.style.display = "none";
+    const discL = document.createElement("span"); discL.id = "discount-label"; discL.textContent = "Discount";
+    const discV = document.createElement("span"); discV.id = "discount-value"; discV.style.color = "#166534"; discV.style.fontWeight = "700";
+    discRow.appendChild(discL); discRow.appendChild(discV); summary.appendChild(discRow);
+
+    const shipRow = document.createElement("div"); shipRow.className = "summary-row";
+    const shipL = document.createElement("span"); shipL.textContent = "Shipping";
+    const shipV = document.createElement("span"); shipV.id = "shipping-value"; shipV.textContent = "Calculated at checkout";
+    shipRow.appendChild(shipL); shipRow.appendChild(shipV); summary.appendChild(shipRow);
+
+    // Promo zone (input or applied-code chip — rendered by renderDiscountState)
+    const promoZone = document.createElement("div"); promoZone.id = "promo-zone"; promoZone.style.margin = "14px 0 4px";
+    summary.appendChild(promoZone);
 
     const totalRow = document.createElement("div"); totalRow.className = "summary-row total";
     const tl = document.createElement("span"); tl.textContent = "Total";
-    const tv = document.createElement("span"); tv.textContent = fmt(subtotal);
+    const tv = document.createElement("span"); tv.id = "total-value"; tv.textContent = fmt(subtotal);
     totalRow.appendChild(tl); totalRow.appendChild(tv); summary.appendChild(totalRow);
 
     const checkoutLink = document.createElement("a"); checkoutLink.href = "/checkout"; checkoutLink.className = "btn btn-primary btn-block"; checkoutLink.textContent = "Checkout"; checkoutLink.style.marginTop = "16px";
@@ -173,6 +181,123 @@ if (typeof isSignedIn === "function" && !isSignedIn()) {
 summary.appendChild(checkoutLink); summary.appendChild(continueLink);
 
     root.appendChild(linesCol); root.appendChild(summary);
+    renderDiscountState();
+  }
+
+  // ── Discount code UI ──────────────────────────────────────────────
+  // Re-validates the applied code against the live cart and updates the
+  // promo zone, discount row, shipping hint and total.
+  function renderDiscountState() {
+    var promoZone = document.getElementById("promo-zone");
+    var discRow = document.getElementById("discount-row");
+    var discLabel = document.getElementById("discount-label");
+    var discValue = document.getElementById("discount-value");
+    var totalValue = document.getElementById("total-value");
+    var shipValue = document.getElementById("shipping-value");
+    if (!promoZone) return;
+    var subtotal = cartSubtotal();
+    var code = typeof getAppliedDiscountCode === "function" ? getAppliedDiscountCode() : "";
+
+    function paintPlain() {
+      if (discRow) discRow.style.display = "none";
+      if (totalValue) totalValue.textContent = fmt(subtotal);
+      if (shipValue) shipValue.textContent = "Calculated at checkout";
+    }
+
+    function paintInput() {
+      paintPlain();
+      promoZone.innerHTML = "";
+      var row = document.createElement("div"); row.className = "promo-row";
+      var input = document.createElement("input");
+      input.type = "text"; input.placeholder = "Promo code";
+      input.setAttribute("aria-label", "Promo code");
+      input.autocapitalize = "characters"; input.autocomplete = "off"; input.spellcheck = false;
+      var btn = document.createElement("button");
+      btn.className = "btn btn-outline btn-sm"; btn.textContent = "Apply"; btn.type = "button";
+      function apply() {
+        var c = input.value.trim();
+        if (!c) { showToast("Enter a promo code first."); return; }
+        btn.disabled = true; btn.textContent = "Checking…";
+        if (typeof setAppliedDiscountCode === "function") setAppliedDiscountCode(c);
+        validateAppliedDiscount().then(function(r) {
+          if (r.valid) {
+            showToast("Code applied: " + r.summary);
+          } else {
+            if (typeof clearAppliedDiscountCode === "function") clearAppliedDiscountCode();
+            showToast(r.reason || "This code is not valid.");
+          }
+          renderDiscountState();
+        });
+      }
+      btn.onclick = apply;
+      input.addEventListener("keydown", function(e) { if (e.key === "Enter") { e.preventDefault(); apply(); } });
+      row.appendChild(input); row.appendChild(btn);
+      promoZone.appendChild(row);
+    }
+
+    if (!code) { paintInput(); return; }
+
+    // Code stored — show it while validating
+    promoZone.innerHTML = "";
+    var chip = document.createElement("div");
+    chip.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;background:#f4f1e8;border:1px dashed #c9bfa8;border-radius:8px;padding:9px 12px;";
+    var chipLabel = document.createElement("span");
+    chipLabel.style.cssText = "font-family:var(--font-mono);font-weight:700;letter-spacing:0.06em;font-size:0.85rem;";
+    chipLabel.textContent = code;
+    var checking = document.createElement("span");
+    checking.style.cssText = "font-size:0.8rem;color:var(--ink-soft);";
+    checking.textContent = "Checking…";
+    var removeBtn = document.createElement("button");
+    removeBtn.type = "button"; removeBtn.textContent = "Remove";
+    removeBtn.setAttribute("aria-label", "Remove promo code " + code);
+    removeBtn.style.cssText = "background:none;border:none;color:#b91c1c;font-size:0.82rem;font-weight:600;cursor:pointer;padding:4px;";
+    removeBtn.onclick = function() {
+      if (typeof clearAppliedDiscountCode === "function") clearAppliedDiscountCode();
+      renderDiscountState();
+    };
+    var right = document.createElement("span");
+    right.style.cssText = "display:flex;align-items:center;gap:8px;";
+    right.appendChild(checking); right.appendChild(removeBtn);
+    chip.appendChild(chipLabel); chip.appendChild(right);
+    promoZone.appendChild(chip);
+
+    validateAppliedDiscount().then(function(r) {
+      // Cart or code may have changed while we were validating
+      if (typeof getAppliedDiscountCode === "function" && getAppliedDiscountCode() !== code) return;
+      if (!document.getElementById("promo-zone")) return;
+      if (!r.valid) {
+        if (typeof clearAppliedDiscountCode === "function") clearAppliedDiscountCode();
+        if (r.reason) showToast(r.reason);
+        renderDiscountState();
+        return;
+      }
+      // Valid — paint the discount
+      promoZone.innerHTML = "";
+      var okChip = document.createElement("div");
+      okChip.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:9px 12px;";
+      var okLabel = document.createElement("span");
+      okLabel.style.cssText = "font-family:var(--font-mono);font-weight:700;letter-spacing:0.06em;font-size:0.85rem;color:#065f46;";
+      okLabel.textContent = r.code + " — " + r.summary;
+      var okRemove = document.createElement("button");
+      okRemove.type = "button"; okRemove.textContent = "Remove";
+      okRemove.setAttribute("aria-label", "Remove promo code " + r.code);
+      okRemove.style.cssText = "background:none;border:none;color:#b91c1c;font-size:0.82rem;font-weight:600;cursor:pointer;padding:4px;";
+      okRemove.onclick = function() {
+        if (typeof clearAppliedDiscountCode === "function") clearAppliedDiscountCode();
+        showToast("Promo code removed.");
+        renderDiscountState();
+      };
+      okChip.appendChild(okLabel); okChip.appendChild(okRemove);
+      promoZone.appendChild(okChip);
+
+      if (discRow && discLabel && discValue) {
+        discRow.style.display = "";
+        discLabel.textContent = "Discount (" + r.code + ")";
+        discValue.textContent = r.discountAmount > 0 ? "−" + fmt(r.discountAmount) : "Applied";
+      }
+      if (shipValue) shipValue.textContent = r.freeShipping ? "FREE" : "Calculated at checkout";
+      if (totalValue) totalValue.textContent = fmt(Math.max(0, subtotal - r.discountAmount));
+    });
   }
 
   loadProducts().then(renderCart).catch(function(err) {
@@ -180,7 +305,8 @@ summary.appendChild(checkoutLink); summary.appendChild(continueLink);
     document.getElementById("cart-root").textContent = "We couldn't load your cart. Please refresh and try again.";
   });
   window.addEventListener("hubator:products-loaded", renderCart);
-  window.addEventListener("hubator:cart-changed", renderCart);
+  window.addEventListener("hubator:cart-changed", function() { renderCart(); });
+  window.addEventListener("hubator:discount-changed", function() { renderDiscountState(); });
 </script>
 </body>
 </html>

@@ -209,7 +209,7 @@
     if (!items.length) return "";
     var cards = items
       .map(function (c) {
-        var label = c.count === 1 ? "1 item" : c.count + " items";
+        var n = Number(c.count) || 0; var label = n === 1 ? "1 item" : n + " items";
         return (
           '<a class="cat-card" href="' + escapeHtml(c.url || ("/shop?cat=" + encodeURIComponent(c.name))) + '">' +
             '<span class="cat-icon">' + CAT_ICON + "</span>" +

@@ -961,6 +961,25 @@
     }
   });
 
+  /* Dashboard default sort (Dashboard -> Homepage -> Shop page defaults).
+     A ?sort= URL parameter always wins; otherwise the dashboard setting applies. */
+  function applyDefaultSort() {
+    try {
+      var q0 = new URLSearchParams(location.search);
+      if (q0.get("sort")) return Promise.resolve();
+    } catch (e) { /* ignore */ }
+    var url = (typeof hubatorApiUrl === "function") ? hubatorApiUrl("/api/public/settings") : null;
+    if (!url) return Promise.resolve();
+    return fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var sort = data && data.shopDefaultSort;
+        var valid = ["newest", "price-asc", "price-desc", "rating-desc", "name-asc"];
+        if (valid.indexOf(sort) !== -1) state.sort = sort;
+      })
+      .catch(function () { /* keep "featured" fallback */ });
+  }
+
   /* ============ Boot ============ */
   function init(products) {
     var token = ++initToken;
@@ -984,13 +1003,15 @@
   }
 
   grid.innerHTML = skeletonHTML();
-  loadProducts().then(init).catch(function (err) {
-    console.error("[Hubator] shop:", err && err.message);
-    grid.innerHTML =
-      '<div class="shp-state"><svg><use href="#shp-i-bag"/></svg>' +
-      "<h3>Couldn't load the collection</h3><p>Please check your connection and try again.</p>" +
-      '<button type="button" class="shp-loadmore" onclick="location.reload()">Retry</button></div>';
-    resultsEl.textContent = "";
+  applyDefaultSort().then(function () {
+    loadProducts().then(init).catch(function (err) {
+      console.error("[Hubator] shop:", err && err.message);
+      grid.innerHTML =
+        '<div class="shp-state"><svg><use href="#shp-i-bag"/></svg>' +
+        "<h3>Couldn't load the collection</h3><p>Please check your connection and try again.</p>" +
+        '<button type="button" class="shp-loadmore" onclick="location.reload()">Retry</button></div>';
+      resultsEl.textContent = "";
+    });
   });
 
   window.addEventListener("hubator:products-loaded", function () {

@@ -1006,7 +1006,7 @@ function buildPage(p) {
   /* --- Parse variants --- */
   var variants = [];
   if(p.variants && typeof p.variants.forEach === 'function'){
-    p.variants.forEach(function(v){ if(v) variants.push(v); });
+    p.variants.forEach(function(v){ if(v && v.enabled !== false) variants.push(v); });
   }
   var colors = [];
   variants.forEach(function(v){

@@ -56,6 +56,7 @@ function productForStorefront(product) {
     key = key.replace(/^-|-$/g, "") || "base";
     variantMap.set(key, {
       _id: String(v._id != null ? v._id : (v.id != null ? v.id : "")),
+      enabled: v.enabled !== false,
       color: v.color,
       colorHex: v.colorHex,
       size: v.size,
@@ -70,10 +71,12 @@ function productForStorefront(product) {
 
   var lowestVariantStock = null;
   if (variants.length > 0) {
-    var stocks = variants.map(function(v) {
-      return v.stock != null ? Number(v.stock) : (product.stock || 0);
-    });
-    lowestVariantStock = Math.min.apply(null, stocks);
+    var stocks = variants
+      .filter(function(v) { return v.enabled !== false; })
+      .map(function(v) {
+        return v.stock != null ? Number(v.stock) : (product.stock || 0);
+      });
+    if (stocks.length) lowestVariantStock = Math.min.apply(null, stocks);
   }
 
   var primaryUrl = primaryImage && typeof primaryImage.url === "string" ? primaryImage.url : "";
@@ -217,7 +220,7 @@ function getProductBySlug(slug) {
   var matches = window.PRODUCTS.filter(function(p) {
     return p.slug && p.slug.toLowerCase() === value;
   });
-  return matches.length === 1 ? matches[0] : null;
+  return matches.length ? matches[0] : null;
 }
 
 function productUrl(product) {
@@ -244,7 +247,21 @@ function getProductFromReference(reference) {
 }
 
 function productIsPurchasable(product) {
-  return Boolean(product) && (product.stock == null || product.stock > 0);
+  if (!product) return false;
+  if (product.stock != null) return product.stock > 0;
+  if (product.hasVariants) {
+    if (product.lowestVariantStock != null) return product.lowestVariantStock > 0;
+    var variants = product.variants;
+    if (variants && typeof variants.forEach === "function") {
+      var anyInStock = false;
+      variants.forEach(function (v) {
+        if (v && v.enabled !== false && (v.stock == null || v.stock > 0 || v.backorderAllowed)) anyInStock = true;
+      });
+      return anyInStock;
+    }
+    return false;
+  }
+  return true;
 }
 
 function safeProductImageUrl(url) {

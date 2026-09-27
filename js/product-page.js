@@ -17,12 +17,16 @@
 
   function render(product) {
     var available = productIsPurchasable(product);
+    // FIX: options must carry the variant's real _id (cart.js looks variants up
+    // by _id), not the color-size Map key. Disabled variants are not offered.
     var variants = product.variants && typeof product.variants.forEach === "function"
-      ? Array.from(product.variants.entries()).filter(function (entry) { return entry[0] !== "base"; })
+      ? Array.from(product.variants.values()).filter(function (v) {
+          return v && v._id && v.enabled !== false;
+        })
       : [];
     var gallery = (product.gallery || []).map(safeProductImageUrl).filter(Boolean);
     if (!gallery.length && product.img) gallery.push(safeProductImageUrl(product.img));
-    var selectedVariant = variants.length ? variants[0][0] : null;
+    var selectedVariant = variants.length ? String(variants[0]._id) : null;
 
     document.title = product.name + " — Hubator";
     if (crumb) crumb.textContent = product.name;
@@ -42,8 +46,8 @@
         '<p class="pd-desc">' + escapeHtml(product.desc || "No description is available for this product.") + "</p>" +
         (!available ? '<p class="product-stock-status" role="status">Out of stock</p>' : "") +
         (variants.length ? '<label class="pd-variant-label" for="pd-variant">Variant</label><select id="pd-variant" class="pd-variant-select">' +
-          variants.map(function (entry) {
-            return '<option value="' + escapeHtml(entry[0]) + '">' + escapeHtml(variantLabel(entry[1])) + "</option>";
+          variants.map(function (v) {
+            return '<option value="' + escapeHtml(String(v._id)) + '">' + escapeHtml(variantLabel(v)) + "</option>";
           }).join("") + "</select>" : "") +
         '<div class="pd-actions">' +
           '<button id="pd-add" class="btn btn-primary" ' + (!available ? "disabled" : "") + ">Add to cart</button>" +

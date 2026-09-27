@@ -161,6 +161,10 @@
 .pdp-divider {
   border: none; border-top: 1px solid var(--line); margin: 20px 0;
 }
+/* Short description — shown above fold near price */
+.pdp-short-desc {
+  font-size: .96rem; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.6;
+}
 
 /* ── Variant sections ────────────────────────────── */
 .pdp-variant-section { margin-bottom: 20px; }
@@ -463,7 +467,389 @@
   <span>✓</span><span id="toast-msg">Added to cart</span>
 </div>
 
+<!-- ── Full Description Section (rendered if product has fullDescription) ── -->
+<section id="full-desc-section" style="max-width:1280px;margin:0 auto;padding:0 24px 0;display:none;">
+  <style>
+  .full-desc-wrap { border:1px solid var(--line); border-radius:10px; background:var(--white); padding:28px 32px; margin-bottom:0; }
+  .full-desc-wrap h2 { font-family:var(--font-display); font-size:1.3rem; margin:0 0 18px; }
+  .full-desc-body { font-size:.95rem; line-height:1.75; color:var(--ink-soft); }
+  .full-desc-body p { margin:0 0 1em; }
+  .full-desc-body ul, .full-desc-body ol { margin:0 0 1em; padding-left:1.5em; }
+  .full-desc-body strong { color:var(--ink); }
+  </style>
+  <div class="full-desc-wrap">
+    <h2>Product Details</h2>
+    <div class="full-desc-body" id="full-desc-body"></div>
+  </div>
+</section>
+
+<!-- ── Reviews Section ───────────────────────────────────────────── -->
+<section id="reviews-section" style="max-width:1280px;margin:48px auto 0;padding:0 24px 72px;">
+  <style>
+  /* ── Reviews ──────────────────────────────────── */
+  .rv-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:28px; }
+  .rv-header h2 { font-family:var(--font-display); font-size:clamp(1.3rem,2.5vw,1.8rem); margin:0; }
+  .rv-summary { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .rv-avg { font-family:var(--font-mono); font-size:2rem; font-weight:700; color:var(--ink); line-height:1; }
+  .rv-stars-row { display:flex; gap:3px; }
+  .rv-star { width:18px; height:18px; fill:var(--gold); }
+  .rv-star.empty { fill:none; stroke:var(--line); stroke-width:1.5; }
+  .rv-count { font-family:var(--font-mono); font-size:.8rem; color:var(--ink-soft); }
+  .rv-bars { display:flex; flex-direction:column; gap:4px; }
+  .rv-bar-row { display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:.72rem; color:var(--ink-soft); }
+  .rv-bar-track { flex:1; height:6px; background:var(--line); border-radius:3px; min-width:80px; }
+  .rv-bar-fill { height:6px; background:var(--gold); border-radius:3px; transition:width .4s; }
+  .rv-write-btn { padding:10px 20px; background:var(--ink); color:var(--paper); border:none; border-radius:6px; font-weight:600; font-family:var(--font-body); font-size:.9rem; cursor:pointer; transition:background .2s; }
+  .rv-write-btn:hover { background:var(--gold-deep); }
+  /* Form */
+  .rv-form-wrap { border:1px solid var(--line); border-radius:10px; background:var(--white); padding:24px; margin-bottom:32px; display:none; }
+  .rv-form-wrap.open { display:block; }
+  .rv-form-wrap h3 { font-size:1rem; margin:0 0 18px; }
+  .rv-star-picker { display:flex; gap:6px; margin-bottom:16px; }
+  .rv-star-pick { width:32px; height:32px; cursor:pointer; fill:var(--line); transition:fill .15s; }
+  .rv-star-pick.lit { fill:var(--gold); }
+  .rv-field { margin-bottom:14px; }
+  .rv-field label { display:block; font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); margin-bottom:5px; }
+  .rv-field input, .rv-field textarea { width:100%; padding:9px 12px; border:1px solid var(--line); border-radius:6px; font-family:var(--font-body); font-size:.9rem; background:var(--paper); resize:vertical; }
+  .rv-field input:focus, .rv-field textarea:focus { border-color:var(--sage); outline:none; }
+  .rv-photo-upload { border:2px dashed var(--line); border-radius:6px; padding:16px; text-align:center; cursor:pointer; font-size:.84rem; color:var(--ink-soft); transition:border-color .15s; }
+  .rv-photo-upload:hover { border-color:var(--ink); }
+  .rv-photo-thumbs { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .rv-photo-thumb { width:64px; height:64px; object-fit:cover; border-radius:6px; border:1px solid var(--line); }
+  .rv-submit-btn { padding:11px 28px; background:var(--ink); color:var(--paper); border:none; border-radius:6px; font-weight:700; font-family:var(--font-body); font-size:.9rem; cursor:pointer; margin-top:8px; }
+  .rv-submit-btn:disabled { opacity:.5; cursor:not-allowed; }
+  .rv-form-msg { font-size:.84rem; margin-top:10px; color:var(--sage); }
+  .rv-form-err { color:var(--rust); }
+  /* Review cards */
+  .rv-list { display:flex; flex-direction:column; gap:20px; }
+  .rv-card { border:1px solid var(--line); border-radius:10px; background:var(--white); padding:20px 22px; }
+  .rv-card-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  .rv-card-name { font-weight:700; font-size:.92rem; }
+  .rv-card-date { font-family:var(--font-mono); font-size:.72rem; color:var(--ink-soft); margin-left:auto; }
+  .rv-verified { font-family:var(--font-mono); font-size:.68rem; color:var(--sage); background:#EFF8F0; padding:2px 7px; border-radius:999px; }
+  .rv-card-body { font-size:.9rem; color:var(--ink-soft); line-height:1.65; white-space:pre-wrap; word-break:break-word; }
+  .rv-card-photos { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .rv-card-photo { width:72px; height:72px; object-fit:cover; border-radius:6px; border:1px solid var(--line); cursor:pointer; transition:opacity .15s; }
+  .rv-card-photo:hover { opacity:.85; }
+  .rv-admin-reply { margin-top:14px; padding:12px 14px; background:var(--paper-dim); border-left:3px solid var(--gold); border-radius:0 6px 6px 0; font-size:.86rem; }
+  .rv-admin-reply strong { font-family:var(--font-mono); font-size:.7rem; text-transform:uppercase; color:var(--gold-deep); display:block; margin-bottom:4px; }
+  /* Load more */
+  .rv-load-more { display:block; margin:24px auto 0; padding:10px 28px; border:1.5px solid var(--line); border-radius:6px; background:none; font-family:var(--font-mono); font-size:.82rem; cursor:pointer; color:var(--ink-soft); transition:border-color .15s, color .15s; }
+  .rv-load-more:hover { border-color:var(--ink); color:var(--ink); }
+  /* Photo lightbox */
+  .rv-lightbox { display:none; position:fixed; inset:0; z-index:600; background:rgba(22,35,31,.85); align-items:center; justify-content:center; }
+  .rv-lightbox.open { display:flex; }
+  .rv-lightbox img { max-width:90vw; max-height:90vh; border-radius:8px; object-fit:contain; }
+  .rv-lightbox-close { position:absolute; top:16px; right:20px; background:none; border:none; color:#fff; font-size:1.8rem; cursor:pointer; }
+  .rv-empty { text-align:center; padding:40px 20px; color:var(--ink-soft); font-size:.92rem; }
+  </style>
+
+  <div class="rv-header">
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+      <h2>Reviews</h2>
+      <div class="rv-summary" id="rv-summary" style="display:none;">
+        <span class="rv-avg" id="rv-avg">0.0</span>
+        <div>
+          <div class="rv-stars-row" id="rv-avg-stars"></div>
+          <div class="rv-count" id="rv-count">0 reviews</div>
+        </div>
+        <div class="rv-bars" id="rv-bars"></div>
+      </div>
+    </div>
+    <button class="rv-write-btn" id="rv-write-btn" onclick="toggleReviewForm()">Write a review</button>
+  </div>
+
+  <!-- Write-a-review form -->
+  <div class="rv-form-wrap" id="rv-form-wrap">
+    <h3>Share your experience</h3>
+    <div style="margin-bottom:14px;">
+      <div style="font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:8px;">Your rating *</div>
+      <div class="rv-star-picker" id="rv-star-picker" role="radiogroup" aria-label="Rating">
+        <svg class="rv-star-pick" data-val="1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        <svg class="rv-star-pick" data-val="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        <svg class="rv-star-pick" data-val="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        <svg class="rv-star-pick" data-val="4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        <svg class="rv-star-pick" data-val="5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+      </div>
+    </div>
+    <div class="rv-field"><label>Your name *</label><input type="text" id="rv-name" placeholder="e.g. Priya S." maxlength="120"></div>
+    <div class="rv-field"><label>Email (optional, not shown publicly)</label><input type="email" id="rv-email" placeholder="you@example.com" maxlength="200"></div>
+    <div class="rv-field"><label>Review *</label><textarea id="rv-body" rows="4" placeholder="Tell others about your experience..." maxlength="3000"></textarea></div>
+    <div class="rv-field">
+      <label>Photos (optional, max 5)</label>
+      <div class="rv-photo-upload" id="rv-photo-drop" onclick="document.getElementById('rv-photo-input').click()">
+        <input type="file" id="rv-photo-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple style="display:none" onchange="handlePhotoSelect(this)">
+        📷 Click to add photos (JPG, PNG, WEBP — max 5 MB each)
+      </div>
+      <div class="rv-photo-thumbs" id="rv-photo-thumbs"></div>
+    </div>
+    <button class="rv-submit-btn" id="rv-submit-btn" onclick="submitReview()">Submit review</button>
+    <div id="rv-form-msg" class="rv-form-msg" style="display:none;"></div>
+  </div>
+
+  <!-- Reviews list -->
+  <div class="rv-list" id="rv-list"></div>
+  <button class="rv-load-more" id="rv-load-more" style="display:none;" onclick="loadMoreReviews()">Load more reviews</button>
+  <div class="rv-empty" id="rv-empty" style="display:none;">No reviews yet — be the first to share your experience!</div>
+
+</section>
+
+<!-- Photo lightbox -->
+<div class="rv-lightbox" id="rv-lightbox" onclick="closeLightbox()">
+  <button class="rv-lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="rv-lightbox-img" src="" alt="Review photo">
+</div>
+
 <div id="site-footer"></div>
+
+<script>
+/* ── Reviews JS ──────────────────────────────────────────────── */
+(function(){
+function apiBase(){ return (window.HUBATOR_API_BASE||'').replace(/\/$/,''); }
+var reviewSlug = '';
+var rvPage = 1;
+var rvTotal = 0;
+var rvLimit = 6;
+var rvRating = 0;
+var rvPhotos = []; // local File objects
+var rvPhotoUrls = []; // uploaded Cloudinary URLs
+
+function starSVG(filled) {
+  var s = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('viewBox','0 0 24 24'); s.setAttribute('width','18'); s.setAttribute('height','18');
+  s.setAttribute('class','rv-star'+(filled?'':' empty'));
+  var p = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+  p.setAttribute('points','12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26');
+  if(!filled){ s.setAttribute('fill','none'); s.setAttribute('stroke','#D8D2C4'); s.setAttribute('stroke-width','1.5'); }
+  else { s.setAttribute('fill','#C99A2E'); }
+  s.appendChild(p); return s;
+}
+
+function starsHTML(rating) {
+  var wrap = document.createElement('div'); wrap.className='rv-stars-row';
+  for(var i=1;i<=5;i++) wrap.appendChild(starSVG(i<=Math.round(rating)));
+  return wrap;
+}
+
+function escText(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function fmtDate(iso) {
+  var d=new Date(iso);
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function loadReviews(append) {
+  if(!reviewSlug) return;
+  var ctrl = new AbortController();
+  var timer = setTimeout(function(){ ctrl.abort(); }, 10000); // 10s timeout
+  var list = document.getElementById('rv-list');
+  var empty = document.getElementById('rv-empty');
+  if(!append && list) list.innerHTML = '<div style="padding:20px 0;color:var(--ink-soft);font-size:.88rem;">Loading reviews…</div>';
+  fetch(apiBase()+'/api/public/reviews?product='+encodeURIComponent(reviewSlug)+'&page='+rvPage+'&limit='+rvLimit, { signal: ctrl.signal })
+    .then(function(r){ clearTimeout(timer); return r.ok?r.json():Promise.reject(new Error('HTTP '+r.status)); })
+    .then(function(data){
+      if(!data) return;
+      rvTotal = data.total || 0;
+
+      // Summary
+      if(data.avgRating && rvTotal > 0){
+        var sumEl = document.getElementById('rv-summary');
+        sumEl.style.display='flex';
+        document.getElementById('rv-avg').textContent = data.avgRating.toFixed(1);
+        var avgStars = document.getElementById('rv-avg-stars');
+        avgStars.innerHTML=''; avgStars.appendChild(starsHTML(data.avgRating));
+        document.getElementById('rv-count').textContent = rvTotal+' review'+(rvTotal===1?'':'s');
+        // Rating bars
+        var bars = document.getElementById('rv-bars');
+        bars.innerHTML='';
+        [5,4,3,2,1].forEach(function(n){
+          var cnt = (data.ratingDistribution||{})[n]||0;
+          var pct = rvTotal>0 ? Math.round(cnt/rvTotal*100) : 0;
+          var row = document.createElement('div'); row.className='rv-bar-row';
+          row.innerHTML='<span>'+n+'★</span><div class="rv-bar-track"><div class="rv-bar-fill" style="width:'+pct+'%"></div></div><span>'+cnt+'</span>';
+          bars.appendChild(row);
+        });
+      }
+
+      var list = document.getElementById('rv-list');
+      var empty = document.getElementById('rv-empty');
+      var reviews = data.reviews||[];
+
+      if(!append) list.innerHTML='';
+      if(reviews.length===0 && !append){ empty.style.display='block'; }
+      else { empty.style.display='none'; }
+
+      reviews.forEach(function(rv){
+        var card = document.createElement('div'); card.className='rv-card';
+        var photosHTML='';
+        if(Array.isArray(rv.photos)&&rv.photos.length){
+          photosHTML='<div class="rv-card-photos">'+rv.photos.map(function(u){
+            return '<img class="rv-card-photo" src="'+escText(u)+'" alt="Review photo" loading="lazy" onclick="openLightbox(\''+escText(u)+'\')"/>';
+          }).join('')+'</div>';
+        }
+        var adminReplyHTML='';
+        if(rv.adminReply){
+          adminReplyHTML='<div class="rv-admin-reply"><strong>Store response</strong>'+escText(rv.adminReply)+'</div>';
+        }
+        var starsEl=document.createElement('div'); starsEl.appendChild(starsHTML(rv.rating));
+        card.innerHTML=
+          '<div class="rv-card-top">'+starsEl.innerHTML+
+            '<span class="rv-card-name">'+escText(rv.reviewerName)+'</span>'+
+            (rv.verifiedPurchase?'<span class="rv-verified">✓ Verified purchase</span>':'')+
+            '<span class="rv-card-date">'+fmtDate(rv.createdAt)+'</span>'+
+          '</div>'+
+          (rv.title?'<div style="font-weight:700;font-size:.88rem;margin-bottom:6px;">'+escText(rv.title)+'</div>':'')+
+          '<div class="rv-card-body">'+escText(rv.body)+'</div>'+
+          photosHTML+adminReplyHTML;
+        list.appendChild(card);
+      });
+
+      var loadMore = document.getElementById('rv-load-more');
+      var loaded = (rvPage-1)*rvLimit+reviews.length;
+      loadMore.style.display = loaded < rvTotal ? 'block' : 'none';
+    }).catch(function(err){
+      clearTimeout(timer);
+      var list = document.getElementById('rv-list');
+      var isAbort = err && err.name === 'AbortError';
+      if(list && !append) {
+        list.innerHTML = '<div style="padding:20px 0;color:var(--ink-soft);font-size:.88rem;">' +
+          (isAbort ? 'Reviews are taking longer than usual.' : 'Couldn\'t load reviews right now.') +
+          ' <button onclick="retryReviews();" style="background:none;border:none;color:var(--gold-deep);cursor:pointer;font-size:.88rem;text-decoration:underline;padding:0;">Try again</button>' +
+          '</div>';
+      }
+    });
+}
+
+window.loadMoreReviews = function(){
+  rvPage++;
+  loadReviews(true);
+};
+window.retryReviews = function(){ rvPage=1; loadReviews(false); };
+
+window.toggleReviewForm = function(){
+  var f=document.getElementById('rv-form-wrap');
+  f.classList.toggle('open');
+  if(f.classList.contains('open')) document.getElementById('rv-name').focus();
+};
+
+// Star picker
+(function(){
+  var stars = document.querySelectorAll('.rv-star-pick');
+  stars.forEach(function(s){
+    s.addEventListener('click',function(){
+      rvRating=parseInt(s.getAttribute('data-val'));
+      stars.forEach(function(x){ x.classList.toggle('lit',parseInt(x.getAttribute('data-val'))<=rvRating); });
+    });
+    s.addEventListener('mouseover',function(){
+      var v=parseInt(s.getAttribute('data-val'));
+      stars.forEach(function(x){ x.style.fill=parseInt(x.getAttribute('data-val'))<=v?'#C99A2E':'#D8D2C4'; });
+    });
+    s.addEventListener('mouseout',function(){
+      stars.forEach(function(x){ x.style.fill=parseInt(x.getAttribute('data-val'))<=rvRating?'#C99A2E':'#D8D2C4'; });
+    });
+  });
+})();
+
+// Photo select
+window.handlePhotoSelect = function(input){
+  var files = Array.from(input.files||[]).slice(0,5);
+  rvPhotos = files;
+  var thumbs = document.getElementById('rv-photo-thumbs');
+  thumbs.innerHTML='';
+  files.forEach(function(f){
+    var url=URL.createObjectURL(f);
+    var img=document.createElement('img'); img.className='rv-photo-thumb'; img.src=url;
+    thumbs.appendChild(img);
+  });
+};
+
+// Submit review
+window.submitReview = function(){
+  var name = (document.getElementById('rv-name').value||'').trim();
+  var email = (document.getElementById('rv-email').value||'').trim();
+  var body = (document.getElementById('rv-body').value||'').trim();
+  var msgEl = document.getElementById('rv-form-msg');
+  var btn = document.getElementById('rv-submit-btn');
+
+  function showMsg(msg,isErr){
+    msgEl.textContent=msg; msgEl.style.display='block';
+    msgEl.className='rv-form-msg'+(isErr?' rv-form-err':'');
+  }
+
+  if(!rvRating){ showMsg('Please select a rating.',true); return; }
+  if(!name){ showMsg('Please enter your name.',true); return; }
+  if(!body){ showMsg('Please write your review.',true); return; }
+
+  btn.disabled=true; btn.textContent='Submitting…';
+
+  // Upload photos first if any
+  var uploadPromise = Promise.resolve([]);
+  if(rvPhotos.length > 0){
+    var fd = new FormData();
+    rvPhotos.forEach(function(f){ fd.append('photos',f); });
+    uploadPromise = fetch(apiBase()+'/api/public/reviews/upload',{ method:'POST', body:fd })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ return d.urls||[]; })
+      .catch(function(){ return []; });
+  }
+
+  uploadPromise.then(function(photoUrls){
+    return fetch(apiBase()+'/api/public/reviews',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ productSlug:reviewSlug, rating:rvRating, reviewerName:name, reviewerEmail:email, body:body, photos:photoUrls })
+    }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); });
+  }).then(function(res){
+    btn.disabled=false; btn.textContent='Submit review';
+    if(!res.ok){ showMsg(res.data.error||'Could not submit review.',true); return; }
+    showMsg('Thank you! Your review has been submitted and is pending approval.', false);
+    document.getElementById('rv-name').value='';
+    document.getElementById('rv-email').value='';
+    document.getElementById('rv-body').value='';
+    document.getElementById('rv-photo-thumbs').innerHTML='';
+    document.getElementById('rv-photo-input').value='';
+    rvRating=0; rvPhotos=[]; rvPhotoUrls=[];
+    document.querySelectorAll('.rv-star-pick').forEach(function(s){ s.classList.remove('lit'); s.style.fill='#D8D2C4'; });
+    setTimeout(function(){ document.getElementById('rv-form-wrap').classList.remove('open'); msgEl.style.display='none'; },3000);
+  }).catch(function(){
+    btn.disabled=false; btn.textContent='Submit review';
+    showMsg('Something went wrong. Please try again.',true);
+  });
+};
+
+// Lightbox
+window.openLightbox = function(url){
+  var lb=document.getElementById('rv-lightbox');
+  document.getElementById('rv-lightbox-img').src=url;
+  lb.classList.add('open');
+};
+window.closeLightbox = function(){
+  document.getElementById('rv-lightbox').classList.remove('open');
+};
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeLightbox(); });
+
+// Boot — wait for product slug to be set
+function initReviews(){
+  var sp = new URLSearchParams(location.search);
+  reviewSlug = sp.get('slug') || '';
+  if(!reviewSlug){
+    // Try path-based slug
+    var m = location.pathname.match(/\/product\/([^/]+)/);
+    if(m) reviewSlug = decodeURIComponent(m[1]);
+  }
+  if(reviewSlug) loadReviews(false);
+}
+
+// Wait for config.js to set HUBATOR_API_BASE — poll up to 3s then init
+(function waitForApi(){
+  if(window.HUBATOR_API_BASE) { initReviews(); return; }
+  var attempts = 0;
+  var t = setInterval(function(){
+    if(window.HUBATOR_API_BASE || ++attempts > 30){ clearInterval(t); initReviews(); }
+  }, 100);
+})();
+})();
+</script>
 
 <script src="/js/maintenance.js"></script>
 <script src="/js/layout.js"></script>
@@ -512,6 +898,28 @@ var stickyBar = document.getElementById('pdp-sticky-bar');
 var stickyTitle = document.getElementById('sticky-title');
 var stickyPrice = document.getElementById('sticky-price');
 var stickyAdd   = document.getElementById('sticky-add');
+
+/* ── Fetch trust badge texts from dashboard settings ── */
+(function(){
+  var apiBase = (window.HUBATOR_API_BASE||'').replace(/\/$/,'');
+  if(!apiBase) return;
+  fetch(apiBase+'/api/public/settings')
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(d){
+      if(!d||!d.trustBadges) return;
+      var tb = d.trustBadges;
+      var els = {
+        'trust-secure': tb.secureCheckout,
+        'trust-shipping': tb.shipping,
+        'trust-returns': tb.returns,
+        'trust-currency': tb.currency
+      };
+      Object.keys(els).forEach(function(id){
+        var el = document.getElementById(id);
+        if(el && els[id]) el.textContent = els[id];
+      });
+    }).catch(function(){});
+})();
 
 /* ── Main render ────────────────────────────────── */
 loadProducts().then(function(){
@@ -570,6 +978,20 @@ loadProducts().then(function(){
 
   buildPage(p);
 
+  // Show Product Details section — uses fullDescription if set, falls back to description
+  var fullDescText = p.fullDescription || p.description || '';
+  if(fullDescText && fullDescText.trim()) {
+    var fdSection = document.getElementById('full-desc-section');
+    var fdBody = document.getElementById('full-desc-body');
+    if(fdSection && fdBody) {
+      // Content comes from the admin dashboard (trusted source) — safe to render as HTML
+      fdBody.innerHTML = fullDescText;
+      fdSection.style.display = 'block';
+      fdSection.style.marginTop = '32px';
+      fdSection.style.marginBottom = '48px';
+    }
+  }
+
 }).catch(function(err){
   console.error('[Hubator] pdp:', err);
   skeleton.style.display = 'none';
@@ -584,7 +1006,7 @@ function buildPage(p) {
   /* --- Parse variants --- */
   var variants = [];
   if(p.variants && typeof p.variants.forEach === 'function'){
-    p.variants.forEach(function(v){ if(v) variants.push(v); });
+    p.variants.forEach(function(v){ if(v && v.enabled !== false) variants.push(v); });
   }
   var colors = [];
   variants.forEach(function(v){
@@ -647,12 +1069,22 @@ function buildPage(p) {
   }
 
   /* --- Description/accordion --- */
-  var desc = p.desc || '';
-  var accordionItems = [
-    { title: 'Product Description', body: desc || 'No description available.' },
-    { title: 'Shipping & Returns', body: 'Free shipping on orders above ₹999. Easy 7-day returns on all products.' },
-    { title: 'Care Instructions', body: 'Machine wash cold. Do not bleach. Tumble dry low. Iron on low heat.' }
-  ];
+  // fullDescription is the field the dashboard writes; legacy `description`
+  // is only a fallback for products saved before the split.
+  var desc = p.fullDescription || p.desc || '';
+  var accordionItems = [];
+  // Only add sections if their show toggle is true (default true for existing products)
+  if(p.showDescription !== false) {
+    accordionItems.push({ title: 'Product Description', body: desc || 'No description available.' });
+  }
+  if(p.showShippingReturns !== false) {
+    var shippingBody = p.shippingReturns || 'Free shipping on orders above \u20b9999. Easy 7-day returns on all products.';
+    accordionItems.push({ title: 'Shipping & Returns', body: shippingBody });
+  }
+  if(p.showCareInstructions !== false) {
+    var careBody = p.careInstructions || 'Machine wash cold. Do not bleach. Tumble dry low. Iron on low heat.';
+    accordionItems.push({ title: 'Care Instructions', body: careBody });
+  }
 
   /* --- Render full page --- */
   pdpRoot.innerHTML =
@@ -661,6 +1093,7 @@ function buildPage(p) {
     '<div class="pdp-info">' +
       '<span class="pdp-cat">'+escapeHtml(p.category)+'</span>' +
       '<h1 class="pdp-title">'+escapeHtml(p.name)+'</h1>' +
+      (p.shortDescription ? '<p class="pdp-short-desc">'+escapeHtml(p.shortDescription)+'</p>' : '') +
       priceBlockHTML(p.price, p.oldPrice) +
       '<hr class="pdp-divider">' +
       '<div id="pdp-variants"></div>' +
@@ -677,16 +1110,11 @@ function buildPage(p) {
         '<button class="pdp-add-btn" id="pdp-add" disabled>Add to cart</button>' +
         '<a href="#" class="pdp-buy-btn disabled" id="pdp-buy">Buy now</a>' +
       '</div>' +
-      '<div class="pdp-trust">' +
-        '<div class="pdp-trust-item"><span class="pdp-trust-icon">🔒</span><span>Secure checkout — Razorpay encrypted</span></div>' +
-        '<div class="pdp-trust-item"><span class="pdp-trust-icon">📦</span><span>Shipping calculated at checkout</span></div>' +
-        '<div class="pdp-trust-item"><span class="pdp-trust-icon">🔄</span><span>Easy 7-day returns</span></div>' +
-        '<div class="pdp-trust-item"><span class="pdp-trust-icon">₹</span><span>Prices shown in Indian Rupees</span></div>' +
-      '</div>' +
-      '<div class="pdp-accordion">' +
-        accordionItems.map(function(item){
-          return '<div class="pdp-accordion-item"><button class="pdp-accordion-head" aria-expanded="false">'+escapeHtml(item.title)+'<span class="pdp-accordion-icon" aria-hidden="true">+</span></button><div class="pdp-accordion-body">'+escapeHtml(item.body)+'</div></div>';
-        }).join('') +
+      '<div class="pdp-trust" id="pdp-trust">' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg></span><span id="trust-secure">Secure checkout — Razorpay encrypted</span></div>' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4h13v13H1Z"/><path d="M14 9h4l4 4v4h-8"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span><span id="trust-shipping">Shipping calculated at checkout</span></div>' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 4-6 6 6 6"/><path d="M3 10h11a6 6 0 0 1 0 12h-3"/></svg></span><span id="trust-returns">Easy 7-day returns</span></div>' +
+        '<div class="pdp-trust-item"><span class="pdp-trust-icon" style="font-family:var(--font-mono);font-size:.8rem;font-weight:700;">₹</span><span id="trust-currency">Prices shown in Indian Rupees</span></div>' +
       '</div>' +
     '</div>' +
     '</div>';
