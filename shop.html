@@ -963,21 +963,18 @@
 
   /* Dashboard default sort (Dashboard -> Homepage -> Shop page defaults).
      A ?sort= URL parameter always wins; otherwise the dashboard setting applies. */
+  /* Default sort for the shop page. Change this one word to change it:
+     "newest" | "price-asc" | "price-desc" | "rating-desc" | "name-asc".
+     A ?sort= URL parameter always wins over this. */
+  var SHOP_DEFAULT_SORT = "newest";
   function applyDefaultSort() {
     try {
       var q0 = new URLSearchParams(location.search);
       if (q0.get("sort")) return Promise.resolve();
+      var valid = ["newest", "price-asc", "price-desc", "rating-desc", "name-asc"];
+      if (valid.indexOf(SHOP_DEFAULT_SORT) !== -1) state.sort = SHOP_DEFAULT_SORT;
     } catch (e) { /* ignore */ }
-    var url = (typeof hubatorApiUrl === "function") ? hubatorApiUrl("/api/public/settings") : null;
-    if (!url) return Promise.resolve();
-    return fetch(url)
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        var sort = data && data.shopDefaultSort;
-        var valid = ["newest", "price-asc", "price-desc", "rating-desc", "name-asc"];
-        if (valid.indexOf(sort) !== -1) state.sort = sort;
-      })
-      .catch(function () { /* keep "featured" fallback */ });
+    return Promise.resolve();
   }
 
   /* ============ Boot ============ */

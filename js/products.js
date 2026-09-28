@@ -103,6 +103,7 @@ function productForStorefront(product) {
     vendor: String(product.vendor || ""),
     productType: String(product.productType || ""),
     categories: Array.isArray(product.categories) ? product.categories : [],
+    collections: Array.isArray(product.collections) ? product.collections : [],
     isFeatured: !!product.isFeatured,
     showInShop: product.showInShop !== false,
     enableReviews: product.enableReviews !== false,

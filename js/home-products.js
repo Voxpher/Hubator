@@ -1,35 +1,70 @@
 /* ═══════════════════════════════════════════════════════════════════
-   HUBATOR HOMEPAGE — product sections.
+   HUBATOR HOMEPAGE — everything on your home page, controlled from here.
    ───────────────────────────────────────────────────────────────────
-   HOW TO EDIT (all in VS Code, no dashboard needed):
+   WHAT EACH PART DOES:
 
-   1. TO ADD A NEW PRODUCT CONTAINER:
-      Copy one of the { ... } blocks in HOME_SECTIONS below, paste it
-      after the last one (don't forget the comma), and change the values.
+   • HOME_BANNERS ...... image banners (sale announcements, lookbooks).
+                         Copy a block, change image/text/button.
+   • HOME_SECTIONS ..... product containers (the shop rows).
+                         Copy a block, pick layout + which products.
+   • pickProducts() .... decides WHICH products go in a container.
+   • cardHTML() ........ how ONE product card looks (shared site-wide).
+   • sectionHTML() ..... builds the container (grid / carousel / marquee).
+   • mount() ........... puts everything on the page + wires the arrows.
 
-   2. LAYOUTS (pick one per section):
-      "grid"     → rows of products, side by side (set columns: 2, 3 or 4)
-      "carousel" → one row with < > arrows to slide
-      "marquee"  → auto-scrolling row, loops forever
+   ── PRODUCT CONTAINERS: YOUR OPTIONS ──
 
-   3. SOURCES (where the products come from):
-      "latest"            → newest products first
-      "category:Apparel"  → products in that category (change the name)
-      "on_sale"           → products with a sale price
-      "manual"            → you pick: put product ids in manualIds: [...]
+   layout:  "grid"     → products in rows. Set columns: 2, 3 or 4.
+            "carousel" → one sideways row with < > arrows.
+            "marquee"  → auto-scrolling row that loops forever.
 
-   4. OTHER KNOBS:
-      limit: how many products to show. title / subtitle: the headings.
-      link / linkText: the "View all →" button ("" hides it).
+   source:  "latest"             → newest products first.
+            "category:Apparel"   → everything in that category
+                                   (use your exact category name).
+            "collection:summer"  → everything in that dashboard
+                                   collection (use the collection slug).
+            "on_sale"            → products with a sale price.
+            "manual"             → hand-picked. Put product ids in
+                                   manualIds: ["id1", "id2"].
+                                   (Find an id: open the product in your
+                                   dashboard, copy it from the URL.)
+
+   limit:   how many products to show (e.g. 8).
+
+   title / subtitle: the heading above the container.
+   link / linkText:  the "View all →" button. Use "" to hide it.
+
+   ── BANNERS: YOUR OPTIONS ──
+   image:    full image URL (upload it in Dashboard → Media, copy the URL).
+   eyebrow:  small text above the heading ("" hides it).
+   heading / text: the big message.
+   buttonText / buttonLink: the button ("" hides it).
+   align:    "left" or "center".
    ═══════════════════════════════════════════════════════════════════ */
 
+/* ── 1. BANNERS: copy a block to add another banner ─────────────── */
+var HOME_BANNERS = [
+  /*
+  {
+    image: "https://res.cloudinary.com/YOUR/image/upload/...jpg",
+    eyebrow: "Limited time",
+    heading: "Monsoon Sale — up to 40% off",
+    text: "Last pieces from independent designers. When they're gone, they're gone.",
+    buttonText: "Shop the sale",
+    buttonLink: "/shop",
+    align: "left"
+  },
+  */
+];
+
+/* ── 2. PRODUCT CONTAINERS: copy a block to add another row ─────── */
 var HOME_SECTIONS = [
   {
     title: "New Arrivals",
     subtitle: "Fresh drops, small runs.",
-    layout: "grid",
-    columns: 4,
-    source: "latest",
+    layout: "grid",          // "grid" | "carousel" | "marquee"
+    columns: 4,              // grid columns on desktop (2, 3 or 4)
+    source: "latest",        // "latest" | "category:X" | "collection:slug" | "on_sale" | "manual"
     manualIds: [],
     limit: 8,
     link: "/shop",
@@ -54,15 +89,42 @@ var HOME_SECTIONS = [
     source: "on_sale",
     manualIds: [],
     limit: 10,
-    link: "/shop?sort=price-asc",
+    link: "/shop",
     linkText: "All deals"
   }
+  /* ── EXAMPLE: hand-picked collection ──
+  ,
+  {
+    title: "Festive Edit",
+    subtitle: "Hand-picked for the season.",
+    layout: "grid",
+    columns: 4,
+    source: "collection:festive-edit",
+    manualIds: [],
+    limit: 8,
+    link: "/shop",
+    linkText: "View all"
+  }
+  ── EXAMPLE: hand-picked products ──
+  ,
+  {
+    title: "Staff Picks",
+    subtitle: "Our personal favourites.",
+    layout: "carousel",
+    columns: 4,
+    source: "manual",
+    manualIds: ["PASTE-ID-1", "PASTE-ID-2", "PASTE-ID-3"],
+    limit: 8,
+    link: "",
+    linkText: ""
+  }
+  */
 ];
 
 (function () {
   "use strict";
 
-  /* Pick products for a section from the already-loaded catalog. */
+  /* ── 3. WHICH PRODUCTS go in a container ──────────────────────── */
   function pickProducts(cfg) {
     var all = (window.PRODUCTS || []).slice();
     if (cfg.source === "manual") {
@@ -72,6 +134,12 @@ var HOME_SECTIONS = [
     }
     if (cfg.source === "on_sale") {
       return all.filter(function (p) { return p.oldPrice && p.oldPrice > p.price; }).slice(0, cfg.limit);
+    }
+    if (cfg.source && cfg.source.indexOf("collection:") === 0) {
+      var slug = cfg.source.slice(11).toLowerCase();
+      return all.filter(function (p) {
+        return (p.collections || []).some(function (c) { return String(c).toLowerCase() === slug; });
+      }).slice(0, cfg.limit);
     }
     if (cfg.source && cfg.source.indexOf("category:") === 0) {
       var cat = cfg.source.slice(9).toLowerCase();
@@ -86,7 +154,7 @@ var HOME_SECTIONS = [
     return all.slice(0, cfg.limit);
   }
 
-  /* Same card markup as the shop page. */
+  /* ── 4. HOW ONE product card looks ────────────────────────────── */
   function cardHTML(p) {
     var available = typeof productIsPurchasable === "function" ? productIsPurchasable(p) : true;
     var url = typeof productUrl === "function" ? productUrl(p) : "/product/" + p.id;
@@ -117,6 +185,26 @@ var HOME_SECTIONS = [
     );
   }
 
+  /* ── 5. HOW ONE banner looks ──────────────────────────────────── */
+  function bannerHTML(b) {
+    return (
+      '<section class="hp-section"><div class="wrap">' +
+        '<div class="hb-banner hb-' + (b.align === "center" ? "center" : "left") + '" style="background-image:url(\'' + escapeHtml(b.image) + "')\">" +
+          '<div class="hb-overlay"></div>' +
+          '<div class="hb-content">' +
+            (b.eyebrow ? '<p class="hb-eyebrow">' + escapeHtml(b.eyebrow) + "</p>" : "") +
+            "<h2>" + escapeHtml(b.heading) + "</h2>" +
+            (b.text ? "<p>" + escapeHtml(b.text) + "</p>" : "") +
+            (b.buttonText && b.buttonLink
+              ? '<a class="btn" href="' + escapeHtml(b.buttonLink) + '">' + escapeHtml(b.buttonText) + "</a>"
+              : "") +
+          "</div>" +
+        "</div>" +
+      "</div></section>"
+    );
+  }
+
+  /* ── 6. HOW ONE product container is built ────────────────────── */
   function sectionHTML(cfg, index) {
     var products = pickProducts(cfg);
     if (!products.length) return "";
@@ -144,7 +232,7 @@ var HOME_SECTIONS = [
       );
     }
     if (cfg.layout === "marquee") {
-      /* Duplicate the cards so the loop is seamless. */
+      /* Cards are duplicated so the loop is seamless. */
       return (
         '<section class="hp-section" data-hp="' + index + '">' + head +
           '<div class="wrap"><div class="hp-marquee"><div class="hp-marquee-track">' +
@@ -153,7 +241,7 @@ var HOME_SECTIONS = [
         "</section>"
       );
     }
-    /* grid (default) */
+    /* grid (default): rows of products */
     var cols = Math.min(4, Math.max(2, cfg.columns || 4));
     return (
       '<section class="hp-section" data-hp="' + index + '">' + head +
@@ -162,12 +250,15 @@ var HOME_SECTIONS = [
     );
   }
 
+  /* ── 7. PUT EVERYTHING on the page ────────────────────────────── */
   function mount() {
     var host = document.getElementById("home-products");
     if (!host) return;
-    host.innerHTML = HOME_SECTIONS.map(sectionHTML).join("");
+    var html = (HOME_BANNERS || []).map(bannerHTML).join("") +
+               HOME_SECTIONS.map(sectionHTML).join("");
+    host.innerHTML = html;
 
-    /* Carousel arrows */
+    /* Wire the carousel < > arrows */
     host.querySelectorAll(".hp-carousel-wrap").forEach(function (wrapEl) {
       var track = wrapEl.querySelector(".hp-carousel");
       wrapEl.querySelector(".hp-prev").addEventListener("click", function () {
@@ -179,7 +270,7 @@ var HOME_SECTIONS = [
     });
   }
 
-  /* Wait for the catalog (products.js fires this when loaded). */
+  /* Wait for the catalog (products.js fires this event when loaded). */
   if (window.PRODUCTS && window.PRODUCTS.length) {
     mount();
   } else {
