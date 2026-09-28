@@ -424,42 +424,77 @@ var HOME_PAGE = [
       '<div class="wrap"><div class="hp-quotes">' + html + "</div></div></section>";
   }
 
-  /* ── BUILD the page in HOME_PAGE order ──────────────────────── */
-  function render(badges) {
-    var out = [];
-    HOME_PAGE.forEach(function (cfg, i) {
-      switch (cfg.type) {
-        case "trust":        out.push(trustHTML(badges)); break;
-        case "categories":    out.push(categoriesHTML(cfg)); break;
-        case "products":      out.push(productsHTML(cfg, i)); break;
-        case "banners":       out.push(bannersHTML(cfg)); break;
-        case "image_text":    out.push(imageTextHTML(cfg)); break;
-        case "testimonials":  out.push(testimonialsHTML(cfg)); break;
-      }
-    });
-    return out.join("");
+  /* ── BUILD the page in HOME_PAGE order ────────────────────────
+     Product-independent sections (trust, banners, image_text,
+     testimonials) render immediately. Product sections (products,
+     categories) render as soon as the catalog arrives — and re-render
+     if it arrives late. The page is never fully blank. */
+  function needsProducts(cfg) {
+    return cfg.type === "products" || cfg.type === "categories";
   }
-
-  function mount() {
-    var host = document.getElementById("home-products");
-    if (!host) return;
-    fetchTrustBadges().then(function (badges) {
-      host.innerHTML = render(badges);
-      host.querySelectorAll(".hp-carousel-wrap").forEach(function (wrapEl) {
-        var track = wrapEl.querySelector(".hp-carousel");
-        wrapEl.querySelector(".hp-prev").addEventListener("click", function () {
-          track.scrollBy({ left: -track.clientWidth * 0.8, behavior: "smooth" });
-        });
-        wrapEl.querySelector(".hp-next").addEventListener("click", function () {
-          track.scrollBy({ left: track.clientWidth * 0.8, behavior: "smooth" });
-        });
+  function sectionHTML(cfg, i, badges, withProducts) {
+    if (withProducts === false && needsProducts(cfg)) return "";
+    switch (cfg.type) {
+      case "trust":        return trustHTML(badges);
+      case "categories":   return categoriesHTML(cfg);
+      case "products":      return productsHTML(cfg, i);
+      case "banners":       return bannersHTML(cfg);
+      case "image_text":    return imageTextHTML(cfg);
+      case "testimonials":  return testimonialsHTML(cfg);
+      default:              return "";
+    }
+  }
+  function renderAll(badges, withProducts) {
+    return HOME_PAGE.map(function (cfg, i) {
+      return sectionHTML(cfg, i, badges, withProducts);
+    }).join("");
+  }
+  function wireCarousels(host) {
+    host.querySelectorAll(".hp-carousel-wrap").forEach(function (wrapEl) {
+      var track = wrapEl.querySelector(".hp-carousel");
+      if (!track || wrapEl.dataset.wired) return;
+      wrapEl.dataset.wired = "1";
+      wrapEl.querySelector(".hp-prev").addEventListener("click", function () {
+        track.scrollBy({ left: -track.clientWidth * 0.8, behavior: "smooth" });
+      });
+      wrapEl.querySelector(".hp-next").addEventListener("click", function () {
+        track.scrollBy({ left: track.clientWidth * 0.8, behavior: "smooth" });
       });
     });
   }
 
-  if (window.PRODUCTS && window.PRODUCTS.length) {
-    mount();
+  var hostEl = null, trustBadges = null, productsReady = false;
+
+  function paint() {
+    if (!hostEl) return;
+    hostEl.innerHTML = renderAll(trustBadges, productsReady);
+    wireCarousels(hostEl);
+  }
+  function onProducts() {
+    productsReady = true;
+    paint();
+  }
+
+  function mount() {
+    hostEl = document.getElementById("home-products");
+    if (!hostEl) return;
+    /* Paint 1: everything that does not need the catalog. */
+    fetchTrustBadges().then(function (badges) {
+      trustBadges = badges;
+      paint();
+    });
+    paint();
+    /* Paint 2: when the catalog arrives, add product sections. */
+    if (window.PRODUCTS && window.PRODUCTS.length) {
+      onProducts();
+    } else {
+      window.addEventListener("hubator:products-loaded", onProducts);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mount);
   } else {
-    window.addEventListener("hubator:products-loaded", mount);
+    mount();
   }
 })();
