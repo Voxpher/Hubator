@@ -1,87 +1,118 @@
 /* ═══════════════════════════════════════════════════════════════════
-   HUBATOR HOMEPAGE — everything on your home page, controlled from here.
+   HUBATOR HOMEPAGE — your full Shopify-style home page, in one file.
    ───────────────────────────────────────────────────────────────────
-   WHAT EACH PART DOES:
+   HOW IT WORKS:
+   HOME_PAGE below is your page, top to bottom. Each { type: ... } block
+   is one section. To reorder sections, move the whole block up or down.
+   To remove a section, delete its block. To add one, copy any block.
 
-   • HOME_BANNERS ...... image banners (sale announcements, lookbooks).
-                         Copy a block, change image/text/button.
-   • HOME_SECTIONS ..... product containers (the shop rows).
-                         Copy a block, pick layout + which products.
-   • pickProducts() .... decides WHICH products go in a container.
-   • cardHTML() ........ how ONE product card looks (shared site-wide).
-   • sectionHTML() ..... builds the container (grid / carousel / marquee).
-   • mount() ........... puts everything on the page + wires the arrows.
+   ── SECTION TYPES ──
 
-   ── PRODUCT CONTAINERS: YOUR OPTIONS ──
+   { type: "trust" }
+       Trust badges strip (Secure checkout / Shipping / Returns).
+       Text comes LIVE from Dashboard → Settings → Trust badges.
+       No settings needed here — it just works.
 
-   layout:  "grid"     → products in rows. Set columns: 2, 3 or 4.
-            "carousel" → one sideways row with < > arrows.
-            "marquee"  → auto-scrolling row that loops forever.
+   { type: "categories", title, subtitle, limit, tiles }
+       "Shop by Category" image tiles.
+       AUTOMATIC: tiles are built from your real products — one tile per
+       category, using a real product photo. Set limit to show fewer.
+       MANUAL (optional): add your own tiles: list, like this:
+         tiles: [
+           { name: "Kurtas", image: "https://.../kurta.jpg", link: "/shop?category=kurtas" },
+           { name: "Shirts", image: "https://.../shirt.jpg", link: "/shop?category=shirts" }
+         ]
+       Manual tiles replace the automatic ones.
 
-   source:  "latest"             → newest products first.
-            "category:Apparel"   → everything in that category
-                                   (use your exact category name).
-            "collection:summer"  → everything in that dashboard
-                                   collection (use the collection slug).
-            "on_sale"            → products with a sale price.
-            "manual"             → hand-picked. Put product ids in
-                                   manualIds: ["id1", "id2"].
-                                   (Find an id: open the product in your
-                                   dashboard, copy it from the URL.)
+   { type: "products", title, subtitle, layout, columns,
+     source, manualIds, limit, link, linkText }
+       A product row. YOUR OPTIONS:
+       layout:  "grid"     → products in rows (set columns: 2, 3 or 4)
+                "carousel" → one sideways row with < > arrows
+                "marquee"  → auto-scrolling row, loops forever
+       source:  "latest"             → newest first
+                "category:Apparel"   → your EXACT category name
+                "collection:summer"  → your collection SLUG
+                                       (Dashboard → Collections, under the name)
+                "on_sale"            → products with a sale price
+                "manual"             → hand-picked: put ids in manualIds
+                                       (open the product in your dashboard,
+                                        copy the id from the page URL)
+       limit:     how many products to show
+       link / linkText: "View all →" button ("" hides it)
 
-   limit:   how many products to show (e.g. 8).
+   { type: "banners", items: [ ... ] }
+       Full-width image banners (sale announcements, lookbooks).
+       Each item: image, eyebrow, heading, text, buttonText, buttonLink,
+       align ("left" or "center"). "" hides any text line.
 
-   title / subtitle: the heading above the container.
-   link / linkText:  the "View all →" button. Use "" to hide it.
+   { type: "image_text", image, eyebrow, heading, text,
+     buttonText, buttonLink, flip }
+       Brand block: image beside text (Shopify's "Image with text").
+       flip: true → image on the right instead of left.
 
-   ── BANNERS: YOUR OPTIONS ──
-   image:    full image URL (upload it in Dashboard → Media, copy the URL).
-   eyebrow:  small text above the heading ("" hides it).
-   heading / text: the big message.
-   buttonText / buttonLink: the button ("" hides it).
-   align:    "left" or "center".
+   { type: "testimonials", title, subtitle, items: [ ... ] }
+       Customer quotes. Each item: quote, name, detail
+       (e.g. "Verified buyer · Mumbai").
+       TIP: use your REAL customer words from Dashboard → Reviews.
+
+   ── WHAT EACH FUNCTION DOES (you rarely need to touch these) ──
+   pickProducts() ... chooses WHICH products go in a products row
+   cardHTML() ....... how ONE product card looks
+   trustHTML() ...... the trust badges strip
+   categoriesHTML() . "Shop by Category" tiles
+   productsHTML() ... a product row (grid / carousel / marquee)
+   bannersHTML() .... image banners
+   imageTextHTML() .. brand image+text block
+   testimonialsHTML() customer quotes
+   mount() .......... builds the page in HOME_PAGE order + wires arrows
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ── 1. BANNERS: copy a block to add another banner ─────────────── */
-var HOME_BANNERS = [
-  /*
-  {
-    image: "https://res.cloudinary.com/YOUR/image/upload/...jpg",
-    eyebrow: "Limited time",
-    heading: "Monsoon Sale — up to 40% off",
-    text: "Last pieces from independent designers. When they're gone, they're gone.",
-    buttonText: "Shop the sale",
-    buttonLink: "/shop",
-    align: "left"
-  },
-  */
-];
+/* ── YOUR PAGE — top to bottom ──────────────────────────────────── */
+var HOME_PAGE = [
+  /* 1. Trust badges — live from Dashboard → Settings */
+  { type: "trust" },
 
-/* ── 2. PRODUCT CONTAINERS: copy a block to add another row ─────── */
-var HOME_SECTIONS = [
+  /* 2. Shop by Category — automatic from your products */
   {
+    type: "categories",
+    title: "Shop by Category",
+    subtitle: "Find your fit.",
+    limit: 6
+    /* Manual override (optional): tiles: [ { name, image, link }, ... ] */
+  },
+
+  /* 3. New arrivals — grid */
+  {
+    type: "products",
     title: "New Arrivals",
     subtitle: "Fresh drops, small runs.",
-    layout: "grid",          // "grid" | "carousel" | "marquee"
-    columns: 4,              // grid columns on desktop (2, 3 or 4)
-    source: "latest",        // "latest" | "category:X" | "collection:slug" | "on_sale" | "manual"
+    layout: "grid",
+    columns: 4,
+    source: "latest",
     manualIds: [],
     limit: 8,
     link: "/shop",
     linkText: "View all"
   },
+
+  /* 4. Bestsellers — sideways carousel */
   {
+    type: "products",
     title: "Bestsellers",
     subtitle: "What everyone is wearing.",
     layout: "carousel",
     columns: 4,
-    source: "category:Apparel",
+    source: "category:Apparel",   // ← change to YOUR exact category name
     manualIds: [],
     limit: 10,
     link: "/shop",
     linkText: "Shop all"
   },
+
+  /* 5. On sale — auto-scrolling marquee */
   {
+    type: "products",
     title: "On Sale",
     subtitle: "Last pieces, honest prices.",
     layout: "marquee",
@@ -92,31 +123,61 @@ var HOME_SECTIONS = [
     link: "/shop",
     linkText: "All deals"
   }
-  /* ── EXAMPLE: hand-picked collection ──
-  ,
-  {
+
+  /* ── MORE SECTIONS — copy one into the list above ──
+
+  // Image banner (sale announcement)
+  ,{
+    type: "banners",
+    items: [
+      {
+        image: "https://res.cloudinary.com/YOUR/image/upload/...jpg",
+        eyebrow: "Limited time",
+        heading: "Monsoon Sale — up to 40% off",
+        text: "Last pieces from independent designers.",
+        buttonText: "Shop the sale",
+        buttonLink: "/shop",
+        align: "left"   // "left" or "center"
+      }
+    ]
+  }
+
+  // Brand block: image beside text
+  ,{
+    type: "image_text",
+    image: "https://res.cloudinary.com/YOUR/image/upload/...jpg",
+    eyebrow: "Our promise",
+    heading: "Independent designers. Honest materials.",
+    text: "Every piece on Hubator comes from an independent designer in a small run. Nothing mass-produced, nothing disposable.",
+    buttonText: "Our story",
+    buttonLink: "/about",
+    flip: false   // true = image on the right
+  }
+
+  // Customer quotes — use your REAL words from Dashboard → Reviews
+  ,{
+    type: "testimonials",
+    title: "Loved by customers",
+    subtitle: "",
+    items: [
+      { quote: "The kurta fits perfectly and the fabric feels premium.", name: "Priya S.", detail: "Verified buyer · Mumbai" },
+      { quote: "Ordered Tuesday, wearing it Friday. Packaging was lovely.", name: "Rahul V.", detail: "Verified buyer · Delhi" },
+      { quote: "Finally a store that sells something different.", name: "Ananya D.", detail: "Verified buyer · Bengaluru" }
+    ]
+  }
+
+  // Hand-picked products row
+  ,{
+    type: "products",
     title: "Festive Edit",
     subtitle: "Hand-picked for the season.",
     layout: "grid",
     columns: 4,
-    source: "collection:festive-edit",
-    manualIds: [],
-    limit: 8,
-    link: "/shop",
-    linkText: "View all"
-  }
-  ── EXAMPLE: hand-picked products ──
-  ,
-  {
-    title: "Staff Picks",
-    subtitle: "Our personal favourites.",
-    layout: "carousel",
-    columns: 4,
     source: "manual",
     manualIds: ["PASTE-ID-1", "PASTE-ID-2", "PASTE-ID-3"],
     limit: 8,
-    link: "",
-    linkText: ""
+    link: "/shop",
+    linkText: "View all"
   }
   */
 ];
@@ -124,7 +185,30 @@ var HOME_SECTIONS = [
 (function () {
   "use strict";
 
-  /* ── 3. WHICH PRODUCTS go in a container ──────────────────────── */
+  function esc(s) {
+    if (typeof escapeHtml === "function") return escapeHtml(s);
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function money(n) {
+    if (typeof fmt === "function") return fmt(n);
+    return "₹" + Number(n || 0).toLocaleString("en-IN");
+  }
+  function imgUrl(u) {
+    if (typeof safeProductImageUrl === "function") return safeProductImageUrl(u);
+    return u || "";
+  }
+  function prodUrl(p) {
+    if (typeof productUrl === "function") return productUrl(p);
+    return "/product/" + p.id;
+  }
+  function canBuy(p) {
+    if (typeof productIsPurchasable === "function") return productIsPurchasable(p);
+    return true;
+  }
+
+  /* ── WHICH products go in a row ─────────────────────────────── */
   function pickProducts(cfg) {
     var all = (window.PRODUCTS || []).slice();
     if (cfg.source === "manual") {
@@ -147,36 +231,32 @@ var HOME_SECTIONS = [
         return String(p.category || "").toLowerCase() === cat;
       }).slice(0, cfg.limit);
     }
-    /* "latest" (default): newest first */
-    all.sort(function (a, b) {
-      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-    });
+    all.sort(function (a, b) { return new Date(b.createdAt || 0) - new Date(a.createdAt || 0); });
     return all.slice(0, cfg.limit);
   }
 
-  /* ── 4. HOW ONE product card looks ────────────────────────────── */
+  /* ── ONE product card ───────────────────────────────────────── */
   function cardHTML(p) {
-    var available = typeof productIsPurchasable === "function" ? productIsPurchasable(p) : true;
-    var url = typeof productUrl === "function" ? productUrl(p) : "/product/" + p.id;
-    var img = typeof safeProductImageUrl === "function" ? safeProductImageUrl(p.img) : (p.img || "");
+    var available = canBuy(p);
+    var url = prodUrl(p);
     return (
       '<div class="product-card">' +
-        '<a href="' + escapeHtml(url) + '" class="product-media">' +
+        '<a href="' + esc(url) + '" class="product-media">' +
           (p.badge
-            ? '<span class="product-badge ticket ' + (p.badge === "Sale" ? "on-sale" : "") + '">' + escapeHtml(p.badge) + "</span>"
+            ? '<span class="product-badge ticket ' + (p.badge === "Sale" ? "on-sale" : "") + '">' + esc(p.badge) + "</span>"
             : "") +
-          '<img src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.name) + '" loading="lazy">' +
+          '<img src="' + esc(imgUrl(p.img)) + '" alt="' + esc(p.name) + '" loading="lazy">' +
         "</a>" +
         '<div class="product-body">' +
-          '<span class="product-cat">' + escapeHtml(p.category) + "</span>" +
-          '<h4><a href="' + escapeHtml(url) + '">' + escapeHtml(p.name) + "</a></h4>" +
+          '<span class="product-cat">' + esc(p.category) + "</span>" +
+          '<h4><a href="' + esc(url) + '">' + esc(p.name) + "</a></h4>" +
           '<div class="product-foot">' +
             '<span class="ticket ' + (p.oldPrice ? "on-sale" : "") + '">' +
-              (p.oldPrice ? '<span class="price-old">' + fmt(p.oldPrice) + "</span>" : "") +
-              fmt(p.price) +
+              (p.oldPrice ? '<span class="price-old">' + money(p.oldPrice) + "</span>" : "") +
+              money(p.price) +
             "</span>" +
-            '<button class="add-btn" data-id="' + escapeHtml(p.id) + '" ' +
-              'aria-label="' + (available ? "Add " + escapeHtml(p.name) + " to cart" : escapeHtml(p.name) + " is out of stock") + '" ' +
+            '<button class="add-btn" data-id="' + esc(p.id) + '" ' +
+              'aria-label="' + (available ? "Add " + esc(p.name) + " to cart" : esc(p.name) + " is out of stock") + '" ' +
               (available ? "" : "disabled") +
               ' onclick="addToCart(this.dataset.id)">' + (available ? "+" : "&mdash;") + "</button>" +
           "</div>" +
@@ -185,41 +265,86 @@ var HOME_SECTIONS = [
     );
   }
 
-  /* ── 5. HOW ONE banner looks ──────────────────────────────────── */
-  function bannerHTML(b) {
+  function headHTML(cfg) {
     return (
-      '<section class="hp-section"><div class="wrap">' +
-        '<div class="hb-banner hb-' + (b.align === "center" ? "center" : "left") + '" style="background-image:url(\'' + escapeHtml(b.image) + "')\">" +
-          '<div class="hb-overlay"></div>' +
-          '<div class="hb-content">' +
-            (b.eyebrow ? '<p class="hb-eyebrow">' + escapeHtml(b.eyebrow) + "</p>" : "") +
-            "<h2>" + escapeHtml(b.heading) + "</h2>" +
-            (b.text ? "<p>" + escapeHtml(b.text) + "</p>" : "") +
-            (b.buttonText && b.buttonLink
-              ? '<a class="btn" href="' + escapeHtml(b.buttonLink) + '">' + escapeHtml(b.buttonText) + "</a>"
-              : "") +
-          "</div>" +
-        "</div>" +
-      "</div></section>"
+      '<div class="hp-head wrap"><div>' +
+        "<h2>" + esc(cfg.title) + "</h2>" +
+        (cfg.subtitle ? '<p class="hp-sub">' + esc(cfg.subtitle) + "</p>" : "") +
+      "</div>" +
+      (cfg.link && cfg.linkText
+        ? '<a class="hp-viewall" href="' + esc(cfg.link) + '">' + esc(cfg.linkText) + " &rarr;</a>"
+        : "") +
+      "</div>"
     );
   }
 
-  /* ── 6. HOW ONE product container is built ────────────────────── */
-  function sectionHTML(cfg, index) {
+  /* ── TRUST badges strip (live from dashboard settings) ──────── */
+  var trustDefaults = [
+    { icon: "✓", text: "Secure checkout" },
+    { icon: "✈", text: "Fast shipping across India" },
+    { icon: "↩", text: "Easy 7-day returns" },
+    { icon: "₹", text: "Prices in Indian Rupees" }
+  ];
+  function trustHTML(badges) {
+    var items = (badges && badges.length ? badges : trustDefaults).map(function (b) {
+      return '<div class="hp-trust-item"><span class="hp-trust-icon">' + esc(b.icon) + "</span><span>" + esc(b.text) + "</span></div>";
+    }).join("");
+    return '<section class="hp-trust"><div class="wrap hp-trust-row">' + items + "</div></section>";
+  }
+  function fetchTrustBadges() {
+    try {
+      var url = (typeof hubatorApiUrl === "function") ? hubatorApiUrl("/api/public/settings") : null;
+      if (!url || typeof fetch !== "function") return Promise.resolve(null);
+      return fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+        var t = (d && d.trustBadges) || {};
+        var out = [];
+        if (t.secureCheckout) out.push({ icon: "✓", text: t.secureCheckout });
+        if (t.shipping) out.push({ icon: "✈", text: t.shipping });
+        if (t.returns) out.push({ icon: "↩", text: t.returns });
+        if (t.currency) out.push({ icon: "₹", text: t.currency });
+        return out.length ? out : null;
+      }).catch(function () { return null; });
+    } catch (e) { return Promise.resolve(null); }
+  }
+
+  /* ── SHOP BY CATEGORY tiles (automatic from your products) ──── */
+  function categoriesHTML(cfg) {
+    var tiles = [];
+    if (cfg.tiles && cfg.tiles.length) {
+      tiles = cfg.tiles;
+    } else {
+      var seen = {};
+      (window.PRODUCTS || []).forEach(function (p) {
+        var name = String(p.category || "").trim();
+        if (!name || seen[name]) return;
+        seen[name] = true;
+        tiles.push({
+          name: name,
+          image: imgUrl(p.img),
+          link: "/shop?category=" + encodeURIComponent(name)
+        });
+      });
+      tiles = tiles.slice(0, cfg.limit || 6);
+    }
+    if (!tiles.length) return "";
+    var html = tiles.map(function (t) {
+      return (
+        '<a class="hp-cat-tile" href="' + esc(t.link) + '">' +
+          '<img src="' + esc(t.image) + '" alt="' + esc(t.name) + '" loading="lazy">' +
+          '<span class="hp-cat-label">' + esc(t.name) + "</span>" +
+        "</a>"
+      );
+    }).join("");
+    return '<section class="hp-section">' + headHTML(cfg) +
+      '<div class="wrap"><div class="hp-cats">' + html + "</div></div></section>";
+  }
+
+  /* ── PRODUCT row (grid / carousel / marquee) ────────────────── */
+  function productsHTML(cfg, index) {
     var products = pickProducts(cfg);
     if (!products.length) return "";
     var cards = products.map(cardHTML).join("");
-    var head =
-      '<div class="hp-head wrap">' +
-        "<div>" +
-          "<h2>" + escapeHtml(cfg.title) + "</h2>" +
-          (cfg.subtitle ? '<p class="hp-sub">' + escapeHtml(cfg.subtitle) + "</p>" : "") +
-        "</div>" +
-        (cfg.link && cfg.linkText
-          ? '<a class="hp-viewall" href="' + escapeHtml(cfg.link) + '">' + escapeHtml(cfg.linkText) + " &rarr;</a>"
-          : "") +
-      "</div>";
-
+    var head = headHTML(cfg);
     if (cfg.layout === "carousel") {
       return (
         '<section class="hp-section" data-hp="' + index + '">' + head +
@@ -227,50 +352,111 @@ var HOME_SECTIONS = [
             '<button class="hp-arrow hp-prev" aria-label="Scroll left">&lsaquo;</button>' +
             '<div class="hp-carousel">' + cards + "</div>" +
             '<button class="hp-arrow hp-next" aria-label="Scroll right">&rsaquo;</button>' +
-          "</div>" +
-        "</section>"
+          "</div></section>"
       );
     }
     if (cfg.layout === "marquee") {
-      /* Cards are duplicated so the loop is seamless. */
       return (
         '<section class="hp-section" data-hp="' + index + '">' + head +
           '<div class="wrap"><div class="hp-marquee"><div class="hp-marquee-track">' +
             cards + cards +
-          "</div></div></div>" +
-        "</section>"
+          "</div></div></div></section>"
       );
     }
-    /* grid (default): rows of products */
     var cols = Math.min(4, Math.max(2, cfg.columns || 4));
     return (
       '<section class="hp-section" data-hp="' + index + '">' + head +
-        '<div class="wrap"><div class="hp-grid hp-cols-' + cols + '">' + cards + "</div></div>" +
-      "</section>"
+        '<div class="wrap"><div class="hp-grid hp-cols-' + cols + '">' + cards + "</div></div></section>"
     );
   }
 
-  /* ── 7. PUT EVERYTHING on the page ────────────────────────────── */
+  /* ── IMAGE banners ──────────────────────────────────────────── */
+  function bannersHTML(cfg) {
+    var items = (cfg.items || []).filter(function (b) { return b && b.image; });
+    if (!items.length) return "";
+    return items.map(function (b) {
+      return (
+        '<section class="hp-section"><div class="wrap">' +
+          '<div class="hb-banner hb-' + (b.align === "center" ? "center" : "left") + '" style="background-image:url(\'' + esc(b.image) + "')\">" +
+            '<div class="hb-overlay"></div><div class="hb-content">' +
+              (b.eyebrow ? '<p class="hb-eyebrow">' + esc(b.eyebrow) + "</p>" : "") +
+              "<h2>" + esc(b.heading) + "</h2>" +
+              (b.text ? "<p>" + esc(b.text) + "</p>" : "") +
+              (b.buttonText && b.buttonLink
+                ? '<a class="btn" href="' + esc(b.buttonLink) + '">' + esc(b.buttonText) + "</a>"
+                : "") +
+            "</div></div></div></section>"
+      );
+    }).join("");
+  }
+
+  /* ── IMAGE + TEXT brand block ───────────────────────────────── */
+  function imageTextHTML(cfg) {
+    if (!cfg.image || !cfg.heading) return "";
+    return (
+      '<section class="hp-section"><div class="wrap">' +
+        '<div class="hp-imagetext' + (cfg.flip ? " hp-flip" : "") + '">' +
+          '<div class="hp-imagetext-media"><img src="' + esc(cfg.image) + '" alt="' + esc(cfg.heading) + '" loading="lazy"></div>' +
+          '<div class="hp-imagetext-body">' +
+            (cfg.eyebrow ? '<p class="hb-eyebrow">' + esc(cfg.eyebrow) + "</p>" : "") +
+            "<h2>" + esc(cfg.heading) + "</h2>" +
+            (cfg.text ? "<p>" + esc(cfg.text) + "</p>" : "") +
+            (cfg.buttonText && cfg.buttonLink
+              ? '<a class="btn" href="' + esc(cfg.buttonLink) + '">' + esc(cfg.buttonText) + "</a>"
+              : "") +
+          "</div></div></div></section>"
+    );
+  }
+
+  /* ── TESTIMONIALS ───────────────────────────────────────────── */
+  function testimonialsHTML(cfg) {
+    var items = (cfg.items || []).filter(function (t) { return t && t.quote; });
+    if (!items.length) return "";
+    var html = items.map(function (t) {
+      return (
+        '<div class="hp-quote"><div class="hp-stars">★★★★★</div>' +
+          "<p>“" + esc(t.quote) + "”</p>" +
+          '<div class="hp-quote-who"><strong>' + esc(t.name || "") + "</strong>" +
+          (t.detail ? "<span>" + esc(t.detail) + "</span>" : "") + "</div></div>"
+      );
+    }).join("");
+    return '<section class="hp-section hp-testimonials">' + headHTML(cfg) +
+      '<div class="wrap"><div class="hp-quotes">' + html + "</div></div></section>";
+  }
+
+  /* ── BUILD the page in HOME_PAGE order ──────────────────────── */
+  function render(badges) {
+    var out = [];
+    HOME_PAGE.forEach(function (cfg, i) {
+      switch (cfg.type) {
+        case "trust":        out.push(trustHTML(badges)); break;
+        case "categories":    out.push(categoriesHTML(cfg)); break;
+        case "products":      out.push(productsHTML(cfg, i)); break;
+        case "banners":       out.push(bannersHTML(cfg)); break;
+        case "image_text":    out.push(imageTextHTML(cfg)); break;
+        case "testimonials":  out.push(testimonialsHTML(cfg)); break;
+      }
+    });
+    return out.join("");
+  }
+
   function mount() {
     var host = document.getElementById("home-products");
     if (!host) return;
-    var html = (HOME_BANNERS || []).map(bannerHTML).join("") +
-               HOME_SECTIONS.map(sectionHTML).join("");
-    host.innerHTML = html;
-
-    /* Wire the carousel < > arrows */
-    host.querySelectorAll(".hp-carousel-wrap").forEach(function (wrapEl) {
-      var track = wrapEl.querySelector(".hp-carousel");
-      wrapEl.querySelector(".hp-prev").addEventListener("click", function () {
-        track.scrollBy({ left: -track.clientWidth * 0.8, behavior: "smooth" });
-      });
-      wrapEl.querySelector(".hp-next").addEventListener("click", function () {
-        track.scrollBy({ left: track.clientWidth * 0.8, behavior: "smooth" });
+    fetchTrustBadges().then(function (badges) {
+      host.innerHTML = render(badges);
+      host.querySelectorAll(".hp-carousel-wrap").forEach(function (wrapEl) {
+        var track = wrapEl.querySelector(".hp-carousel");
+        wrapEl.querySelector(".hp-prev").addEventListener("click", function () {
+          track.scrollBy({ left: -track.clientWidth * 0.8, behavior: "smooth" });
+        });
+        wrapEl.querySelector(".hp-next").addEventListener("click", function () {
+          track.scrollBy({ left: track.clientWidth * 0.8, behavior: "smooth" });
+        });
       });
     });
   }
 
-  /* Wait for the catalog (products.js fires this event when loaded). */
   if (window.PRODUCTS && window.PRODUCTS.length) {
     mount();
   } else {
