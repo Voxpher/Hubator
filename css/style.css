@@ -109,16 +109,27 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* ── Header ─────────────────────────────────────────────── */
 .site-header{
-  position:sticky;top:0;z-index:50;
+  /* FIX (header stretch on scroll, home page, mobile Chrome):
+     position:sticky must be repositioned on every scroll frame, and the
+     hero's infinite GPU animations keep the main thread busy — on mobile
+     Chrome the sticky header smears/"stretches" while scrolling.
+     position:fixed is positioned by the compositor alone, so it cannot
+     smear, tear, or stretch during scroll. The compositor hints below
+     keep it on its own layer. */
+  position:fixed;top:0;left:0;right:0;z-index:50;
   background:var(--paper);
   border-bottom:1px solid var(--line);
-  /* FIX (header stretch on scroll, home page): the hero's infinite GPU
-     animations below force the sticky header to repaint on every scroll
-     frame, which Chrome smears as a vertical "stretch". Pinning the header
-     to its own compositor layer isolates its paint so it stays pixel-stable.
-     Safe: the mobile drawer is fixed to <body>, not inside the header. */
+  -webkit-transform:translateZ(0);
   transform:translateZ(0);
+  will-change:transform;
+  backface-visibility:hidden;
 }
+/* Offset page content for the fixed header (header is 76px desktop / 68px mobile) */
+body{padding-top:77px;}
+@media(max-width:680px){body{padding-top:69px;}}
+/* Keep anchor jumps (skip link) visible below the fixed header */
+#main-content{scroll-margin-top:84px;}
+@media(max-width:680px){#main-content{scroll-margin-top:76px;}}
 .header-bar{
   display:flex;align-items:center;justify-content:space-between;
   min-height:76px;
